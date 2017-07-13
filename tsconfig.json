@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "module": "es6",
+        "outDir": "build",
+        "sourceMap": true,
+        "target": "es5"
+    },
+    "exclude": [
+        "node_modeles"
+    ]
+}
