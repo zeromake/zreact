@@ -1,11 +1,16 @@
 {
     "compilerOptions": {
-        "module": "es6",
-        "outDir": "build",
-        "sourceMap": true,
-        "target": "es5"
+      "module": "es6", // 目标代码模块方式
+      "outDir": "build", // 输出目录
+      "sourceMap": true,
+      "target": "es5", // 目标代码平台
+      "strict": true, // TS严格模式
+      "allowSyntheticDefaultImports": true // 使用 ES2015 默认的 imports 风格
     },
     "exclude": [
-        "node_modeles"
+      "node_modeles" // 不转换 node_modeles
+    ],
+    "files": [
+       "src/zreact.ts"
     ]
 }

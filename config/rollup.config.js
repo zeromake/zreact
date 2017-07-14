@@ -1,16 +1,27 @@
 import rollupTypescript from 'rollup-plugin-typescript'
-import uglify from 'rollup-plugin-uglify'
-import { minify } from 'uglify-es'
+// import uglify from 'rollup-plugin-uglify'
+// import { minify } from 'uglify-es'
+import pkg from '../package.json'
+// import typescript from 'typescript'
 
 const isProduction = process.env.NODE_ENV === 'production'
+
+// set new typescript
+const rollupTypescriptPlugin = rollupTypescript()
 export default {
-    entry: 'src/index.ts',
-    format: 'umd',
+    entry: 'src/zreact.ts',
     moduleName: 'Zreact',
-    dest: 'dist/zreact.js',
-    plugins: isProduction ? [
-        uglify({}, minify),
-        rollupTypescript()
-    ]: [rollupTypescript()],
-    sourceMap: !isProduction
+    // dest: isProduction ? 'dist/zreact.min.js' : 'dist/zreact.js',
+    plugins: [rollupTypescriptPlugin],
+    sourceMap: !isProduction,
+    targets: [
+        {
+            format: 'umd',
+            dest: pkg.main
+        },
+        {
+            format: 'es',
+            dest: pkg.module
+        }
+	]
 }
