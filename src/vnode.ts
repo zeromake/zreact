@@ -1,5 +1,5 @@
 export class VNode {
-    public nodeName: string;
+    public nodeName: any;
     public children: any[];
     public attributes: any | undefined;
     public key: any | undefined;

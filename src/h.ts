@@ -11,7 +11,7 @@ import { VNode } from "./vnode";
  * @see http://jasonformat.com/wtf-is-jsx
  * @public
  */
-export function h(nodeName: string, attributes: any) {
+export function h(nodeName: string, attributes: any, ...args: any[]) {
     // 初始化子元素列表
     const stack: any[] = [];
     const children: any[] = [];
@@ -22,8 +22,8 @@ export function h(nodeName: string, attributes: any) {
     // 上一个子元素是否为原生组件
     let lastSimple: boolean = false;
     // 把剩余的函数参数全部倒序放入stack
-    for (let i = arguments.length; i-- > 2; ) {
-        stack.push(arguments[i]);
+    for (let i = args.length; i--; ) {
+        stack.push(args[i]);
     }
     // 把元素上属性的children放入栈
     if (attributes && attributes.children != null) {
