@@ -1,12 +1,19 @@
-import { h } from '../dist/zreact'
+import { h, Component } from '../dist/zreact'
 
-class App {
+
+class App extends Component {
+    test() {
+        console.log('----')
+    }
     render() {
-        return <h1>testApp</h1>
+        return <h1 onClick={ this.test }></h1>
     }
 }
 
 const test = {
+    test() {
+        console.log('-----')
+    },
     render() {
         return <div>
             <App/>
