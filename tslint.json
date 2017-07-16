@@ -18,7 +18,18 @@
         "time",
         "timeEnd",
         "trace"
-      ]
+      ],
+      "forin": false,
+      "variable-name": [
+        true,
+        "ban-keywords",
+        "check-format",
+        "allow-leading-underscore",
+        "allow-trailing-underscore",
+        "allow-pascal-case"
+      ],
+      "no-empty": false,
+      "ordered-imports": false
     },
     "rulesDirectory": []
 }

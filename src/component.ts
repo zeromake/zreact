@@ -6,12 +6,13 @@ export class Component {
     public state: any;
     public props: any;
     public context: any;
-    public base: HTMLElement;
+    public defaultProps?: any;
+    public base?: Element;
+    public name?: string;
     public prevProps?: any;
     public prevState?: any;
     public prevContext?: any;
-    public nextBase?: any;
-    public component?: Component;
+    public nextBase?: Element;
     public componentWillMount?: () => void;
     public componentDidMount?: () => void;
     public componentWillUnmount?: () => void;
@@ -20,13 +21,15 @@ export class Component {
     public componentWillUpdate?: (nextProps: any, nextState: any, nextContext: any) => void;
     public componentDidUpdate?: (previousProps: any, previousState: any, previousContext: any) => void;
     public getChildContext?: () => any;
-    public dirty: boolean;
-    public renderCallbacks?: any[];
-    public __key?: string;
+    public _component?: Component;
+    public _parentComponent?: Component;
+    public _dirty: boolean;
+    public _renderCallbacks?: any[];
+    public _key?: string;
     public _disable?: boolean;
-    public __ref: string;
+    public _ref?: (component: Component | null) => void;
     constructor(props: any, context: any) {
-        this.dirty = true;
+        this._dirty = true;
         this.context = context;
         this.props = props;
         this.state = this.state || {};
@@ -38,15 +41,15 @@ export class Component {
         }
         s = {...(typeof state === "function" ? state(s, this.props) : state)};
         if (callback) {
-            this.renderCallbacks = this.renderCallbacks || [];
-            this.renderCallbacks.push(callback);
+            this._renderCallbacks = this._renderCallbacks || [];
+            this._renderCallbacks.push(callback);
         }
         // enqueueRender(this);
     }
     public forceUpdate(callback: () => void) {
         if (callback) {
-            this.renderCallbacks = this.renderCallbacks || [];
-            this.renderCallbacks.push(callback);
+            this._renderCallbacks = this._renderCallbacks || [];
+            this._renderCallbacks.push(callback);
         }
         renderComponent(this, FORCE_RENDER);
     }

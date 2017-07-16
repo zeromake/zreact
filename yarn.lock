@@ -1614,8 +1614,8 @@ tslint@^5.5.0:
     tsutils "^2.5.1"
 
 tsutils@^2.5.1:
-  version "2.6.1"
-  resolved "http://registry.npm.taobao.org/tsutils/download/tsutils-2.6.1.tgz#98ecf009594f4e4af884057be4cf41a450bc7637"
+  version "2.7.1"
+  resolved "http://registry.npm.taobao.org/tsutils/download/tsutils-2.7.1.tgz#411a0e9466525a2b2869260a55620d7292155e24"
   dependencies:
     tslib "^1.7.1"
 

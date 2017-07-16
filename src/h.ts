@@ -1,3 +1,4 @@
+import { Component } from "./component";
 import options from "./options";
 import { VNode } from "./vnode";
 
@@ -6,12 +7,12 @@ import { VNode } from "./vnode";
 /** JSX/hyperscript reviver
  * Benchmarks: https://esbench.com/bench/57ee8f8e330ab09900a1a1a0
  * 标准JSX转换函数
- * @param {string} nodeName 组件或者原生dom组件名
+ * @param {string|Component} nodeName 组件{@link Component}或者原生dom组件名
  * @param {{key: string => value: string}} attributes 组件属性
  * @see http://jasonformat.com/wtf-is-jsx
  * @public
  */
-export function h(nodeName: string, attributes: any, ...args: any[]) {
+export function h(nodeName: string | Component, attributes: any, ...args: any[]) {
     // 初始化子元素列表
     const stack: any[] = [];
     const children: any[] = [];
