@@ -1,8 +1,8 @@
+import { h, h as createElement } from "./h";
 import { cloneElement } from "./clone-element";
 import { Component } from "./component";
-import { h, h as createElement } from "./h";
-import options from "./options";
 import { render } from "./render";
+import options from "./options";
 
 export default {
     Component,

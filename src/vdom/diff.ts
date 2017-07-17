@@ -28,6 +28,15 @@ export function flushMounts() {
     }
 }
 
+/**
+ * 比较dom差异
+ * @param dom 原dom
+ * @param vnode jsx
+ * @param context 通过render来的是一个空对象。
+ * @param mountAll 是否已全部挂载
+ * @param parent 挂载元素
+ * @param componentRoot 是否为componentRoot
+ */
 export function diff(
     dom: Element | undefined,
     vnode: VNode,
@@ -35,11 +44,13 @@ export function diff(
     mountAll: boolean,
     parent: any,
     componentRoot: boolean,
-) {
+): Element {
     if (!diffLevel++) {
+        // 在diff调用递归层数为0时设置isSvgMode，hydrating
         isSvgMode = parent != null && parent.ownerSVGDocument !== undefined;
         hydrating = dom != null && !(ATTR_KEY in dom);
     }
+    // 调用idiff生成dom
     const ret = idiff(
         dom,
         vnode,
@@ -47,10 +58,12 @@ export function diff(
         mountAll,
         componentRoot,
     );
+    // 如果有父dom直接appendChild
     if (parent && ret.parentNode !== parent) {
         parent.appendChild(ret);
     }
     if (!--diffLevel) {
+        // diff调用递归层为0
         hydrating = false;
         if (!componentRoot) {
             flushMounts();

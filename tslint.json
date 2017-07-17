@@ -29,7 +29,8 @@
         "allow-pascal-case"
       ],
       "no-empty": false,
-      "ordered-imports": false
+      "ordered-imports": false,
+      "no-conditional-assignment": false
     },
     "rulesDirectory": []
 }

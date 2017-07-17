@@ -17,7 +17,7 @@ export function enqueueRender(component: Component) {
 }
 
 export function rerender() {
-    let p: Component;
+    let p: Component | undefined;
     const list = items;
     items = [];
     p = list.pop();

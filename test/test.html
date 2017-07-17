@@ -5,16 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="../dist/zreact.js"></script>
+    <script src="./preact.dev.js"></script>
     <title>Document</title>
 </head>
 <body>
-    <div id="app"></div>
+    <div id="app">
+    </div>
     <script>
-        function test() {
-            console.log('_______')
+        // var Zreact = preact;
+        class App extends Zreact.Component {
+            constructor() {
+                super()
+                this.state = {
+                    num: 0
+                }
+            }
+            render(props, state) {
+                return Zreact.h("span", { "onClick": this.test.bind(this) }, "APP test+ ", state.num)
+            }
+            test() {
+                console.log("App test", this.state);
+                this.setState(function(state) {
+                    // state.num += 1
+                    return {
+                        num: state.num + 1
+                    }
+                })
+            }
         }
         Zreact.render(
-            Zreact.h("h1", { "onClick": test }, "test"),
+            Zreact.h(App),
             document.querySelector("#app")
         );
     </script>

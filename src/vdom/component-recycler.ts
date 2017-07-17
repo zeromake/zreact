@@ -4,10 +4,6 @@ const components: {
     [name: string]: Component[];
 } = {};
 
-declare class Function {
-
-}
-
 export function collectComponent(component: Component) {
     const constructor: any = component.constructor;
     const name = constructor.name;
@@ -24,9 +20,7 @@ export function createComponent(Ctor: any, props: any, context: any) {
     } else {
         inst = new Component(props, context);
         inst.constructor = Ctor;
-        inst.render = function doRender(tprops: any, state: any, tcontext: any) {
-            return this.constructor(tprops, tcontext);
-        };
+        inst.render = doRender;
     }
     if (list) {
         for (let i = list.length; i-- ; ) {
@@ -39,4 +33,8 @@ export function createComponent(Ctor: any, props: any, context: any) {
         }
     }
     return inst;
+}
+
+function doRender(props: any, state: any, tcontext: any) {
+    return this.constructor(props, tcontext);
 }

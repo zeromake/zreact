@@ -2,11 +2,17 @@ import { h, Component } from '../dist/zreact'
 
 
 class App extends Component {
+    constructor() {
+        super()
+        this.state = {
+            num: 0
+        }
+    }
     test() {
         console.log('----')
     }
-    render() {
-        return <h1 onClick={ this.test }></h1>
+    render(props, state) {
+        return <h1 onClick={ this.test }>test{ state.num }</h1>
     }
 }
 
@@ -21,7 +27,7 @@ const test = {
                 [1, 2, 3].map(function(modeItem) {
                     return (
                         <div data-options="{test: 1}">
-                            <p>{modeItem}</p>
+                            <p>{modeItem}1111</p>
                         </div>
                     )
                 })

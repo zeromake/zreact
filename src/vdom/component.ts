@@ -59,23 +59,34 @@ export function setComponentProps(component: Component, props: any, opts: any, c
 
 export function renderComponent(component: Component, opts?: number, mountALL?: boolean, isChild?: boolean) {
     if (component._disable) {
+        // 组件已停用直接不做操作。
         return;
     }
+    // 获取组件props
     const props = component.props;
+    // 获取组件state
     const state = component.state;
+    // 获取组件context
     let context = component.context;
+    // 获取组件上一次的props没有取当前
     const previousProps = component.prevProps || props;
+    // 获取组件上一次的state没有取当前
     const previousState = component.prevState || state;
+    // 获取组件上一次的context没有取当前
     const previousContext = component.prevContext || context;
+    // 判断是否已有dom元素
     const isUpdate = component.base;
+    //
     const nextBase = component.nextBase;
     const initialBase = isUpdate || nextBase;
+    // 获取当前组件的子组件
     const initialChildComponent = component._component;
+    // 略过dom更新标记
     let skip = false;
-    let rendered: VNode | undefined;
-    let inst: Component | undefined;
     let cbase: Element | undefined;
     if (isUpdate) {
+        // 有dom元素在组件上说明是更新操作.
+        // 把组件上的props，state，context都返回到更新前
         component.props = previousProps;
         component.state = previousState;
         component.context = previousContext;
@@ -83,25 +94,35 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
             && component.shouldComponentUpdate
             && component.shouldComponentUpdate(props, state, context) === false
         ) {
+            // 非用户代码调用(Component.forceUpdate),就执行shouldComponentUpdate钩子
+            // 也就是说如果使用Component.forceUpdate来更新render执行就无法被阻止
+            // shouldComponentUpdate钩子把新的props,state,context作为参数传入
+            // 如果shouldComponentUpdate钩子返回false，跳过下面的dom操作。
             skip = true;
         } else if (component.componentWillUpdate) {
+            // render 前钩子与shouldComponentUpdate互斥, Component.forceUpdate更新依旧会触发该钩子。
             component.componentWillUpdate(props, state, context);
         }
+        // 把组件上的props，state，context都设置到新的
         component.props = props;
         component.state = state;
         component.context = context;
     }
-    // clear
+    // 清理掉
     component.prevProps = null;
     component.prevState = null;
     component.prevContext = null;
     component.nextBase = undefined;
+    // 重置_dirty
     component._dirty = false;
 
     if (!skip) {
-        rendered = component.render(props, state, context);
+        // 当前组件的render函数返回的VNode
+        const rendered: VNode | undefined = component.render(props, state, context);
+        //
+        let inst: Component | undefined;
         if (component.getChildContext) {
-            context = { ...({ ...context }), ...component.getChildContext() };
+            context = { ...context, ...component.getChildContext() };
         }
         // 取出VNode的nodeName
         const childComponent = rendered && rendered.nodeName;
@@ -110,18 +131,26 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
 
         if (typeof childComponent === "function" && rendered) {
             // 如果是自定义组件
+            // 获取VNode上的props
             const childProps = getNodeProps(rendered);
             inst = initialChildComponent;
             if (inst && inst.constructor === childComponent && childProps.key === inst._key) {
+                // 子组件已存在且key未变化只改变props
                 setComponentProps(inst, childProps, SYNC_RENDER, context, false);
             } else {
+                // 设置到toUnmount等待unmount
                 toUnmount = inst;
+                // 新建Component
                 inst = createComponent(childComponent, childProps, context);
                 inst.nextBase = inst.nextBase || nextBase;
+                // 设置父组件索引
                 inst._parentComponent = component;
+                // 设置props但是不进行render
                 setComponentProps(inst, childProps, NO_RENDER, context, false);
+                // 递归调用renderComponent保证子组件的子组件创建
                 renderComponent(inst, SYNC_RENDER, mountALL, true);
             }
+            // 把子组件dom设置到base
             base = inst.base;
         } else {
             cbase = initialBase;
@@ -148,7 +177,51 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
         }
         if (initialBase && base !== initialBase && inst !== initialChildComponent) {
             const baseParent = initialBase.parentNode;
+            if (base && baseParent && base !== baseParent) {
+                baseParent.replaceChild(base, initialBase);
+                if (!toUnmount) {
+                    const initBase: any = initialBase;
+                    initBase._component = null;
+                    recollectNodeTree(initialBase, false);
+                }
+            }
         }
+
+        if (toUnmount) {
+            unmountComponent(toUnmount);
+        }
+
+        component.base = base;
+        if (base && !isChild) {
+            let componentRef: Component | undefined = component;
+            let t: Component | undefined = component;
+            while ((t = t._parentComponent)) {
+                componentRef = t;
+                componentRef.base = base;
+            }
+            const _base: any = base;
+            _base._component = componentRef;
+            _base._componentConstructor = componentRef.constructor;
+        }
+    }
+    if (!isUpdate || mountALL) {
+        mounts.unshift(component);
+    } else if (!skip) {
+        if (component.componentDidUpdate) {
+            component.componentDidUpdate(previousProps, previousState, previousContext);
+        }
+        if (options.afterUpdate) {
+            options.afterUpdate(component);
+        }
+    }
+
+    if (component._renderCallbacks != null) {
+        while (component._renderCallbacks.length) {
+            component._renderCallbacks.pop().call(component);
+        }
+    }
+    if (!diffLevel && !isChild) {
+        flushMounts();
     }
 }
 
@@ -164,10 +237,8 @@ export function buildComponentFromVNode(
     const isDiectOwner = c && dom._componentConstructor === vnode.nodeName;
     let isOwner = isDiectOwner;
     const props = getNodeProps(vnode);
-    c = c._parentComponent;
-    while (c && !isOwner && c) {
+    while (c && !isOwner && (c = c._parentComponent)) {
         isOwner = c.constructor === vnode.nodeName;
-        c = c._parentComponent;
     }
 
     if (c && isOwner && (!mountALL || c._component)) {

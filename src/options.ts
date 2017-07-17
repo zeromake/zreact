@@ -2,6 +2,7 @@ import { VNode } from "./vnode";
 import { Component } from "component";
 
 const options: {
+    afterUpdate?: (component: Component) => void;
     beforeUnmount?: (component: Component) => void;
     afterMount?: (component: Component) => void;
     syncComponentUpdates?: boolean;

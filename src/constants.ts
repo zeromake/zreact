@@ -1,5 +1,6 @@
 export const NO_RENDER = 0;
 export const SYNC_RENDER = 1;
+// 用于Component.forceUpdate方法更新组件时的标记
 export const FORCE_RENDER = 2;
 export const ASYNC_RENDER = 3;
 

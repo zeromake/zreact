@@ -104,12 +104,12 @@ export function setAccessor(
     }
 }
 
-function setProperty(node, name, value) {
+function setProperty(node: any, name: string, value: string) {
     try {
         node[name] = value;
     } catch (e) { }
 }
 
-function eventProxy(e) {
+function eventProxy(e: Event) {
     return this._listeners[e.type](options.event && options.event(e) || e);
 }
