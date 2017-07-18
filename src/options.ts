@@ -8,7 +8,11 @@ const options: {
     syncComponentUpdates?: boolean;
     debounceRendering?: (render: () => void) => void;
     vnode?: (vnode: VNode) => void;
-    event?: (event: Event) => Event;
-} = {};
+    event?: (event: Event) => any;
+    // 是否自动对事件方法绑定this为组件，默认为true(preact没有)
+    eventBind?: boolean;
+} = {
+    eventBind: true,
+};
 
 export default options;

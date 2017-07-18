@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="../dist/zreact.js"></script>
-    <script src="./preact.dev.js"></script>
+    <!-- <script src="./preact.dev.js"></script> -->
     <title>Document</title>
 </head>
 <body>
@@ -13,28 +13,63 @@
     </div>
     <script>
         // var Zreact = preact;
-        class App extends Zreact.Component {
-            constructor() {
-                super()
-                this.state = {
-                    num: 0
-                }
-            }
-            render(props, state) {
-                return Zreact.h("span", { "onClick": this.test.bind(this) }, "APP test+ ", state.num)
-            }
-            test() {
-                console.log("App test", this.state);
+        // class App extends Zreact.Component {
+        //     constructor() {
+        //         super()
+        //         this.state = {
+        //             num: {
+        //                 num: 1
+        //             }
+        //         }
+        //         this.getDom = dom => {
+        //             this.dom = dom;
+        //             console.log(dom);
+        //         };
+        //     }
+        //     render(props, state) {
+        //         return Zreact.h("span", { "onClick": this.test, ref: this.getDom }, "APP test+ ", state.num.num)
+        //     }
+        //     test() {
+        //         console.log("App test", this.state);
+        //         this.setState(function(state) {
+        //             state.num.num += 1
+        //         })
+        //     }
+        // }
+        // function Foo() {
+        //     // Zreact.Component.call(this);
+        //     this.state = {
+        //         test: 5
+        //     }
+        //     var self = this;
+        //     this.test = function() {
+        //         console.log("Foo test", self.state);
+        //         self.setState(function(state) {
+        //             state.test += 1
+        //         })
+        //     }
+        // }
+        // Foo.prototype = Zreact.Component.prototype
+        // Foo.prototype.render = function(props, state) {
+        //     var vnode = Zreact.h("span", { "onClick": this.test }, "APP test+ ", state.num)
+        //     return vnode
+        // }
+        var Foo = Zreact.createClass({
+            state: {
+                num: 1
+            },
+            render: function(props, state) {
+                return Zreact.h("h1", { "onClick": this.test }, state.num);
+            },
+            test: function() {
+                console.log("Foo test", this.state.num);
                 this.setState(function(state) {
-                    // state.num += 1
-                    return {
-                        num: state.num + 1
-                    }
+                    state.num += 1
                 })
             }
-        }
+        })
         Zreact.render(
-            Zreact.h(App),
+            Zreact.h(Foo),
             document.querySelector("#app")
         );
     </script>

@@ -1,7 +1,13 @@
 import { ATTR_KEY } from "../constants";
 import { isSameNodeType, isNamedNode } from "./index";
 import { buildComponentFromVNode, unmountComponent } from "./component";
-import { setAccessor, createNode, removeNode } from "../dom/index";
+import {
+    setAccessor,
+    createNode,
+    removeNode,
+    getPreviousSibling,
+    getLastChild,
+} from "../dom/index";
 import options from "../options";
 import { VNode } from "../vnode";
 import { Component } from "../component";
@@ -105,7 +111,9 @@ function idiff(
                 recollectNodeTree(dom, true);
             }
         }
-        out[ATTR_KEY] = true;
+        try {
+            out[ATTR_KEY] = true;
+        } catch (e) {}
         return out;
     }
     let vnodeName = vnode.nodeName;
@@ -279,26 +287,37 @@ function innerDiffNode(
         }
     }
 }
-
+/** 递归回收(或者只是卸载一个)
+ * @param node 要被卸载的dom
+ * @param unmountOnly 为true则只触发生命周期，跳过删除(仅在dom上的组件索引不存在有效)
+ */
 export function recollectNodeTree(node: any, unmountOnly: any) {
+    // 获取dom上的组件索引
     const component = node._component;
     if (component) {
+        // 如果存在
         unmountComponent(component);
     } else {
         if (node[ATTR_KEY] != null && node[ATTR_KEY].ref) {
-            node[ATTR_KEY](null);
+            // ref用于取消引用dom
+            node[ATTR_KEY].ref(null);
         }
         if (unmountOnly === false || node[ATTR_KEY] == null) {
+            // 移除dom
             removeNode(node);
         }
+        // 卸载子dom
         removeChildren(node);
     }
 }
 
 export function removeChildren(node: any) {
-    node = node.lastChild;
+    // 去除最后一个子元素
+    node = getLastChild(node);
     while (node) {
-        const next = node.previousSibling;
+        // 取前一个兄弟节点
+        const next = getPreviousSibling(node);
+        // 不需要移除因为父级已经移除
         recollectNodeTree(node, true);
         node = next;
     }

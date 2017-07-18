@@ -57,7 +57,14 @@ export function setComponentProps(component: Component, props: any, opts: any, c
     }
 }
 
-export function renderComponent(component: Component, opts?: number, mountALL?: boolean, isChild?: boolean) {
+/**
+ * 执行render，diff或新建render
+ * @param {Component} component
+ * @param {number?} opts
+ * @param {boolean?} mountALL
+ * @param {boolean?} isChild
+ */
+export function renderComponent(component: Component, opts?: number, mountALL?: boolean, isChild?: boolean): void {
     if (component._disable) {
         // 组件已停用直接不做操作。
         return;
@@ -76,7 +83,7 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
     const previousContext = component.prevContext || context;
     // 判断是否已有dom元素
     const isUpdate = component.base;
-    //
+    // 被移除过时保存的dom
     const nextBase = component.nextBase;
     const initialBase = isUpdate || nextBase;
     // 获取当前组件的子组件
@@ -142,6 +149,7 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
                 toUnmount = inst;
                 // 新建Component
                 inst = createComponent(childComponent, childProps, context);
+                // 设置好缓存dom
                 inst.nextBase = inst.nextBase || nextBase;
                 // 设置父组件索引
                 inst._parentComponent = component;
@@ -153,35 +161,55 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
             // 把子组件dom设置到base
             base = inst.base;
         } else {
+            // 原生组件
+            // 获取原dom或缓存dom
             cbase = initialBase;
+            // 把自定义子组件放到卸载，对应使用if分支控制自定义组件和原生组件
             toUnmount = initialChildComponent;
             if (toUnmount) {
+                // 如果存在说明上次渲染时是一个自定义组件
+                // 清理子组件索引
                 component._component = undefined;
+                // 清理dom索引
                 cbase = undefined;
             }
 
             if (initialBase || opts === SYNC_RENDER) {
+                // 组件dom，缓存dom，同步渲染
                 if (cbase) {
+                    //
                     const b: any = cbase;
                     b._component = undefined;
                 }
+                // 渲染原生组件
                 base = diff(
+                    // 原dom
                     cbase,
+                    // VNode
                     rendered,
                     context,
+                    // 父级组件需要挂载，或者dom不存在也需要挂载
                     mountALL || !isUpdate,
+                    // 把组件挂载到缓存dom的父级
                     initialBase && initialBase.parentNode,
+                    // 以原生组件这里执行说明是自定义组件的第一个原生组件
                     true,
                 );
             }
         }
         if (initialBase && base !== initialBase && inst !== initialChildComponent) {
+            // 存在缓存dom，现dom和缓存dom不相同且新建过自定义子组件
+            // 获取当前组件缓存dom的父级dom
             const baseParent = initialBase.parentNode;
             if (base && baseParent && base !== baseParent) {
+                // 替换到新dom
                 baseParent.replaceChild(base, initialBase);
                 if (!toUnmount) {
+                    // 没有
                     const initBase: any = initialBase;
+                    // 去除dom上的component索引
                     initBase._component = null;
+                    //
                     recollectNodeTree(initialBase, false);
                 }
             }
@@ -200,8 +228,10 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
                 componentRef.base = base;
             }
             const _base: any = base;
-            _base._component = componentRef;
-            _base._componentConstructor = componentRef.constructor;
+            try {
+                _base._component = componentRef;
+                _base._componentConstructor = componentRef.constructor;
+            } catch (e) {}
         }
     }
     if (!isUpdate || mountALL) {
@@ -285,14 +315,17 @@ export function unmountComponent(component: Component) {
     const anyBase: any = base;
     if (inner) {
         unmountComponent(inner);
-    } else if (base) {
+    } else if (anyBase) {
         if (anyBase[ATTR_KEY] && anyBase[ATTR_KEY].ref) {
             anyBase[ATTR_KEY].ref(null);
         }
-        component.nextBase = base;
+        // 卸载组件dom前把它存到nextBase
+        component.nextBase = anyBase;
+        // 从dom上移除
         removeNode(anyBase);
+        // 放入全局缓存对象保存
         collectComponent(component);
-        removeChildren(base);
+        removeChildren(anyBase);
     }
     if (component._ref) {
         component._ref(null);

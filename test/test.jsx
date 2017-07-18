@@ -12,7 +12,7 @@ class App extends Component {
         console.log('----')
     }
     render(props, state) {
-        return <h1 onClick={ this.test }>test{ state.num }</h1>
+        return <h1 onClick={ this.test() }>test{ state.num }</h1>
     }
 }
 

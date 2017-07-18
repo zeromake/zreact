@@ -17,7 +17,7 @@ export function removeNode(node: HTMLElement) {
 }
 
 export function setAccessor(
-    node: HTMLElement,
+    node: any,
     name: string,
     old: any,
     value: any,
@@ -54,7 +54,7 @@ export function setAccessor(
         }
     } else if ("dangerouslySetInnerHTML" === name) {
         if (value) {
-            node.innerHTML = value._html || "";
+            node.innerHTML = value.__html || "";
         }
     } else if (name[0] === "o" && name[1] === "n") {
         const oldName = name;
@@ -63,16 +63,15 @@ export function setAccessor(
         name = name.toLowerCase().substring(2);
         if (value) {
             if (!old) {
-                node.addEventListener(name, eventProxy, useCapture);
+                addEventListener(node, name, eventProxy, useCapture);
             }
         } else {
-            node.removeEventListener(name, eventProxy, useCapture);
+            removeEventListener(node, name, eventProxy, useCapture);
         }
-        const n: any = node;
-        if (!n._listeners) {
-            n._listeners = {};
+        if (!node._listeners) {
+            node._listeners = {};
         }
-        n._listeners[name] = value;
+        node._listeners[name] = value;
     } else if (name !== "list" && name !== "type" && !isSvg && name in node) {
         setProperty(node, name, value == null ? "" : value);
         if (value == null || value === false) {
@@ -110,6 +109,36 @@ function setProperty(node: any, name: string, value: string) {
     } catch (e) { }
 }
 
-function eventProxy(e: Event) {
-    return this._listeners[e.type](options.event && options.event(e) || e);
+function eventProxy(e: Event): (e: Event) => void {
+    const listener = this._listeners[e.type];
+    const event = options.event && options.event(e) || e;
+    if (options.eventBind) {
+        return listener.call(this._component, event);
+    }
+    return listener(event);
+}
+
+export function getPreviousSibling(node: Node): Node| null {
+    return node.previousSibling;
+}
+
+export function getLastChild(node: Node): Node| null {
+    return node.lastChild;
+}
+
+function addEventListener(node: any, name: string, eventFun: (e: Event) => void, useCapture: boolean) {
+    console.log("-----addEventListener------");
+    if (node.addEventListener) {
+        node.addEventListener(name, eventProxy, useCapture);
+    } else {
+        node.attachEvent("on" + name, eventProxy.bind(node));
+    }
+}
+
+function removeEventListener(node: any, name: string, eventFun: (e: Event) => void, useCapture: boolean) {
+    if (node.removeEventListener) {
+        node.removeEventListener(name, eventProxy, useCapture);
+    } else {
+        node.detachEvent("on" + name);
+    }
 }

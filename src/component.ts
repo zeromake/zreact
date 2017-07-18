@@ -10,13 +10,17 @@ export class Component {
     // 由父级组件传递的状态，不可修改
     public props: any;
     public context: any;
+    // 默认props
     public defaultProps?: any;
     // 组件挂载后的dom
     public base?: Element;
+    // 自定义组件名
     public name?: string;
+    // 修改状态时的原状态
     public prevProps?: any;
     public prevState?: any;
     public prevContext?: any;
+    // 被移除时的dom缓存
     public nextBase?: Element;
     /**
      * 在一个组件被渲染到 DOM 之前
@@ -74,7 +78,7 @@ export class Component {
         this._dirty = true;
         this.context = context;
         this.props = props;
-        this.state = {};
+        this.state = this.state || {};
     }
     /**
      * 设置state并通过enqueueRender异步更新dom
@@ -114,7 +118,13 @@ export class Component {
         }
         renderComponent(this, FORCE_RENDER);
     }
-    public render(state: any, props: any, context?: any): VNode {
+    /**
+     * 用来生成VNode的函数，一定要继承后覆盖
+     * @param props
+     * @param state
+     * @param context
+     */
+    public render(props: any, state?: any, context?: any): VNode {
         throw new TypeError("not set render");
     }
 }
