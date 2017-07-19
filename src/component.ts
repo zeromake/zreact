@@ -73,6 +73,8 @@ export class Component {
     // 是否停用
     public _disable?: boolean;
     public _ref?: (component: Component | null) => void;
+    // 原生如果VNode，root为原生组件就创建并设置它的一些props，event
+    public child?: any;
     constructor(props: any, context: any) {
         // 初始化为true
         this._dirty = true;

@@ -50,11 +50,12 @@ export function diff(
     mountAll: boolean,
     parent: any,
     componentRoot: boolean,
+    child: any,
 ): Element {
     if (!diffLevel++) {
         // 在diff调用递归层数为0时设置isSvgMode，hydrating
         isSvgMode = parent != null && parent.ownerSVGDocument !== undefined;
-        hydrating = dom != null && !(ATTR_KEY in dom);
+        hydrating = dom != null && !(child && ATTR_KEY in child);
     }
     // 调用idiff生成dom
     const ret = idiff(
@@ -63,6 +64,7 @@ export function diff(
         context,
         mountAll,
         componentRoot,
+        child,
     );
     // 如果有父dom直接appendChild
     if (parent && ret.parentNode !== parent) {
@@ -84,6 +86,7 @@ function idiff(
     context: any,
     mountAll: boolean,
     componentRoot?: boolean,
+    child?: any,
 ) {
     let out = dom;
     const prevSvgMode = isSvgMode;
@@ -96,10 +99,10 @@ function idiff(
             dom
             && dom.splitText !== undefined
             && dom.parentNode
-            && (!dom._component || componentRoot)
+            && (!child._component || componentRoot)
         ) {
-            if (dom.nodeValue !== vnode) {
-                dom.nodeValue = vnode;
+            if (child.nodeValue !== vnode) {
+                child.nodeValue = vnode;
             }
         } else {
             const data: any = vnode;
@@ -108,17 +111,19 @@ function idiff(
                 if (dom.parentNode) {
                     dom.parentNode.replaceChild(out, dom);
                 }
-                recollectNodeTree(dom, true);
+                if (child.base !== dom) {
+                    child.base = dom;
+                }
+                recollectNodeTree(child, true);
             }
         }
-        try {
-            out[ATTR_KEY] = true;
-        } catch (e) {}
+        child[ATTR_KEY] = true;
+        child.base = out;
         return out;
     }
     let vnodeName = vnode.nodeName;
     if (typeof vnodeName === "function") {
-        return buildComponentFromVNode(dom, vnode, context, mountAll);
+        return buildComponentFromVNode(dom, vnode, context, mountAll, child);
     }
 
     isSvgMode = vnodeName === "svg"
@@ -126,6 +131,9 @@ function idiff(
     vnodeName = String(vnodeName);
     if (!dom || !isNamedNode(dom, vnodeName)) {
         out = createNode(vnodeName, isSvgMode);
+        if (child._component) {
+            child._component = undefined;
+        }
         if (dom) {
             while (dom.firstChild) {
                 out.appendChild(dom.firstChild);
@@ -133,20 +141,26 @@ function idiff(
             if (dom.parentNode) {
                 dom.parentNode.replaceChild(out, dom);
             }
-            recollectNodeTree(dom, true);
+            if (child.base !== dom) {
+                child.base = dom;
+            }
+            recollectNodeTree(child, true);
         }
     }
     const fc = out.firstChild;
-    let props = out[ATTR_KEY];
+    let props = child[ATTR_KEY];
     const vchildren = vnode.children;
     if (props == null) {
-        props = out[ATTR_KEY] = {};
+        props = child[ATTR_KEY] = {};
         for (let a = out.attributes, i = a.length; i-- ; ) {
             const attr = a[i];
             props[attr.name] = attr.value;
         }
     }
 
+    if (child.base !== out) {
+        child.base = out;
+    }
     if (
         !hydrating
         && vchildren
@@ -160,16 +174,20 @@ function idiff(
             fc.nodeValue = vchildren[0];
         }
     } else if (vchildren && vchildren.length || fc != null) {
+        if (!child.children) {
+            child.children = [];
+        }
         innerDiffNode(
             out,
             vchildren,
             context,
             mountAll,
             hydrating || props.dangerouslySetInnerHTML != null,
+            child,
         );
     }
 
-    diffAttributes(out, vnode.attributes, props);
+    diffAttributes(out, vnode.attributes, props, child);
     isSvgMode = prevSvgMode;
     return out;
 }
@@ -180,8 +198,9 @@ function innerDiffNode(
     context: any,
     mountAll: boolean,
     isHydrating: boolean,
+    domChild: any,
 ) {
-    const originalChildren = dom.childNodes;
+    const originalChildren = domChild.children;
     const children = [];
     const keyed: {
         [name: string]: any;
@@ -196,6 +215,8 @@ function innerDiffNode(
     let f;
     let vchild;
     let child;
+    const pchildren = [];
+    const childNodes = dom.childNodes;
 
     // Build up a map of keyed children and an Array of unkeyed children:
     if (len !== 0) {
@@ -209,16 +230,16 @@ function innerDiffNode(
             : null;
         if (key != null) {
             keyedLen++;
-            keyed[key] = child;
+            keyed[key] = pchild;
         } else if (
             props
             || (
-                pchild.splitText !== undefined
-                ? (isHydrating ? pchild.nodeValue.trim() : true)
+                pchild.base.splitText !== undefined
+                ? (isHydrating ? pchild.base.nodeValue.trim() : true)
                 : isHydrating
             )
             ) {
-            children[childrenLen++] = child;
+            children[childrenLen++] = pchild;
         }
     }
     }
@@ -240,7 +261,7 @@ function innerDiffNode(
             // attempt to pluck a node of the same type from the existing children
                 for (j = min; j < childrenLen; j++) {
                     c = children[j];
-                    if (children[j] !== undefined && isSameNodeType(c, vchild, isHydrating)) {
+                    if (children[j] !== undefined && isSameNodeType(c.base, vchild, isHydrating)) {
                         child = c;
                         children[j] = undefined;
                         if (j === childrenLen - 1) {
@@ -253,11 +274,14 @@ function innerDiffNode(
                     }
                 }
             }
-
+            // 获取上一次的props存储对象
+            const tchild = child || originalChildren[i] || {};
             // morph the matched/found/created DOM child to match vchild (deep)
-            child = idiff(child, vchild, context, mountAll);
-
-            f = originalChildren[i];
+            child = idiff(child && child.base, vchild, context, mountAll, false, tchild);
+            // 把新的props存储对象存储起来
+            pchildren.push(tchild);
+            // 获取真实
+            f = childNodes[i];
             if (child && child !== dom && child !== f) {
                 if (f == null) {
                     dom.appendChild(child);
@@ -270,11 +294,13 @@ function innerDiffNode(
             }
         }
     }
+    domChild.children = pchildren;
     // remove unused keyed children:
     if (keyedLen) {
         for (const i in keyed) {
             if (keyed[i] !== undefined) {
-                recollectNodeTree(keyed[i], false);
+                removeNode(keyed[i].base);
+                // recollectNodeTree(keyed[i], false);
             }
         }
     }
@@ -283,7 +309,8 @@ function innerDiffNode(
     while (min <= childrenLen) {
         child = children[childrenLen--];
         if (child !== undefined) {
-            recollectNodeTree(child, false);
+            removeNode(child.base);
+            // recollectNodeTree(child, false);
         }
     }
 }
@@ -304,7 +331,7 @@ export function recollectNodeTree(node: any, unmountOnly: any) {
         }
         if (unmountOnly === false || node[ATTR_KEY] == null) {
             // 移除dom
-            removeNode(node);
+            removeNode(node.base);
         }
         // 卸载子dom
         removeChildren(node);
@@ -313,23 +340,23 @@ export function recollectNodeTree(node: any, unmountOnly: any) {
 
 export function removeChildren(node: any) {
     // 去除最后一个子元素
-    node = getLastChild(node);
-    while (node) {
-        // 取前一个兄弟节点
-        const next = getPreviousSibling(node);
+    const nodeList = node.children;
+    node.children = [];
+    let len = nodeList ? nodeList.length : 0;
+    node = getLastChild(node && node.base);
+    while (len--) {
         // 不需要移除因为父级已经移除
-        recollectNodeTree(node, true);
-        node = next;
+        recollectNodeTree(nodeList[len], true);
     }
 }
 
-function diffAttributes(dom: any, attrs: any, old: any) {
+function diffAttributes(dom: any, attrs: any, old: any, child: any) {
     let name: string;
     for (name in old) {
         if (!(attrs && attrs[name] != null) && old[name] != null) {
             const oldValue = old[name];
             const value = old[name] = undefined;
-            setAccessor(dom, name, oldValue, value, isSvgMode);
+            setAccessor(dom, name, oldValue, value, isSvgMode, child);
         }
     }
     for (name in attrs) {
@@ -348,7 +375,7 @@ function diffAttributes(dom: any, attrs: any, old: any) {
         ) {
             const oldValue = old[name];
             const value = old[name] = attrs[name];
-            setAccessor(dom, name, oldValue, value, isSvgMode);
+            setAccessor(dom, name, oldValue, value, isSvgMode, child);
         }
     }
 

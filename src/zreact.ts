@@ -5,6 +5,7 @@ import { PureComponent } from "./pure-component";
 import { render } from "./render";
 import options from "./options";
 import { createClass } from "./create-class";
+import { rerender } from "./render-queue";
 
 export default {
     Component,
@@ -15,6 +16,7 @@ export default {
     h,
     options,
     render,
+    rerender,
 };
 
 export {
@@ -26,4 +28,5 @@ export {
     h,
     options,
     render,
+    rerender,
 };

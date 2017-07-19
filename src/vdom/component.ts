@@ -138,6 +138,10 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
 
         if (typeof childComponent === "function" && rendered) {
             // 如果是自定义组件
+
+            if (component.child) {
+                component.child = undefined;
+            }
             // 获取VNode上的props
             const childProps = getNodeProps(rendered);
             inst = initialChildComponent;
@@ -176,10 +180,15 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
 
             if (initialBase || opts === SYNC_RENDER) {
                 // 组件dom，缓存dom，同步渲染
-                if (cbase) {
+                if (component.child && component.child._component) {
+                    // 清理component索引防止使用同一个component情况下却卸载了。
+                    component.child._component = undefined;
                     //
-                    const b: any = cbase;
-                    b._component = undefined;
+                    // const b: any = cbase;
+                    // b._component = undefined;
+                }
+                if (!component.child) {
+                    component.child = {};
                 }
                 // 渲染原生组件
                 base = diff(
@@ -194,6 +203,7 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
                     initialBase && initialBase.parentNode,
                     // 以原生组件这里执行说明是自定义组件的第一个原生组件
                     true,
+                    component.child,
                 );
             }
         }
@@ -206,9 +216,12 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
                 baseParent.replaceChild(base, initialBase);
                 if (!toUnmount) {
                     // 没有
-                    const initBase: any = initialBase;
+                    // const initBase: any = initialBase;
                     // 去除dom上的component索引
-                    initBase._component = null;
+                    // initBase._component = null;
+                    if (component.child && component.child.base) {
+                        component.child.base = null;
+                    }
                     //
                     recollectNodeTree(initialBase, false);
                 }
@@ -227,11 +240,15 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
                 componentRef = t;
                 componentRef.base = base;
             }
-            const _base: any = base;
-            try {
-                _base._component = componentRef;
-                _base._componentConstructor = componentRef.constructor;
-            } catch (e) {}
+            // const _base: any = base;
+            // try {
+            //     _base._component = componentRef;
+            //     _base._componentConstructor = componentRef.constructor;
+            // } catch (e) {}
+            if (component.child) {
+                component.child._component = componentRef;
+                component.child._componentConstructor = componentRef.constructor;
+            }
         }
     }
     if (!isUpdate || mountALL) {
@@ -260,11 +277,12 @@ export function buildComponentFromVNode(
     vnode: VNode,
     context: any,
     mountALL: boolean,
+    child: any,
 ) {
-    let c = dom && dom._component;
+    let c = child && child._component;
     const originalComponent = c;
     let oldDom = dom;
-    const isDiectOwner = c && dom._componentConstructor === vnode.nodeName;
+    const isDiectOwner = c && child._componentConstructor === vnode.nodeName;
     let isOwner = isDiectOwner;
     const props = getNodeProps(vnode);
     while (c && !isOwner && (c = c._parentComponent)) {
@@ -285,6 +303,9 @@ export function buildComponentFromVNode(
             c.nextBase = dom;
             oldDom = null;
         }
+        c.child = child;
+        child._component = c;
+        child.base = c.base;
         setComponentProps(
             c,
             props,
@@ -294,7 +315,7 @@ export function buildComponentFromVNode(
         );
         dom = c.base;
         if (oldDom && dom !== oldDom) {
-            oldDom._component = null;
+            // oldDom._component = null;
             recollectNodeTree(oldDom, false);
         }
     }
@@ -315,9 +336,9 @@ export function unmountComponent(component: Component) {
     const anyBase: any = base;
     if (inner) {
         unmountComponent(inner);
-    } else if (anyBase) {
-        if (anyBase[ATTR_KEY] && anyBase[ATTR_KEY].ref) {
-            anyBase[ATTR_KEY].ref(null);
+    } else if (anyBase && component.child) {
+        if (component.child[ATTR_KEY] && component.child[ATTR_KEY].ref) {
+            component.child[ATTR_KEY].ref(null);
         }
         // 卸载组件dom前把它存到nextBase
         component.nextBase = anyBase;
@@ -325,7 +346,7 @@ export function unmountComponent(component: Component) {
         removeNode(anyBase);
         // 放入全局缓存对象保存
         collectComponent(component);
-        removeChildren(anyBase);
+        removeChildren(component.child);
     }
     if (component._ref) {
         component._ref(null);

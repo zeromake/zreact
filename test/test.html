@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="../dist/zreact.js"></script>
-    <!-- <script src="./preact.dev.js"></script> -->
+    <script src="./preact.dev.js"></script>
     <title>Document</title>
 </head>
 <body>
     <div id="app">
     </div>
     <script>
+
         // var Zreact = preact;
         // class App extends Zreact.Component {
         //     constructor() {
@@ -54,24 +55,94 @@
         //     var vnode = Zreact.h("span", { "onClick": this.test }, "APP test+ ", state.num)
         //     return vnode
         // }
-        var Foo = Zreact.createClass({
-            state: {
-                num: 1
-            },
-            render: function(props, state) {
-                return Zreact.h("h1", { "onClick": this.test }, state.num);
-            },
-            test: function() {
-                console.log("Foo test", this.state.num);
-                this.setState(function(state) {
-                    state.num += 1
-                })
+        // var Foo = Zreact.createClass({
+        //     state: {
+        //         num: [1,2,3]
+        //     },
+        //     render: function(props, state) {
+        //         var self = this
+        //         var test = state.num.map(function(i, index) {
+        //             return Zreact.h("li", null, i, Zreact.h("button", { onClick: self["delete"].bind(self, index) }, "x"))
+        //         });
+        //         return Zreact.h("div", null, Zreact.h("ul", null, test), Zreact.h("button", { onClick: this.test.bind(this) }, "添加"));
+        //     },
+        //     test: function() {
+        //         console.log("Foo test", this.state);
+        //         this.setState(function(state) {
+        //             state.num.push(8)
+        //         })
+        //     },
+        //     "delete": function(index) {
+        //         this.setState(function(state) {
+        //             state.num.splice(index, 1);
+        //         })
+        //     }
+        // })
+        var scratch = document.querySelector("#app");
+        // class Comp extends Zreact.Component {
+        //     render() {
+        //         return Zreact.h(
+        //             'span',
+        //             null,
+        //             'span in a component'
+        //         );
+        //     }
+        // }
+        // // var Comp = Zreact.createClass({
+        // //     render: function () {
+        // //         return Zreact.h(
+        // //             'span',
+        // //             null,
+        // //             'span in a component'
+        // //         );
+        // //     }
+        // // });
+        // var root;
+        // function test(content) {
+        //     root = Zreact.render(content, scratch, root);
+        // }
+        // var com;
+        // test(Zreact.h(Comp, {ref: c => com=c}));
+        // window.com = com;
+        // let comp;
+
+		// class Comp extends Zreact.Component {
+		// 	render(_, { alt }) {
+		// 		return alt ? 'asdf' : Zreact.h("div", null, "test");
+		// 	}
+		// }
+
+        // Zreact.render(Zreact.h(Comp, { ref: c=>comp=c }), scratch);
+        // console.log('----', comp)
+
+		// comp.setState({ alt:true });
+		// comp.forceUpdate();
+		// //expect(scratch.innerHTML, 'switching to textnode').to.equal('asdf');
+
+		// comp.setState({ alt:false });
+		// comp.forceUpdate();
+		// // expect(scratch.innerHTML, 'switching to element').to.equal('<div>test</div>');
+
+		// comp.setState({ alt:true });
+        // comp.forceUpdate();
+        const Foo = props => Zreact.h("div", Object.assign({}, props));
+
+        Zreact.render(Zreact.h(Foo,
+            {
+                a: "b",
+                children:[
+                Zreact.h("span", { class: "bar" }, "bar"),
+                '123',
+                456]
             }
-        })
-        Zreact.render(
-            Zreact.h(Foo),
-            document.querySelector("#app")
-        );
+        ), scratch);
+        const Empty = () => null;
+        let c = scratch.firstElementChild;
+		if (c) Zreact.render(Zreact.h(Empty), scratch, c);
+		//scratch.innerHTML = '';
+        const Foa = props => Zreact.h("div", Object.assign({}, props), "a");
+
+		//Zreact.render(Zreact.h(Foa, {children: 'b'}), scratch);
     </script>
 </body>
 </html>

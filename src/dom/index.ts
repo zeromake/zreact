@@ -22,6 +22,7 @@ export function setAccessor(
     old: any,
     value: any,
     isSvg: boolean,
+    child: any,
 ) {
     if (name === "className") {
         name = "class";
@@ -63,15 +64,15 @@ export function setAccessor(
         name = name.toLowerCase().substring(2);
         if (value) {
             if (!old) {
-                addEventListener(node, name, eventProxy, useCapture);
+                addEventListener(node, name, useCapture, child);
             }
         } else {
-            removeEventListener(node, name, eventProxy, useCapture);
+            removeEventListener(node, name, useCapture, child);
         }
-        if (!node._listeners) {
-            node._listeners = {};
+        if (!child._listeners) {
+            child._listeners = {};
         }
-        node._listeners[name] = value;
+        child._listeners[name] = value;
     } else if (name !== "list" && name !== "type" && !isSvg && name in node) {
         setProperty(node, name, value == null ? "" : value);
         if (value == null || value === false) {
@@ -109,13 +110,15 @@ function setProperty(node: any, name: string, value: string) {
     } catch (e) { }
 }
 
-function eventProxy(e: Event): (e: Event) => void {
-    const listener = this._listeners[e.type];
-    const event = options.event && options.event(e) || e;
-    if (options.eventBind) {
-        return listener.call(this._component, event);
-    }
-    return listener(event);
+function eventProxy(child: any): (e: Event) => void {
+    return (e: Event) => {
+        const listener = child._listeners[e.type];
+        const event = options.event && options.event(e) || e;
+        if (options.eventBind) {
+            return listener.call(child._component, event);
+        }
+        return listener(event);
+    };
 }
 
 export function getPreviousSibling(node: Node): Node| null {
@@ -126,19 +129,24 @@ export function getLastChild(node: Node): Node| null {
     return node.lastChild;
 }
 
-function addEventListener(node: any, name: string, eventFun: (e: Event) => void, useCapture: boolean) {
-    console.log("-----addEventListener------");
+function addEventListener(node: any, name: string, useCapture: boolean, child: any) {
+    const eventProxyFun = eventProxy(child);
+    if (!child.event) {
+        child.event = {};
+    }
+    child.event[name] = eventProxyFun;
     if (node.addEventListener) {
-        node.addEventListener(name, eventProxy, useCapture);
+        node.addEventListener(name, eventProxyFun, useCapture);
     } else {
-        node.attachEvent("on" + name, eventProxy.bind(node));
+        node.attachEvent("on" + name, eventProxyFun);
     }
 }
 
-function removeEventListener(node: any, name: string, eventFun: (e: Event) => void, useCapture: boolean) {
+function removeEventListener(node: any, name: string, useCapture: boolean, child: any) {
+    const eventProxyFun = child.event[name];
     if (node.removeEventListener) {
-        node.removeEventListener(name, eventProxy, useCapture);
+        node.removeEventListener(name, eventProxyFun, useCapture);
     } else {
-        node.detachEvent("on" + name);
+        node.detachEvent("on" + name, eventProxyFun);
     }
 }

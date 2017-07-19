@@ -1,6 +1,8 @@
 import { diff } from "./vdom/diff";
 import { VNode } from "./vnode";
 
+const child = {};
+
 /**
  * 创建组件到dom上
  * @param vnode jsx
@@ -8,5 +10,5 @@ import { VNode } from "./vnode";
  * @param merge 原dom元素
  */
 export function render(vnode: VNode, parent: Element, merge: Element) {
-    return diff(merge, vnode, {}, false, parent, false);
+    return diff(merge, vnode, {}, false, parent, false, child);
 }
