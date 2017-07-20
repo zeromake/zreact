@@ -248,7 +248,7 @@ function innerDiffNode(
         for (let i = 0; i < vlen; i++) {
             vchild = vchildren[i];
             child = null;
-
+            let tchild = null;
             // attempt to find a node based on key matching
             const key = vchild.key;
             if (key != null) {
@@ -261,7 +261,7 @@ function innerDiffNode(
             // attempt to pluck a node of the same type from the existing children
                 for (j = min; j < childrenLen; j++) {
                     c = children[j];
-                    if (children[j] !== undefined && isSameNodeType(c.base, vchild, isHydrating)) {
+                    if (children[j] !== undefined && isSameNodeType(c, vchild, isHydrating)) {
                         child = c;
                         children[j] = undefined;
                         if (j === childrenLen - 1) {
@@ -275,7 +275,7 @@ function innerDiffNode(
                 }
             }
             // 获取上一次的props存储对象
-            const tchild = child || originalChildren[i] || {};
+            tchild = child || {};
             // morph the matched/found/created DOM child to match vchild (deep)
             child = idiff(child && child.base, vchild, context, mountAll, false, tchild);
             // 把新的props存储对象存储起来

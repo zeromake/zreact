@@ -188,20 +188,48 @@
         // Zreact.rerender();
 
         // console.log(scratch.firstElementChild)
-        class Comp extends Component {
-			render() {
-				return <span>span in a component</span>;
-			}
-		}
+        // class Comp extends Component {
+		// 	render() {
+		// 		return <span>span in a component</span>;
+		// 	}
+		// }
 
-		let root;
-		function test(content) {
-			root = render(content, scratch, root);
-		}
+		// let root;
+		// function test(content) {
+		// 	root = render(content, scratch, root);
+		// }
 
-		test(<Comp />);
-		test(<div>just a div</div>);
-		test(<Comp />);
+		// test(<Comp />);
+		// test(<div>just a div</div>);
+        // test(<Comp />);
+        const Component = Zreact.Component;
+        const h = Zreact.h;
+        const rerender = Zreact.rerender;
+        const render = Zreact.render;
+        let doRender = null;
+        class Outer extends Component {
+            componentDidMount() {
+                let i = 1;
+                doRender = () => this.setState({ i: ++i });
+            }
+            componentWillUnmount() {}
+            render(props, { i }) {
+                return h(Inner, Object.assign({i: i}, props));
+            }
+        }
+
+        let j = 0;
+        const Inner = props => h("div", Object.assign({j: ++j }, props), "inner");
+
+        render(h(Outer, { foo: "bar"}), scratch);
+
+        // update & flush
+        doRender();
+        rerender();
+
+        // update & flush
+        doRender();
+        rerender();
     </script>
 </body>
 </html>

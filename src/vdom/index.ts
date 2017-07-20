@@ -3,7 +3,7 @@ import { Component } from "../component";
 
 export function isSameNodeType(node: any, vnode: VNode, hydrating: boolean) {
     if (typeof vnode === "string" || typeof vnode === "number") {
-        return node.splitText !== undefined;
+        return node.base.splitText !== undefined;
     }
     if (typeof vnode.nodeName === "string") {
         return !node._componentConstructor && isNamedNode(node, vnode.nodeName);

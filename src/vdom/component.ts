@@ -358,4 +358,5 @@ export function removeDomChild(child: any) {
     child[ATTR_KEY] = null;
     child.event = null;
     child._listeners = null;
+    child._componentConstructor = null;
 }
