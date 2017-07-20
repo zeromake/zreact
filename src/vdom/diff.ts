@@ -1,6 +1,6 @@
 import { ATTR_KEY } from "../constants";
 import { isSameNodeType, isNamedNode } from "./index";
-import { buildComponentFromVNode, unmountComponent } from "./component";
+import { buildComponentFromVNode, unmountComponent, removeDomChild } from "./component";
 import {
     setAccessor,
     createNode,
@@ -324,6 +324,7 @@ export function recollectNodeTree(node: any, unmountOnly: any) {
     if (component) {
         // 如果存在
         unmountComponent(component);
+        node._component = null;
     } else {
         if (node[ATTR_KEY] != null && node[ATTR_KEY].ref) {
             // ref用于取消引用dom
@@ -343,11 +344,13 @@ export function removeChildren(node: any) {
     const nodeList = node.children;
     node.children = [];
     let len = nodeList ? nodeList.length : 0;
-    node = getLastChild(node && node.base);
+    // node = getLastChild(node && node.base);
     while (len--) {
         // 不需要移除因为父级已经移除
         recollectNodeTree(nodeList[len], true);
     }
+    // removeDomChild
+    removeDomChild(node);
 }
 
 function diffAttributes(dom: any, attrs: any, old: any, child: any) {

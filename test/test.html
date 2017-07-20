@@ -125,24 +125,83 @@
 
 		// comp.setState({ alt:true });
         // comp.forceUpdate();
-        const Foo = props => Zreact.h("div", Object.assign({}, props));
+        // const Foo = props => Zreact.h("div", Object.assign({}, props));
 
-        Zreact.render(Zreact.h(Foo,
-            {
-                a: "b",
-                children:[
-                Zreact.h("span", { class: "bar" }, "bar"),
-                '123',
-                456]
-            }
-        ), scratch);
-        const Empty = () => null;
-        let c = scratch.firstElementChild;
-		if (c) Zreact.render(Zreact.h(Empty), scratch, c);
-		//scratch.innerHTML = '';
-        const Foa = props => Zreact.h("div", Object.assign({}, props), "a");
+        // Zreact.render(Zreact.h(Foo,
+        //     {
+        //         a: "b",
+        //         children:[
+        //         Zreact.h("span", { class: "bar" }, "bar"),
+        //         '123',
+        //         456]
+        //     }
+        // ), scratch);
+        // const Empty = () => null;
+        // let c = scratch.firstElementChild;
+		// if (c) Zreact.render(Zreact.h(Empty), scratch, c);
+		// //scratch.innerHTML = '';
+        // const Foa = props => Zreact.h("div", Object.assign({}, props), "a");
 
-		//Zreact.render(Zreact.h(Foa, {children: 'b'}), scratch);
+        //Zreact.render(Zreact.h(Foa, {children: 'b'}), scratch);
+
+        // const PROPS = { foo:'bar', onBaz:()=>{} };
+
+        // const C3 = props => Zreact.h("div", Object.assign({}, props));
+        // console.log(Zreact.h(C3, Object.assign({}, PROPS)))
+
+        // Zreact.render(Zreact.h(C3, Object.assign({}, PROPS)), scratch);
+        // let doRender = null,
+        //         alt = false;
+
+        // class Outer extends Zreact.Component {
+        //     componentDidMount() {
+        //         let i = 1;
+        //         doRender = () => this.setState({ i: ++i });
+        //     }
+        //     componentWillUnmount() {}
+        //     render(props, { i }) {
+        //         if (alt) return Zreact.h("div", { "is-alt": true });
+        //         return Zreact.h(Inner, Object.assign({i: i}, props));
+        //     }
+        // }
+
+        // let j = 0;
+        // class Inner extends Zreact.Component {
+        //     constructor(...args) {
+        //         super();
+        //         this._constructor(...args);
+        //     }
+        //     _constructor() {}
+        //     componentWillMount() {}
+        //     componentDidMount() {}
+        //     componentWillUnmount() {}
+        //     render(props) {
+        //         return Zreact.h("div", Object.assign({ j: ++j }, props), "inner");
+        //     }
+        // }
+
+        // Zreact.render(Zreact.h(Outer, { foo: "bar" }), scratch);
+
+
+        // // update & flush
+        // doRender();
+        // Zreact.rerender();
+
+        // console.log(scratch.firstElementChild)
+        class Comp extends Component {
+			render() {
+				return <span>span in a component</span>;
+			}
+		}
+
+		let root;
+		function test(content) {
+			root = render(content, scratch, root);
+		}
+
+		test(<Comp />);
+		test(<div>just a div</div>);
+		test(<Comp />);
     </script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 /*eslint no-var:0, object-shorthand:0 */
+const path = require('path')
 
 var coverage = String(process.env.COVERAGE)!=='false',
 	ci = String(process.env.CI).match(/^(1|true)$/gi),
@@ -61,9 +62,9 @@ var localBrowsers = realBrowser ? Object.keys(travisLaunchers) : ['PhantomJS'];
 
 module.exports = function(config) {
 	config.set({
-		browsers: ['PhantomJS'], //sauceLabs ? Object.keys(sauceLabsLaunchers) : localBrowsers,
+		browsers: ['Chrome'], //sauceLabs ? Object.keys(sauceLabsLaunchers) : localBrowsers,
 
-		frameworks: ['source-map-support', 'mocha', 'chai-sinon'],
+		frameworks: ['mocha', 'chai-sinon'],
 
 		reporters: ['mocha'].concat(
 			coverage ? 'coverage' : [],
@@ -138,18 +139,20 @@ module.exports = function(config) {
                         loader: "ts-loader"
                     },
 					/* Only Instrument our source files for coverage */
-					coverage ? {
-						test: /\.jsx?$/,
-						loader: 'isparta-loader',
-						include: /src/
-					} : {}
+					coverage ?
+                    {
+                        test: /\.jsx?$/,
+                        use: 'istanbul-instrumenter-loader',
+                        include:  /build/,
+                        exclude: /(node_modules|\.spec\.js$)/
+                    }: {}
 				]
 			},
 			resolve: {
 				// The React DevTools integration requires preact as a module
 				// rather than referencing source files inside the module
 				// directly
-				alias: { preact: '../build/zreact' },
+				alias: { preact: '../src/zreact.ts' },
 				modules: [__dirname, 'node_modules']
 			},
 			plugins: [
@@ -164,6 +167,17 @@ module.exports = function(config) {
 
 		webpackMiddleware: {
 			noInfo: true
-		}
+        },
+        coverageIstanbulReporter: {
+            reports: ['html', 'lcovonly', 'text-summary'],
+            dir: path.join(__dirname, 'coverage'),
+            fixWebpackSourcePaths: true,
+            'report-config': {
+                html: {
+                    subdir: 'html'
+                }
+
+            }
+        }
 	});
 };

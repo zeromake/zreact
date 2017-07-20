@@ -139,9 +139,9 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
         if (typeof childComponent === "function" && rendered) {
             // 如果是自定义组件
 
-            if (component.child) {
-                component.child = undefined;
-            }
+            // if (component.child) {
+            //     component.child = undefined;
+            // }
             // 获取VNode上的props
             const childProps = getNodeProps(rendered);
             inst = initialChildComponent;
@@ -157,6 +157,8 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
                 inst.nextBase = inst.nextBase || nextBase;
                 // 设置父组件索引
                 inst._parentComponent = component;
+                // 设置domchild
+                inst.child = component.child;
                 // 设置props但是不进行render
                 setComponentProps(inst, childProps, NO_RENDER, context, false);
                 // 递归调用renderComponent保证子组件的子组件创建
@@ -207,6 +209,7 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
                 );
             }
         }
+
         if (initialBase && base !== initialBase && inst !== initialChildComponent) {
             // 存在缓存dom，现dom和缓存dom不相同且新建过自定义子组件
             // 获取当前组件缓存dom的父级dom
@@ -219,15 +222,13 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
                     // const initBase: any = initialBase;
                     // 去除dom上的component索引
                     // initBase._component = null;
-                    if (component.child && component.child.base) {
-                        component.child.base = null;
-                    }
-                    //
-                    recollectNodeTree(initialBase, false);
+                    component.child.base = initialBase;
+                    component.child._component = null;
+                    recollectNodeTree(component.child, false);
+                    component.child.base = null;
                 }
             }
         }
-
         if (toUnmount) {
             unmountComponent(toUnmount);
         }
@@ -245,10 +246,8 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
             //     _base._component = componentRef;
             //     _base._componentConstructor = componentRef.constructor;
             // } catch (e) {}
-            if (component.child) {
-                component.child._component = componentRef;
-                component.child._componentConstructor = componentRef.constructor;
-            }
+            component.child._component = componentRef;
+            component.child._componentConstructor = componentRef.constructor;
         }
     }
     if (!isUpdate || mountALL) {
@@ -304,7 +303,7 @@ export function buildComponentFromVNode(
             oldDom = null;
         }
         c.child = child;
-        child._component = c;
+        // child._component = c;
         child.base = c.base;
         setComponentProps(
             c,
@@ -351,4 +350,12 @@ export function unmountComponent(component: Component) {
     if (component._ref) {
         component._ref(null);
     }
+}
+
+export function removeDomChild(child: any) {
+    child.base = null;
+    child._component = null;
+    child[ATTR_KEY] = null;
+    child.event = null;
+    child._listeners = null;
 }

@@ -11,7 +11,8 @@
     "build": "cross-env NODE_ENV=production rollup -c config/rollup.config.js",
     "dev": "rollup -c config/rollup.config.js -w",
     "test": "babel test/test.jsx -o test/test.js && node test/test.js",
-    "test:karma": "karma start test/karma.conf.js --single-run"
+    "test:karma": "karma start test/karma.conf.js --single-run",
+    "test:karma:watch": "npm run test:karma -- no-single-run"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
@@ -23,13 +24,13 @@
     "chai": "^4.1.0",
     "cross-env": "^5.0.1",
     "isparta-loader": "^2.0.0",
+    "istanbul-instrumenter-loader": "^2.0.0",
     "karma": "^1.7.0",
     "karma-chai-sinon": "^0.1.5",
-    "karma-coverage": "^1.1.1",
+    "karma-chrome-launcher": "^2.2.0",
     "karma-mocha": "^1.3.0",
     "karma-mocha-reporter": "^2.2.3",
     "karma-phantomjs-launcher": "^1.0.4",
-    "karma-source-map-support": "^1.2.0",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^2.0.4",
     "mocha": "^3.4.2",
