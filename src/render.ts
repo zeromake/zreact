@@ -9,6 +9,6 @@ const child = {};
  * @param parent 挂载的dom元素
  * @param merge 原dom元素
  */
-export function render(vnode: VNode, parent: Element, merge: Element) {
-    return diff(merge, vnode, {}, false, parent, false, child);
+export function render(vnode: VNode, parent: Element, merge: Element, domChild?: any) {
+    return diff(merge, vnode, {}, false, parent, false, domChild || child);
 }

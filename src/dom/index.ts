@@ -27,7 +27,9 @@ export function setAccessor(
     if (name === "className") {
         name = "class";
     }
-    if ("ref" === name) {
+    if (name === "key") {
+        // no set
+    } else if ("ref" === name) {
         if (old) {
             old(null);
         }
@@ -127,6 +129,10 @@ export function getPreviousSibling(node: Node): Node| null {
 
 export function getLastChild(node: Node): Node| null {
     return node.lastChild;
+}
+
+export function isTextNode(node: Text | any): boolean {
+    return node.splitText !== undefined;
 }
 
 function addEventListener(node: any, name: string, useCapture: boolean, child: any) {

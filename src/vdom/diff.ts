@@ -7,6 +7,7 @@ import {
     removeNode,
     getPreviousSibling,
     getLastChild,
+    isTextNode,
 } from "../dom/index";
 import options from "../options";
 import { VNode } from "../vnode";
@@ -97,12 +98,12 @@ function idiff(
     if (typeof vnode === "string" || typeof vnode === "number") {
         if (
             dom
-            && dom.splitText !== undefined
+            && isTextNode(dom)
             && dom.parentNode
             && (!child._component || componentRoot)
         ) {
-            if (child.nodeValue !== vnode) {
-                child.nodeValue = vnode;
+            if (dom.nodeValue !== vnode) {
+                dom.nodeValue = vnode;
             }
         } else {
             const data: any = vnode;
@@ -111,9 +112,9 @@ function idiff(
                 if (dom.parentNode) {
                     dom.parentNode.replaceChild(out, dom);
                 }
-                if (child.base !== dom) {
-                    child.base = dom;
-                }
+                // if (child.base !== dom) {
+                //     child.base = dom;
+                // }
                 recollectNodeTree(child, true);
             }
         }
@@ -131,9 +132,6 @@ function idiff(
     vnodeName = String(vnodeName);
     if (!dom || !isNamedNode(dom, vnodeName)) {
         out = createNode(vnodeName, isSvgMode);
-        if (child._component) {
-            child._component = undefined;
-        }
         if (dom) {
             while (dom.firstChild) {
                 out.appendChild(dom.firstChild);
@@ -141,9 +139,9 @@ function idiff(
             if (dom.parentNode) {
                 dom.parentNode.replaceChild(out, dom);
             }
-            if (child.base !== dom) {
-                child.base = dom;
-            }
+            // if (child.base !== dom) {
+            //     child.base = dom;
+            // }
             recollectNodeTree(child, true);
         }
     }
@@ -167,7 +165,7 @@ function idiff(
         && vchildren.length === 1
         && typeof vchildren[0] === "string"
         && fc != null
-        && fc.splitText !== undefined
+        && isTextNode(fc)
         && fc.nextSibling == null
     ) {
         if (fc.nodeValue !== vchildren[0]) {
@@ -234,7 +232,7 @@ function innerDiffNode(
         } else if (
             props
             || (
-                pchild.base.splitText !== undefined
+                isTextNode(pchild.base)
                 ? (isHydrating ? pchild.base.nodeValue.trim() : true)
                 : isHydrating
             )

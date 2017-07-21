@@ -1,12 +1,13 @@
 import { VNode } from "../vnode";
 import { Component } from "../component";
+import { isTextNode } from "../dom/index";
 
 export function isSameNodeType(node: any, vnode: VNode, hydrating: boolean) {
     if (typeof vnode === "string" || typeof vnode === "number") {
-        return node.base.splitText !== undefined;
+        return isTextNode(node.base);
     }
     if (typeof vnode.nodeName === "string") {
-        return !node._componentConstructor && isNamedNode(node, vnode.nodeName);
+        return !node._componentConstructor && isNamedNode(node.base, vnode.nodeName);
     }
     return hydrating || node._componentConstructor === vnode.nodeName;
 }

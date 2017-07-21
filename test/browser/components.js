@@ -267,7 +267,6 @@ describe('Components', () => {
 		});
 
 		it('should be ignored when explicit children exist', () => {
-            console.log("-------", scratch.innerHTML)
 			const Foo = props => <div {...props}>a</div>;
 
 			render(<Foo children={'b'} />, scratch);

@@ -149,10 +149,17 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
                 // 子组件已存在且key未变化只改变props
                 setComponentProps(inst, childProps, SYNC_RENDER, context, false);
             } else {
-                // 设置到toUnmount等待unmount
-                toUnmount = inst;
+                if (inst) {
+                    // 设置到toUnmount等待unmount
+                    toUnmount = inst;
+                    toUnmount.child = {...toUnmount.child};
+                    // 防止共享子dom
+                    inst.child.children = [];
+                }
                 // 新建Component
                 inst = createComponent(childComponent, childProps, context);
+                // 子组件索引保证下次相同子组件不会重新创建
+                component._component = inst;
                 // 设置好缓存dom
                 inst.nextBase = inst.nextBase || nextBase;
                 // 设置父组件索引
@@ -248,6 +255,7 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
             // } catch (e) {}
             component.child._component = componentRef;
             component.child._componentConstructor = componentRef.constructor;
+            // component.child.base = base;
         }
     }
     if (!isUpdate || mountALL) {
@@ -304,7 +312,6 @@ export function buildComponentFromVNode(
         }
         c.child = child;
         // child._component = c;
-        child.base = c.base;
         setComponentProps(
             c,
             props,
