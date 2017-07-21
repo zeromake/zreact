@@ -1,4 +1,4 @@
-import { h, Component, render } from '../../build/zreact';
+import { h, Component, render } from '../preact.dev';
 /** @jsx h */
 
 describe('keys', () => {
@@ -40,16 +40,20 @@ describe('keys', () => {
 	});
 
 	it('should set VNode#key property', () => {
-		expect(<div />).to.have.property('key').that.is.empty;
-		expect(<div a="a" />).to.have.property('key').that.is.empty;
+		expect(<div />).to.have.property('key').that.is.undefined;
+		expect(<div a="a" />).to.have.property('key').that.is.undefined;
 		expect(<div key="1" />).to.have.property('key', '1');
 	});
 
 	it('should remove keyed nodes (#232)', () => {
 		class App extends Component {
 			componentDidMount() {
-				setTimeout(() => this.setState({opened: true,loading: true}), 10);
-				setTimeout(() => this.setState({opened: true,loading: false}), 20);
+				setTimeout(() => {
+                    this.setState({opened: true,loading: true})
+                }, 10);
+				setTimeout(() => {
+                    this.setState({opened: true,loading: false})
+                }, 20);
 			}
 
 			render({ opened, loading }) {

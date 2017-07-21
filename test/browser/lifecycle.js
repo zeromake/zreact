@@ -274,7 +274,8 @@ describe('Lifecycle methods', () => {
 
 		class LifecycleTestComponent extends Component {
 			constructor(p, c) { super(p, c); this._constructor(); }
-			_constructor() {}
+			_constructor() {
+            }
 			componentWillMount() {}
 			componentDidMount() {}
 			componentWillUnmount() {}
@@ -292,6 +293,8 @@ describe('Lifecycle methods', () => {
 		}
 
 		class InnerMost extends LifecycleTestComponent {
+            _constructor() {
+            }
 			render() { return <div />; }
 		}
 
@@ -303,7 +306,7 @@ describe('Lifecycle methods', () => {
 			let reset = () => spies.forEach( s => proto[s].reset() );
 
 			it('should be invoked for components on initial render', () => {
-				reset();
+                reset();
 				render(<Outer />, scratch);
 				expect(proto._constructor).to.have.been.called;
 				expect(proto.componentDidMount).to.have.been.called;

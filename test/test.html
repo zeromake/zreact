@@ -14,48 +14,88 @@
     <script>
 
         // var Zreact = preact;
-        // var Foo = Zreact.createClass({
-        //     state: {
-        //         num: [1,2,3]
-        //     },
-        //     render: function(props, state) {
-        //         var self = this
-        //         var test = state.num.map(function(i, index) {
-        //             return Zreact.h("li", null, i, Zreact.h("button", { onClick: self["delete"].bind(self, index) }, "x"))
-        //         });
-        //         return Zreact.h("div", null, Zreact.h("ul", null, test), Zreact.h("button", { onClick: this.test.bind(this) }, "添加"));
-        //     },
-        //     test: function() {
-        //         console.log("Foo test", this.state);
-        //         this.setState(function(state) {
-        //             state.num.push(state.num.length + 1);
-        //         })
-        //     },
-        //     "delete": function(index) {
-        //         this.setState(function(state) {
-        //             state.num.splice(index, 1);
-        //         })
-        //     }
-        // })
-        var h = Zreact.h
-        var render = Zreact.render
+        var Foo = Zreact.createClass({
+            state: {
+                num: [1,2,3]
+            },
+            render: function(props, state) {
+                var self = this
+                var test = state.num.map(function(i, index) {
+                    return Zreact.h("li", null, i, Zreact.h("button", { onClick: self["delete"].bind(self, index) }, "x"))
+                });
+                return Zreact.h("div", null, Zreact.h("ul", null, test), Zreact.h("button", { onClick: this.test.bind(this) }, "添加"));
+            },
+            test: function() {
+                console.log("Foo test", this.state);
+                this.setState(function(state) {
+                    state.num.push(state.num.length + 1);
+                })
+            },
+            "delete": function(index) {
+                this.setState(function(state) {
+                    state.num.splice(index, 1);
+                })
+            }
+        })
         var scratch = document.querySelector("#app");
-        // Zreact.render(Zreact.h(Foo), scratch)
-        const root = render((
-            h("div", null,
-                h("div", null, "1"),
-                h("li", {key: "a"}, "a"),
-                h("li", {key: "b"}, "b"),
-			)
-		), scratch);
+        Zreact.render(Zreact.h(Foo), scratch)
+        // var h = Zreact.h
+        // var render = Zreact.render
+        // var Component = Zreact.Component;
+        // var rerender = Zreact.rerender;
+        // let setState;
+		// class Outer extends Component {
+		// 	constructor(p, c) {
+		// 		super(p, c);
+		// 		this.state = { show:true };
+		// 		setState = s => this.setState(s);
+		// 	}
+		// 	render(props, { show }) {
+		// 		return (
+        //             h("div", {name: "Outer"},
+        //                 show && h(Inner, Object.assign({}, props))
+        //             )
+		// 		);
+		// 	}
+		// }
 
-		render((
-			h("div", null,
-				h("div", null, "2"),
-                h("li", {key: "b"}, "b"),
-                h("li", {key: "c"}, "c")
-            )
-		), scratch, root);
+		// class LifecycleTestComponent extends Component {
+		// 	constructor(p, c) {
+        //         super(p, c);
+        //         this._constructor();
+        //         console.log('LifecycleTestComponent, constructor')
+        //     }
+		// 	_constructor() {
+        //         // console.log('LifecycleTestComponent, _constructor')
+        //     }
+		// 	componentWillMount() {}
+		// 	componentDidMount() {}
+		// 	componentWillUnmount() {
+        //         console.log('---componentWillUnmount----')
+        //     }
+		// 	render() { return h("div", {name: "LifecycleTestComponent"}); }
+		// }
+
+		// class Inner extends LifecycleTestComponent {
+		// 	render() {
+		// 		return h("div", {name: "Inner"}, h(InnerMost))
+		// 	}
+		// }
+
+		// class InnerMost extends LifecycleTestComponent {
+        //     _constructor() {
+        //         console.log('InnerMost, _constructor')
+        //     }
+		// 	render() { return h("div", {name: "InnerMost"}); }
+        // }
+        // render(h(Outer), scratch);
+        // console.log('-----')
+
+        // scratch.innerHTML = '';
+
+        // render(h(Outer), scratch);
+        // setState({ show:false });
+		// rerender();
     </script>
 </body>
 </html>

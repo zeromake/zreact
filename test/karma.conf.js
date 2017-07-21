@@ -170,7 +170,7 @@ module.exports = function(config) {
         },
         coverageIstanbulReporter: {
             reports: ['html', 'lcovonly', 'text-summary'],
-            dir: path.join(__dirname, 'coverage'),
+            dir: 'coverage',
             fixWebpackSourcePaths: true,
             'report-config': {
                 html: {

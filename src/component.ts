@@ -126,7 +126,7 @@ export class Component {
      * @param state
      * @param context
      */
-    public render(props: any, state?: any, context?: any): VNode {
-        throw new TypeError("not set render");
+    public render(props: any, state?: any, context?: any): VNode | void {
+        // console.error("not set render");
     }
 }

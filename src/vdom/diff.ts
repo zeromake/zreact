@@ -307,8 +307,8 @@ function innerDiffNode(
     while (min <= childrenLen) {
         child = children[childrenLen--];
         if (child !== undefined) {
-            removeNode(child.base);
-            // recollectNodeTree(child, false);
+            // removeNode(child.base);
+            recollectNodeTree(child, false);
         }
     }
 }

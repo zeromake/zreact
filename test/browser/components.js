@@ -33,8 +33,8 @@ describe('Components', () => {
 	});
 
 	beforeEach( () => {
-		// let c = scratch.firstElementChild;
-		// if (c) render(<Empty />, scratch, c);
+		let c = scratch.firstElementChild;
+		if (c) render(<Empty />, scratch, c);
 		scratch.innerHTML = '';
 	});
 
