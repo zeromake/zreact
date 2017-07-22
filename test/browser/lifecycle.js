@@ -460,7 +460,7 @@ describe('Lifecycle methods', () => {
 
 
 	describe('Lifecycle DOM Timing', () => {
-		it('should be invoked when dom does (DidMount, WillUnmount) or does not (WillMount, DidUnmount) exist', () => {
+		it('should be invoked when dom does (DidMount, WillUnmount) or does not (WillMount, DidUnmount) exist', (done) => {
 			let setState;
 			class Outer extends Component {
 				constructor() {
@@ -534,12 +534,14 @@ describe('Lifecycle methods', () => {
 
 			expect(proto.componentWillUnmount).to.have.been.called;
 
-			reset();
-			setState({ show:true });
-
-			expect(proto.componentWillMount).to.have.been.called;
-			expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
-			expect(proto.componentDidMount).to.have.been.called;
+            reset();
+            setTimeout(() => {
+                setState({ show:true });
+                expect(proto.componentWillMount).to.have.been.called;
+                expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
+                expect(proto.componentDidMount).to.have.been.called;
+                done();
+            }, 0)
 		});
 
 		it('should remove this.base for HOC', () => {
@@ -584,7 +586,7 @@ describe('Lifecycle methods', () => {
 			render(<App ref={ c => app=c } />, scratch);
 
 			for (let i=0; i<20; i++) {
-				app.setState({ page: i%components.length });
+                app.setState({ page: i%components.length });
 				app.forceUpdate();
 			}
 		});

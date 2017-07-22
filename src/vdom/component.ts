@@ -125,7 +125,7 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
 
     if (!skip) {
         // 当前组件的render函数返回的VNode
-        const rendered: VNode | undefined = component.render(props, state, context);
+        const rendered: VNode | void = component.render(props, state, context);
         //
         let inst: Component | undefined;
         if (component.getChildContext) {
@@ -366,4 +366,5 @@ export function removeDomChild(child: any) {
     child.event = null;
     child._listeners = null;
     child._componentConstructor = null;
+    child.children = [];
 }

@@ -84,12 +84,10 @@ export function h(nodeName: string | Component, attributes: any, ...args: any[])
     p.nodeName = nodeName;
     // 设置子元素
     p.children = children;
-    if (attributes) {
-        // 设置属性
-        p.attributes = attributes;
-        // 设置key
-        p.key = attributes.key;
-    }
+    // 设置属性
+    p.attributes = attributes == null ? undefined : attributes;
+    // 设置key
+    p.key = attributes == null ? undefined : attributes.key;
     // vnode 钩子
     if (options.vnode !== undefined) {
         options.vnode(p);

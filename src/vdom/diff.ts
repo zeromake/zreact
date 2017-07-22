@@ -46,7 +46,7 @@ export function flushMounts() {
  */
 export function diff(
     dom: Element | undefined,
-    vnode: VNode,
+    vnode: VNode | void,
     context: any,
     mountAll: boolean,
     parent: any,
@@ -89,6 +89,13 @@ function idiff(
     componentRoot?: boolean,
     child?: any,
 ) {
+    if (
+        dom == null
+        && child.base != null
+    ) {
+        // 原preact使用dom存放数据，现在，如果dom不存在，且pchild内有dom就卸载掉
+        removeDomChild(child);
+    }
     let out = dom;
     const prevSvgMode = isSvgMode;
 
@@ -297,8 +304,8 @@ function innerDiffNode(
     if (keyedLen) {
         for (const i in keyed) {
             if (keyed[i] !== undefined) {
-                removeNode(keyed[i].base);
-                // recollectNodeTree(keyed[i], false);
+                // removeNode(keyed[i].base);
+                recollectNodeTree(keyed[i], false);
             }
         }
     }
@@ -323,6 +330,7 @@ export function recollectNodeTree(node: any, unmountOnly: any) {
         // 如果存在
         unmountComponent(component);
         node._component = null;
+        removeDomChild(node);
     } else {
         if (node[ATTR_KEY] != null && node[ATTR_KEY].ref) {
             // ref用于取消引用dom

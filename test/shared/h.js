@@ -38,14 +38,13 @@ describe('h(jsx)', () => {
 			null,
 			h('bar'),
 			h('baz')
-		);
+        );
+        const bar = buildVNode('bar');
+        const baz = buildVNode('baz');
 
 		expect(r).to.be.an('object')
 			.with.property('children')
-			.that.deep.equals([
-				buildVNode('bar'),
-				buildVNode('baz')
-			]);
+			.that.deep.equals([bar, baz]);
 	});
 
 	it('should support multiple element children, given as arg list', () => {

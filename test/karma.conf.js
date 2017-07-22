@@ -67,7 +67,6 @@ module.exports = function(config) {
 		frameworks: ['mocha', 'chai-sinon'],
 
 		reporters: ['mocha'].concat(
-			coverage ? 'coverage' : [],
 			sauceLabs ? 'saucelabs' : []
 		),
 
