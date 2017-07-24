@@ -36,7 +36,7 @@ export function setAccessor(
         if (value) {
             value(node);
         }
-    } else if ("class" === name) {
+    } else if ("class" === name && !isSvg) {
         node.className = value || "";
     } else if ("style" === name) {
         if (!value || typeof value === "string" || typeof old === "string") {
@@ -58,11 +58,19 @@ export function setAccessor(
     } else if ("dangerouslySetInnerHTML" === name) {
         if (value) {
             node.innerHTML = value.__html || "";
+            // child.children = [];
+            // const childNodes = node.childNodes;
+            // for (let i = 0, len = childNodes.length; i < len ; i++) {
+            //     child.children.push({
+            //         base: childNodes[i],
+            //     });
+            // }
+
         }
     } else if (name[0] === "o" && name[1] === "n") {
         const oldName = name;
         name = name.replace(/Capture$/, "");
-        const useCapture = oldName !== oldName;
+        const useCapture = oldName !== name;
         name = name.toLowerCase().substring(2);
         if (value) {
             if (!old) {

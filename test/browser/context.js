@@ -152,13 +152,19 @@ describe('context', () => {
 			getChildContext() {
 				return { innerContext };
 			}
-			render() {
+			render(props, state, context) {
+                expect(props.children).to.be.empty
+                expect(state).to.deep.equal({});
+                expect(context).to.deep.equal({ outerContext });
 				return <InnerMost />;
 			}
 		}
 
 		class InnerMost extends Component {
-			render() {
+			render(props, state, context) {
+                expect(props.children).to.be.empty
+                expect(state).to.deep.equal({});
+                expect(context).to.deep.equal({ outerContext, innerContext });
 				return <strong>test</strong>;
 			}
 		}
@@ -168,7 +174,7 @@ describe('context', () => {
 
 		render(<Outer />, scratch);
 
-		expect(Inner.prototype.render).to.have.been.calledWith({ children: CHILDREN_MATCHER }, {}, { outerContext });
-		expect(InnerMost.prototype.render).to.have.been.calledWith({ children: CHILDREN_MATCHER }, {}, { outerContext, innerContext });
+		// expect(Inner.prototype.render).to.have.been.calledWith({ children: CHILDREN_MATCHER }, {}, { outerContext });
+		// expect(InnerMost.prototype.render).to.have.been.calledWith({ children: CHILDREN_MATCHER }, {}, { outerContext, innerContext });
 	});
 });

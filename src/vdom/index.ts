@@ -2,6 +2,7 @@ import { VNode } from "../vnode";
 import { Component } from "../component";
 import { isTextNode } from "../dom/index";
 import { ATTR_KEY } from "../constants";
+import { extend } from "../util";
 
 export function isSameNodeType(node: any, vnode: VNode, hydrating: boolean) {
     if (typeof vnode === "string" || typeof vnode === "number") {
@@ -26,7 +27,7 @@ export function isNamedNode(
 }
 
 export function getNodeProps(vnode: VNode) {
-    const props = { ...vnode.attributes };
+    const props = extend({}, vnode.attributes);
     props.children = vnode.children;
     const nodeName: any = vnode.nodeName;
     const defaultProps = nodeName.defaultProps;

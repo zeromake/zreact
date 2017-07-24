@@ -53,10 +53,14 @@ export function diff(
     componentRoot: boolean,
     child: any,
 ): Element {
+    if (child.base && dom !== child.base) {
+        // 原preact使用dom存放数据，现在，如果dom不存在，且pchild内有dom就卸载掉
+        removeDomChild(child);
+    }
     if (!diffLevel++) {
         // 在diff调用递归层数为0时设置isSvgMode，hydrating
         isSvgMode = parent != null && parent.ownerSVGDocument !== undefined;
-        hydrating = dom != null && !(child && ATTR_KEY in child);
+        hydrating = dom != null && !(child && child[ATTR_KEY]);
     }
     // 调用idiff生成dom
     const ret = idiff(
@@ -89,13 +93,10 @@ function idiff(
     componentRoot?: boolean,
     child?: any,
 ) {
-    if (
-        dom == null
-        && child.base != null
-    ) {
-        // 原preact使用dom存放数据，现在，如果dom不存在，且pchild内有dom就卸载掉
-        removeDomChild(child);
-    }
+    // if (child.base && dom !== child.base) {
+    //     // 原preact使用dom存放数据，现在，如果dom不存在，且pchild内有dom就卸载掉
+    //     removeDomChild(child);
+    // }
     let out = dom;
     const prevSvgMode = isSvgMode;
 
@@ -205,14 +206,13 @@ function innerDiffNode(
     isHydrating: boolean,
     domChild: any,
 ) {
-    const originalChildren = domChild.children;
+    let originalChildren = domChild.children;
     const children = [];
     const keyed: {
         [name: string]: any;
     } = {};
     let keyedLen = 0;
     let min = 0;
-    const len = originalChildren.length;
     let childrenLen = 0;
     const vlen = vchildren ? vchildren.length : 0;
     let j;
@@ -222,7 +222,31 @@ function innerDiffNode(
     let child;
     const pchildren = [];
     const childNodes = dom.childNodes;
+    const unChildren = [];
 
+    if (childNodes.length !== originalChildren.length) {
+        let offset = 0;
+        const nodeList = childNodes;
+        const nodeLen = nodeList.length;
+        const newChildren = [];
+        for (let i = 0; i < nodeLen; i++) {
+            const node = nodeList[i];
+            let vdom = originalChildren[i + offset];
+            while (vdom && node !== vdom.base) {
+                offset ++;
+                vdom = originalChildren[i + offset];
+            }
+            if (vdom) {
+                newChildren.push(vdom);
+            } else {
+                newChildren.push({
+                    base: node,
+                });
+            }
+        }
+        originalChildren = newChildren;
+    }
+    const len = originalChildren.length;
     // Build up a map of keyed children and an Array of unkeyed children:
     if (len !== 0) {
     for (let i = 0; i < len; i++) {

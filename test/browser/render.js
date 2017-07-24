@@ -501,7 +501,7 @@ describe('render()', () => {
 		};
 
 		const DOMElement = html`<div><a foo="bar"></a></div>`;
-		const preactElement = <div><a></a></div>;
+        const preactElement = <div><a></a></div>;
 
 		render(preactElement, scratch, DOMElement);
 		expect(scratch).to.have.property('innerHTML', '<div><a></a></div>');

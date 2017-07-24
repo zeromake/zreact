@@ -6,6 +6,7 @@ import { VNode } from "../vnode";
 import { createComponent, collectComponent } from "./component-recycler";
 import { getNodeProps } from "./index";
 import { removeNode } from "../dom/index";
+import { extend } from "../util";
 
 import { diff, diffLevel, flushMounts, mounts, recollectNodeTree, removeChildren } from "./diff";
 
@@ -129,7 +130,7 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
         //
         let inst: Component | undefined;
         if (component.getChildContext) {
-            context = { ...context, ...component.getChildContext() };
+            context = extend(context, component.getChildContext());
         }
         // 取出VNode的nodeName
         const childComponent = rendered && rendered.nodeName;
@@ -152,7 +153,7 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
                 if (inst) {
                     // 设置到toUnmount等待unmount
                     toUnmount = inst;
-                    toUnmount.child = {...toUnmount.child};
+                    toUnmount.child = extend({}, toUnmount.child);
                     // 防止共享子dom
                     inst.child.children = [];
                 }

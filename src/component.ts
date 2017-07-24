@@ -91,7 +91,7 @@ export class Component {
         const s: any = this.state;
         if (!this.prevState) {
             // 把旧的状态保存起来
-            this.prevState = { ...s };
+            this.prevState = extend({}, s);
         }
         if (typeof state === "function") {
             const newState = state(s, this.props);

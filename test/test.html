@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
      <script src="../dist/zreact.js"></script>
-     <script src="./preact.dev.js"></script>
+     <!-- <script src="./preact.dev.js"></script> -->
     <title>Document</title>
 </head>
 <body>
     <div id="app">
     </div>
     <script>
-
-        var Zreact = preact;
+        if (typeof preact !== "undefined")
+            var Zreact = preact;
         // var Foo = Zreact.createClass({
         //     state: {
         //         num: [1,2,3]
@@ -43,9 +43,16 @@
         var render = Zreact.render
         var Component = Zreact.Component;
         var rerender = Zreact.rerender;
-        let html = '<b>foo &amp; bar</b>';
-		let root = render(h("div", {dangerouslySetInnerHTML: { __html: html }}), scratch);
-		root = render(h("div", null, "a", h("strong", null, "b")), scratch, root);
+        const html = (htmlString) => {
+			const div = document.createElement('div');
+			div.innerHTML = htmlString;
+			return div.firstChild;
+		};
+
+		const DOMElement = html('<div><a foo="bar"></a></div>');
+        const preactElement = h("div", null, h("a"));
+
+		render(preactElement, scratch, DOMElement);
     </script>
 </body>
 </html>

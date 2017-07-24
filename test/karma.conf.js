@@ -62,14 +62,14 @@ var localBrowsers = realBrowser ? Object.keys(travisLaunchers) : ['PhantomJS'];
 
 module.exports = function(config) {
 	config.set({
-		browsers: ['Chrome'], //sauceLabs ? Object.keys(sauceLabsLaunchers) : localBrowsers,
+		browsers: ["Chrome"],//sauceLabs ? Object.keys(sauceLabsLaunchers) : localBrowsers,
 
 		frameworks: ['mocha', 'chai-sinon'],
 
 		reporters: ['mocha'].concat(
-			sauceLabs ? 'saucelabs' : []
+            sauceLabs ? 'saucelabs' : [],
+            coverage ? 'coverage-istanbul' : []
 		),
-
 		coverageReporter: {
 			dir: __dirname+'/../coverage',
 			reporters: [
@@ -143,14 +143,11 @@ module.exports = function(config) {
                         test: /\.jsx?$/,
                         use: 'istanbul-instrumenter-loader',
                         include:  /build/,
-                        exclude: /(node_modules|\.spec\.js$)/
+                        exclude: /node_modules/
                     }: {}
 				]
 			},
 			resolve: {
-				// The React DevTools integration requires preact as a module
-				// rather than referencing source files inside the module
-				// directly
 				alias: { preact: '../src/zreact.ts' },
 				modules: [__dirname, 'node_modules']
 			},
@@ -169,7 +166,7 @@ module.exports = function(config) {
         },
         coverageIstanbulReporter: {
             reports: ['html', 'lcovonly', 'text-summary'],
-            dir: 'coverage',
+            dir: 'test/coverage',
             fixWebpackSourcePaths: true,
             'report-config': {
                 html: {
