@@ -1,6 +1,6 @@
 import rollupTypescript from 'rollup-plugin-typescript'
-// import uglify from 'rollup-plugin-uglify'
-// import { minify } from 'uglify-es'
+import uglify from 'rollup-plugin-uglify'
+import { minify } from 'uglify-es'
 import pkg from '../package.json'
 // import typescript from 'typescript'
 
@@ -12,9 +12,17 @@ export default {
     entry: 'src/zreact.ts',
     moduleName: 'Zreact',
     // dest: isProduction ? 'dist/zreact.min.js' : 'dist/zreact.js',
-    plugins: [rollupTypescriptPlugin],
+    plugins: !isProduction ? [rollupTypescriptPlugin] : [
+        rollupTypescriptPlugin,
+        uglify({}, minify)
+    ],
     sourceMap: !isProduction,
-    targets: [
+    targets: isProduction ? [
+        {
+            format: 'umd',
+            dest: pkg["minified:main"]
+        }
+    ] : [
         {
             format: 'umd',
             dest: pkg.main
