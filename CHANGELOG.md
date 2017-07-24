@@ -23,6 +23,7 @@
 * **config:** add ts rollup config file ([afddb4c](https://github.com/zeromake/zreact/commit/afddb4c))
 * **src:** add createElement ([dbe3811](https://github.com/zeromake/zreact/commit/dbe3811))
 * add changelog ([69e0231](https://github.com/zeromake/zreact/commit/69e0231))
+* add CHANGELOG.md file ([73939e6](https://github.com/zeromake/zreact/commit/73939e6))
 
 
 
