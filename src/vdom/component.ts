@@ -7,10 +7,11 @@ import { createComponent, collectComponent } from "./component-recycler";
 import { getNodeProps } from "./index";
 import { removeNode } from "../dom/index";
 import { extend } from "../util";
+import { IKeyValue } from "../types";
 
 import { diff, diffLevel, flushMounts, mounts, recollectNodeTree, removeChildren } from "./diff";
 
-export function setComponentProps(component: Component, props: any, opts: any, context: any, mountAll: boolean) {
+export function setComponentProps(component: Component, props: IKeyValue, opts: number, context: IKeyValue, mountAll: boolean) {
     if (component._disable) {
         return;
     }
@@ -117,9 +118,9 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
         component.context = context;
     }
     // 清理掉
-    component.prevProps = null;
-    component.prevState = null;
-    component.prevContext = null;
+    component.prevProps = undefined;
+    component.prevState = undefined;
+    component.prevContext = undefined;
     component.nextBase = undefined;
     // 重置_dirty
     component._dirty = false;
@@ -283,7 +284,7 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
 export function buildComponentFromVNode(
     dom: any,
     vnode: VNode,
-    context: any,
+    context: IKeyValue,
     mountALL: boolean,
     child: any,
 ) {

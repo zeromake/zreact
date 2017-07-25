@@ -1,6 +1,7 @@
 import { Component } from "./component";
 import options from "./options";
 import { VNode } from "./vnode";
+import { IKeyValue } from "./types";
 
 // const EMPTY_CHILDREN: any[] = [];
 
@@ -12,10 +13,10 @@ import { VNode } from "./vnode";
  * @see http://jasonformat.com/wtf-is-jsx
  * @public
  */
-export function h(nodeName: string | Component, attributes: any, ...args: any[]) {
+export function h(nodeName: string | Component | ((props?: IKeyValue, state?: IKeyValue, context?: IKeyValue) => VNode), attributes: IKeyValue, ...args: Array<VNode|string>) {
     // 初始化子元素列表
-    const stack: any[] = [];
-    const children: any[] = [];
+    const stack: Array<VNode|string> = [];
+    const children: Array<VNode|string> = [];
     // let i: number;
     // let child: any;
     // 是否为原生组件

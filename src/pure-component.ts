@@ -1,4 +1,5 @@
 import { Component } from "./component";
+import { IKeyValue } from "./types";
 
 /**
  * 简单组件state,props对象只有一层改变使用，超过一层改变就会无法更新
@@ -6,7 +7,7 @@ import { Component } from "./component";
  */
 export class PureComponent extends Component {
     public isPureReactComponent: boolean = true;
-    public shouldComponentUpdate(props: any, state: any): boolean {
+    public shouldComponentUpdate (props: IKeyValue, state: IKeyValue): boolean  {
         // props,state只要一个不同就返回true
         return shallowDiffers(this.props, props) || shallowDiffers(this.state, state);
     }
@@ -17,7 +18,7 @@ export class PureComponent extends Component {
  * @param a
  * @param b
  */
-function shallowDiffers(a: any, b: any): boolean {
+function shallowDiffers(a: IKeyValue, b: IKeyValue): boolean {
     for (const i in a) {
         if (!(i in b)) {
             return true;

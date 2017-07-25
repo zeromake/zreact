@@ -12,6 +12,7 @@ import {
 import options from "../options";
 import { VNode } from "../vnode";
 import { Component } from "../component";
+import { IKeyValue } from "../types";
 
 export const mounts: Component[] = [];
 
@@ -47,7 +48,7 @@ export function flushMounts() {
 export function diff(
     dom: Element | undefined,
     vnode: VNode | void,
-    context: any,
+    context: IKeyValue,
     mountAll: boolean,
     parent: any,
     componentRoot: boolean,
@@ -88,7 +89,7 @@ export function diff(
 function idiff(
     dom: any,
     vnode: any,
-    context: any,
+    context: IKeyValue,
     mountAll: boolean,
     componentRoot?: boolean,
     child?: any,

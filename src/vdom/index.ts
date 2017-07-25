@@ -3,6 +3,7 @@ import { Component } from "../component";
 import { isTextNode } from "../dom/index";
 import { ATTR_KEY } from "../constants";
 import { extend } from "../util";
+import { IKeyValue } from "../types";
 
 export function isSameNodeType(node: any, vnode: VNode, hydrating: boolean) {
     if (typeof vnode === "string" || typeof vnode === "number") {
@@ -41,11 +42,8 @@ export function getNodeProps(vnode: VNode) {
     return props;
 }
 
-interface IKeyValue {
-    [name: string]: any;
-}
-interface IEventFunList {
-    [name: string]: Array<(e: Event) => void>;
+interface IEventFun {
+    [name: string]: (e: Event) => void;
 }
 
 /**
@@ -76,9 +74,9 @@ export class VDom {
     /**
      * 通过props设置的事件方法, 通过eventProxy来调用, 保证在不停的props变化时不会一直绑定与解绑。
      */
-    public listeners?: IEventFunList;
+    public listeners?: IEventFun;
     /**
-     * domb标签名
+     * dom标签名
      */
     public normalizedNodeName?: string;
 }

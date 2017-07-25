@@ -3,23 +3,24 @@ import { renderComponent } from "./vdom/component";
 import { VNode } from "./vnode";
 import { enqueueRender } from "./render-queue";
 import { extend } from "./util";
+import { IKeyValue } from "./types";
 
 export class Component {
     // 当前组件的状态,可以修改
-    public state: any;
+    public state: IKeyValue;
     // 由父级组件传递的状态，不可修改
-    public props: any;
-    public context: any;
+    public props: IKeyValue;
+    public context: IKeyValue;
     // 默认props
-    public defaultProps?: any;
+    public defaultProps?: IKeyValue;
     // 组件挂载后的dom
     public base?: Element;
     // 自定义组件名
     public name?: string;
     // 修改状态时的原状态
-    public prevProps?: any;
-    public prevState?: any;
-    public prevContext?: any;
+    public prevProps?: IKeyValue;
+    public prevState?: IKeyValue;
+    public prevContext?: IKeyValue;
     // 被移除时的dom缓存
     public nextBase?: Element;
     /**
@@ -36,33 +37,33 @@ export class Component {
     public componentWillUnmount?: () => void;
     /**
      * 在新的 props 被接受之前
-     * @param { any } nextProps
-     * @param { any } nextContext
+     * @param { IKeyValue } nextProps
+     * @param { IKeyValue } nextContext
      */
-    public componentWillReceiveProps?: (nextProps: any, nextContext: any) => void;
+    public componentWillReceiveProps?: (nextProps: IKeyValue, nextContext: IKeyValue) => void;
     /**
      * 在 render() 之前. 若返回 false，则跳过 render，与 componentWillUpdate 互斥
-     * @param { any } nextProps
-     * @param { any } nextState
-     * @param { any } nextContext
+     * @param { IKeyValue } nextProps
+     * @param { IKeyValue } nextState
+     * @param { IKeyValue } nextContext
      * @returns { boolean }
      */
-    public shouldComponentUpdate?: (nextProps: any, nextState: any, nextContext: any) => boolean;
+    public shouldComponentUpdate?: (nextProps: IKeyValue, nextState: IKeyValue, nextContext: IKeyValue) => boolean;
     /**
      * 在 render() 之前，与 shouldComponentUpdate 互斥
-     * @param { any } nextProps
-     * @param { any } nextState
-     * @param { any } nextContext
+     * @param { IKeyValue } nextProps
+     * @param { IKeyValue } nextState
+     * @param { IKeyValue } nextContext
      */
-    public componentWillUpdate?: (nextProps: any, nextState: any, nextContext: any) => void;
+    public componentWillUpdate?: (nextProps: IKeyValue, nextState: IKeyValue, nextContext: IKeyValue) => void;
     /**
      * 在 render() 之后
-     * @param { any } previousProps
-     * @param { any } previousState
-     * @param { any } previousContext
+     * @param { IKeyValue } previousProps
+     * @param { IKeyValue } previousState
+     * @param { IKeyValue } previousContext
      */
-    public componentDidUpdate?: (previousProps: any, previousState: any, previousContext: any) => void;
-    public getChildContext?: () => any;
+    public componentDidUpdate?: (previousProps: IKeyValue, previousState: IKeyValue, previousContext: IKeyValue) => void;
+    public getChildContext?: () => IKeyValue;
     public _component?: Component;
     public _parentComponent?: Component;
     // 能否添加入更新队列
@@ -75,7 +76,7 @@ export class Component {
     public _ref?: (component: Component | null) => void;
     // 原生如果VNode，root为原生组件就创建并设置它的一些props，event
     public child?: any;
-    constructor(props: any, context: any) {
+    constructor(props: IKeyValue, context: IKeyValue) {
         // 初始化为true
         this._dirty = true;
         this.context = context;
@@ -87,8 +88,8 @@ export class Component {
      * @param state 对象或方法
      * @param callback render执行完后的回调。
      */
-    public setState(state: any, callback?: () => void): void {
-        const s: any = this.state;
+    public setState(state: IKeyValue, callback?: () => void): void {
+        const s: IKeyValue = this.state;
         if (!this.prevState) {
             // 把旧的状态保存起来
             this.prevState = extend({}, s);
@@ -126,7 +127,7 @@ export class Component {
      * @param state
      * @param context
      */
-    public render(props: any, state?: any, context?: any): VNode | void {
+    public render(props?: IKeyValue, state?: IKeyValue, context?: IKeyValue): VNode | void {
         // console.error("not set render");
     }
 }

@@ -1,4 +1,5 @@
 import { Component } from "../component";
+import { IKeyValue } from "../types";
 
 const components: {
     [name: string]: Component[];
@@ -11,7 +12,7 @@ export function collectComponent(component: Component) {
     list.push(component);
 }
 
-export function createComponent(Ctor: any, props: any, context: any) {
+export function createComponent(Ctor: any, props: IKeyValue, context: IKeyValue) {
     const list = components[Ctor.name];
     let inst: Component;
     if (Ctor.prototype && Ctor.prototype.render) {
@@ -35,6 +36,6 @@ export function createComponent(Ctor: any, props: any, context: any) {
     return inst;
 }
 
-function doRender(props: any, state: any, tcontext: any) {
-    return this.constructor(props, tcontext);
+function doRender(props: IKeyValue, state: IKeyValue, context: IKeyValue) {
+    return this.constructor(props, context);
 }
