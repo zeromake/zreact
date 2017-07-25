@@ -5,17 +5,25 @@ import { ATTR_KEY } from "../constants";
 import { extend } from "../util";
 import { IKeyValue } from "../types";
 
+/**
+ * dom节点与vnode是否相同的标签
+ * @param node
+ * @param vnode
+ * @param hydrating
+ */
 export function isSameNodeType(node: any, vnode: VNode, hydrating: boolean) {
     if (typeof vnode === "string" || typeof vnode === "number") {
+        // vnode是文本节点,判断dom是否为文本节点
         return isTextNode(node.base);
     }
     if (typeof vnode.nodeName === "string") {
+        // vnode是原生组件,判断dom非组件的根节点且标签名相同
         return !node._componentConstructor && isNamedNode(node.base, vnode.nodeName);
     }
     return hydrating || node._componentConstructor === vnode.nodeName;
 }
 
-/** Check if an Element has a given normalized name.
+/** 判断标签名是否相同.
  * @param {Element} node
  * @param {String} nodeName
  */
@@ -27,10 +35,17 @@ export function isNamedNode(
         || node.nodeName.toLowerCase() === nodeName.toLowerCase();
 }
 
+/**
+ * 获取当前组件所有地方来的props
+ * @param vnode
+ */
 export function getNodeProps(vnode: VNode) {
+    // jsx上的属性
     const props = extend({}, vnode.attributes);
     props.children = vnode.children;
+    // 组件类
     const nodeName: any = vnode.nodeName;
+    // 组件默认props
     const defaultProps = nodeName.defaultProps;
     if (defaultProps !== undefined) {
         for (const i in defaultProps) {

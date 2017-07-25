@@ -5,26 +5,34 @@ import { renderComponent } from "./vdom/component";
 
 let items: Component[] = [];
 
+/**
+ * 把Component放入队列中等待更新
+ * @param component 组件
+ */
 export function enqueueRender(component: Component) {
     if (!component._dirty) {
+        // 防止多次render
         component._dirty = true;
         const len = items.push(component);
         if (len === 1) {
+            // 在第一次时添加一个异步render，保证同步代码执行完只有一个异步render。
             const deferFun = options.debounceRendering || defer;
             deferFun(rerender);
         }
     }
 }
 
+/**
+ * 根据Component队列更新dom。
+ */
 export function rerender() {
     let p: Component | undefined;
     const list = items;
     items = [];
-    p = list.pop();
-    while (p) {
+    while (p = list.pop()) {
         if (p._dirty) {
+            // 防止多次render。
             renderComponent(p);
         }
-        p = list.pop();
     }
 }

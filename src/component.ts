@@ -6,22 +6,45 @@ import { extend } from "./util";
 import { IKeyValue } from "./types";
 
 export class Component {
-    // 当前组件的状态,可以修改
+    /**
+     * 默认props
+     */
+    public static defaultProps?: IKeyValue;
+    /**
+     * 当前组件的状态,可以修改
+     */
     public state: IKeyValue;
-    // 由父级组件传递的状态，不可修改
+    /**
+     * 由父级组件传递的状态，不可修改
+     */
     public props: IKeyValue;
+    /**
+     * 组件上下文，由父组件传递
+     */
     public context: IKeyValue;
-    // 默认props
-    public defaultProps?: IKeyValue;
-    // 组件挂载后的dom
+    /**
+     * 组件挂载后的dom
+     */
     public base?: Element;
-    // 自定义组件名
+    /**
+     * 自定义组件名
+     */
     public name?: string;
-    // 修改状态时的原状态
+    /**
+     * 上一次的属性
+     */
     public prevProps?: IKeyValue;
+    /**
+     * 上一次的状态
+     */
     public prevState?: IKeyValue;
+    /**
+     * 上一次的上下文
+     */
     public prevContext?: IKeyValue;
-    // 被移除时的dom缓存
+    /**
+     * 被移除时的dom缓存
+     */
     public nextBase?: Element;
     /**
      * 在一个组件被渲染到 DOM 之前
@@ -63,18 +86,41 @@ export class Component {
      * @param { IKeyValue } previousContext
      */
     public componentDidUpdate?: (previousProps: IKeyValue, previousState: IKeyValue, previousContext: IKeyValue) => void;
+    /**
+     * 获取上下文，会被传递到所有的子组件
+     */
     public getChildContext?: () => IKeyValue;
+    /**
+     * 子组件
+     */
     public _component?: Component;
+    /**
+     * 父组件
+     */
     public _parentComponent?: Component;
-    // 能否添加入更新队列
+    /**
+     * 是否加入更新队列
+     */
     public _dirty: boolean;
-    // render 执行完后的回调队列
+    /**
+     * render 执行完后的回调队列
+     */
     public _renderCallbacks?: any[];
+    /**
+     * 当前组件的key用于复用
+     */
     public _key?: string;
-    // 是否停用
+    /**
+     * 是否停用
+     */
     public _disable?: boolean;
+    /**
+     * react标准用于设置component实例
+     */
     public _ref?: (component: Component | null) => void;
-    // 原生如果VNode，root为原生组件就创建并设置它的一些props，event
+    /**
+     * VDom暂定用于存放组件根dom的上下文
+     */
     public child?: any;
     constructor(props: IKeyValue, context: IKeyValue) {
         // 初始化为true
@@ -119,6 +165,7 @@ export class Component {
             this._renderCallbacks = this._renderCallbacks || [];
             this._renderCallbacks.push(callback);
         }
+        // 重新执行render
         renderComponent(this, FORCE_RENDER);
     }
     /**

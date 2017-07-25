@@ -11,49 +11,71 @@ import { IKeyValue } from "../types";
 
 import { diff, diffLevel, flushMounts, mounts, recollectNodeTree, removeChildren } from "./diff";
 
+/**
+ * 设置props，通常来自jsx
+ * @param component 组件
+ * @param props 新的props
+ * @param opts render的执行方式
+ * @param context 新的context
+ * @param mountAll 是否已挂载
+ */
 export function setComponentProps(component: Component, props: IKeyValue, opts: number, context: IKeyValue, mountAll: boolean) {
     if (component._disable) {
+        // 如果组件已停用就什么都不做
         return;
     }
+    // 阻止在异步时再次进入
     component._disable = true;
+    // 取出ref设置到组件上
     const ref = component._ref = props.ref;
     if (ref) {
+        // 清理掉props中的ref
         delete props.ref;
     }
+    // 同上
     const key = component._key = props.key;
     if (key) {
+        // 清理掉props中的key
         delete props.key;
     }
     if (!component.base || mountAll) {
+        // 如果没有插入到DOM树或正在被render渲染执行钩子
         if (component.componentWillMount) {
             component.componentWillMount();
         }
     } else if (component.componentWillReceiveProps) {
+        // 更新的钩子
         component.componentWillReceiveProps(props, context);
     }
     if (context && context !== component.context) {
+        // 保存旧的context，设置新的context
         if (!component.prevContext) {
             component.prevContext = component.context;
         }
         component.context = context;
     }
-
+    // 同上
     if (!component.prevProps) {
         component.prevProps = component.props;
     }
     component.props = props;
+    // 进入renderComponent前启用组件
     component._disable = false;
     if (opts !== NO_RENDER) {
+        // 进行renderComponent
         if (
             opts === SYNC_RENDER
             || options.syncComponentUpdates !== false
             || !component.base
         ) {
+            // 同步执行
             renderComponent(component, SYNC_RENDER, mountAll);
         } else {
+            // 异步执行
             enqueueRender(component);
         }
     }
+    // 用于react的标准ref用于dom实例化完成后组件引用，多用于函数组件。
     if (component._ref) {
         component._ref(component);
     }
@@ -85,8 +107,9 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
     const previousContext = component.prevContext || context;
     // 判断是否已有dom元素
     const isUpdate = component.base;
-    // 被移除过时保存的dom
+    // 上次移除的dom
     const nextBase = component.nextBase;
+    // 组件dom
     const initialBase = isUpdate || nextBase;
     // 获取当前组件的子组件
     const initialChildComponent = component._component;
@@ -155,8 +178,8 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
                     // 设置到toUnmount等待unmount
                     toUnmount = inst;
                     toUnmount.child = extend({}, toUnmount.child);
-                    // 防止共享子dom
-                    inst.child.children = [];
+                    // 清理
+                    removeDomChild(inst.child);
                 }
                 // 新建Component
                 inst = createComponent(childComponent, childProps, context);
@@ -198,9 +221,6 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
                     // const b: any = cbase;
                     // b._component = undefined;
                 }
-                if (!component.child) {
-                    component.child = {};
-                }
                 // 渲染原生组件
                 base = diff(
                     // 原dom
@@ -208,12 +228,13 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
                     // VNode
                     rendered,
                     context,
-                    // 父级组件需要挂载，或者dom不存在也需要挂载
+                    // 父级或者该原生组件，原dom不存在说明必须触发生命周期
                     mountALL || !isUpdate,
                     // 把组件挂载到缓存dom的父级
                     initialBase && initialBase.parentNode,
                     // 以原生组件这里执行说明是自定义组件的第一个原生组件
                     true,
+                    // dom上下文
                     component.child,
                 );
             }
@@ -234,35 +255,35 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
                     component.child.base = initialBase;
                     component.child._component = null;
                     recollectNodeTree(component.child, false);
-                    component.child.base = null;
+                    component.child.base = base;
                 }
             }
         }
         if (toUnmount) {
+            // 卸载无用的自定义组件
             unmountComponent(toUnmount);
         }
-
+        // 当前自定义组件的根dom
         component.base = base;
         if (base && !isChild) {
+            // 创建了dom且不是子组件渲染
             let componentRef: Component | undefined = component;
             let t: Component | undefined = component;
+            // 获取根自定义组件，有可能是一个子组件变化数据
             while ((t = t._parentComponent)) {
                 componentRef = t;
                 componentRef.base = base;
             }
-            // const _base: any = base;
-            // try {
-            //     _base._component = componentRef;
-            //     _base._componentConstructor = componentRef.constructor;
-            // } catch (e) {}
+            // 保证dom的上下文为根自定义组件
             component.child._component = componentRef;
             component.child._componentConstructor = componentRef.constructor;
-            // component.child.base = base;
         }
     }
     if (!isUpdate || mountALL) {
+        // 新建dom的需要触发componentDidMount放入mounts等待生命周期触发
         mounts.unshift(component);
     } else if (!skip) {
+        // 没有skip render的话触发component.componentDidUpdate，options.afterUpdate钩子
         if (component.componentDidUpdate) {
             component.componentDidUpdate(previousProps, previousState, previousContext);
         }
@@ -272,15 +293,25 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
     }
 
     if (component._renderCallbacks != null) {
+        // 触发所有回调
         while (component._renderCallbacks.length) {
             component._renderCallbacks.pop().call(component);
         }
     }
     if (!diffLevel && !isChild) {
+        // 根状态下触发生命周期
         flushMounts();
     }
 }
 
+/**
+ * 创建Component实例，buildComponentFromVNode创建的一般为父级为原生，或没有
+ * @param dom 原dom
+ * @param vnode VNode实例
+ * @param context 父组件来的上下文
+ * @param mountALL 是否需要挂载om
+ * @param child 父组件用来对dom元素的上下文
+ */
 export function buildComponentFromVNode(
     dom: any,
     vnode: VNode,
@@ -288,11 +319,14 @@ export function buildComponentFromVNode(
     mountALL: boolean,
     child: any,
 ) {
+    // 获取根组件缓存
     let c = child && child._component;
     const originalComponent = c;
     let oldDom = dom;
+    // 判断是否为同一个组件类
     const isDiectOwner = c && child._componentConstructor === vnode.nodeName;
     let isOwner = isDiectOwner;
+    // 获取jsx上的属性及其它如
     const props = getNodeProps(vnode);
     while (c && !isOwner && (c = c._parentComponent)) {
         isOwner = c.constructor === vnode.nodeName;

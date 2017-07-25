@@ -7,6 +7,7 @@ export const FORCE_RENDER = 2;
 // 异步render标记
 export const ASYNC_RENDER = 3;
 
+// dom的props属性key
 export const ATTR_KEY = "__preactattr_";
 
 // 使用number值的style属性
