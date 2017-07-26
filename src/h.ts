@@ -13,7 +13,7 @@ import { IKeyValue } from "./types";
  * @see http://jasonformat.com/wtf-is-jsx
  * @public
  */
-export function h(nodeName: string | Component | ((props?: IKeyValue, state?: IKeyValue, context?: IKeyValue) => VNode), attributes: IKeyValue, ...args: Array<VNode|string>) {
+export function h(nodeName: string | typeof Component | ((props?: IKeyValue, state?: IKeyValue, context?: IKeyValue) => VNode), attributes: IKeyValue, ...args: Array<VNode|string>) {
     // 初始化子元素列表
     const stack: Array<VNode|string> = [];
     const children: Array<VNode|string> = [];

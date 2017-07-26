@@ -140,6 +140,7 @@ export class Component {
             // 把旧的状态保存起来
             this.prevState = extend({}, s);
         }
+        // 把新的state和并到this.state
         if (typeof state === "function") {
             const newState = state(s, this.props);
             if (newState) {
@@ -153,7 +154,7 @@ export class Component {
             this._renderCallbacks = this._renderCallbacks || [];
             this._renderCallbacks.push(callback);
         }
-        // 更新dom
+        // 异步队列更新dom，通过enqueueRender方法可以保证在一个任务栈下多次setState但是只会发生一次render
         enqueueRender(this);
     }
     /**

@@ -24,6 +24,7 @@ export function enqueueRender(component: Component) {
 
 /**
  * 根据Component队列更新dom。
+ * 可以setState后直接执行这个方法强制同步更新dom
  */
 export function rerender() {
     let p: Component | undefined;
