@@ -1,6 +1,14 @@
+import options from "../options";
 import { ATTR_KEY } from "../constants";
 import { isSameNodeType, isNamedNode } from "./index";
-import { buildComponentFromVNode, unmountComponent, removeDomChild } from "./component";
+import { VNode } from "../vnode";
+import { Component } from "../component";
+import { IKeyValue } from "../types";
+import {
+    buildComponentFromVNode,
+    unmountComponent,
+    removeDomChild,
+} from "./component";
 import {
     setAccessor,
     createNode,
@@ -9,10 +17,6 @@ import {
     getLastChild,
     isTextNode,
 } from "../dom/index";
-import options from "../options";
-import { VNode } from "../vnode";
-import { Component } from "../component";
-import { IKeyValue } from "../types";
 
 export const mounts: Component[] = [];
 
@@ -22,9 +26,12 @@ let isSvgMode = false;
 
 let hydrating = false;
 
+/**
+ * 对挂载队列触发挂载完成钩子
+ */
 export function flushMounts() {
-    let c = mounts.pop();
-    while (c) {
+    let c;
+    while (c = mounts.pop()) {
         const afterMount = options.afterMount;
         if (afterMount) {
             afterMount(c);
@@ -32,7 +39,6 @@ export function flushMounts() {
         if (c.componentDidMount) {
             c.componentDidMount();
         }
-        c = mounts.pop();
     }
 }
 
@@ -60,7 +66,9 @@ export function diff(
     }
     if (!diffLevel++) {
         // 在diff调用递归层数为0时设置isSvgMode，hydrating
+        // 判断是否为svg
         isSvgMode = parent != null && parent.ownerSVGDocument !== undefined;
+        // 判断是否在上次渲染过了
         hydrating = dom != null && !(child && child[ATTR_KEY]);
     }
     // 调用idiff生成dom
@@ -77,15 +85,26 @@ export function diff(
         parent.appendChild(ret);
     }
     if (!--diffLevel) {
-        // diff调用递归层为0
+        // diff调用递归层为0,说明已经全部diff完毕
         hydrating = false;
         if (!componentRoot) {
+            // 非renderComponent执行的diff如render，触发挂载完成生命周期
+            // 通过renderComponent执行的是更新状态，无需重新触发挂载生命周期
             flushMounts();
         }
     }
     return ret;
 }
 
+/**
+ * 比较dom和vnode，进行新建dom，复用dom，或者新建组件，复用组件
+ * @param dom 原dom
+ * @param vnode 用于创建dom的虚拟对象
+ * @param context 组件上下文用于组件创建时使用
+ * @param mountAll 是否需要挂载
+ * @param componentRoot 是否来自renderComponent
+ * @param child dom上下文
+ */
 function idiff(
     dom: any,
     vnode: any,
@@ -94,71 +113,79 @@ function idiff(
     componentRoot?: boolean,
     child?: any,
 ) {
-    // if (child.base && dom !== child.base) {
-    //     // 原preact使用dom存放数据，现在，如果dom不存在，且pchild内有dom就卸载掉
-    //     removeDomChild(child);
-    // }
     let out = dom;
     const prevSvgMode = isSvgMode;
 
     if (vnode == null || typeof vnode === "boolean") {
+        // 去除空，布尔值转为空字符串
         vnode = "";
     }
     if (typeof vnode === "string" || typeof vnode === "number") {
+        // 文本节点处理
         if (
             dom
             && isTextNode(dom)
             && dom.parentNode
             && (!child._component || componentRoot)
         ) {
+            // 原dom就是文本节点，更新文本内容
             if (dom.nodeValue !== vnode) {
                 dom.nodeValue = vnode;
             }
         } else {
+            // 新建一个文本dom
             const data: any = vnode;
             out = document.createTextNode(data);
             if (dom) {
+                // 如果有旧dom，就替换并卸载旧的。
                 if (dom.parentNode) {
                     dom.parentNode.replaceChild(out, dom);
                 }
-                // if (child.base !== dom) {
-                //     child.base = dom;
-                // }
                 recollectNodeTree(child, true);
             }
         }
+        // 文本节点的props直接设置为true
         child[ATTR_KEY] = true;
         child.base = out;
         return out;
     }
     let vnodeName = vnode.nodeName;
     if (typeof vnodeName === "function") {
+        // 是一个组件,创建或复用组件实例，返回dom
         return buildComponentFromVNode(dom, vnode, context, mountAll, child);
     }
-
+    // 重新判断一下是否要创建svg
     isSvgMode = vnodeName === "svg"
         ? true : vnodeName === "foreignObject" ? false : isSvgMode;
+    // 一般通过babel的jsx无法发生非字符串的vnodeName
     vnodeName = String(vnodeName);
     if (!dom || !isNamedNode(dom, vnodeName)) {
+        // 没有原dom或者原dom与vnode里的不同，新建一个
         out = createNode(vnodeName, isSvgMode);
         if (dom) {
+            // 旧dom存在时的一些处理
+            // 把旧dom的子元素全部移动到新dom中
             while (dom.firstChild) {
                 out.appendChild(dom.firstChild);
             }
+            // 把新dom挂载到旧dom上的位置
             if (dom.parentNode) {
                 dom.parentNode.replaceChild(out, dom);
             }
-            // if (child.base !== dom) {
-            //     child.base = dom;
-            // }
+            // 卸载旧dom
             recollectNodeTree(child, true);
         }
     }
     const fc = out.firstChild;
+    // 取出上次存放的props
     let props = child[ATTR_KEY];
+    // 获取虚拟的子节点
     const vchildren = vnode.children;
     if (props == null) {
-        props = child[ATTR_KEY] = {};
+        // 上回的props不存在说明，这次一般为新建（preact有可能通过原生dom操作删除）
+        props = {};
+        // 把dom中的attributes也就是我们常见的setAttribute的属性，取出
+        // 据说ie6-7的property也在attributes，就是style，id，class这种
         for (let a = out.attributes, i = a.length; i-- ; ) {
             const attr = a[i];
             props[attr.name] = attr.value;
@@ -177,14 +204,14 @@ function idiff(
         && isTextNode(fc)
         && fc.nextSibling == null
     ) {
+        // 如果未渲染过，且vnode的子元素和dom子元素长度都为1且为文本
+        // 替换文本
         if (fc.nodeValue !== vchildren[0]) {
             fc.nodeValue = vchildren[0];
         }
     } else if (vchildren && vchildren.length || fc != null) {
-        if (!child.children) {
-            child.children = [];
-        }
-        innerDiffNode(
+        // vnode子元素需要渲染或者为空但dom子元素需要清空
+        diffChildren(
             out,
             vchildren,
             context,
@@ -193,13 +220,25 @@ function idiff(
             child,
         );
     }
-
+    // 设置dom属性
     diffAttributes(out, vnode.attributes, props, child);
+    // 把props存到dom上下文中
+    child[ATTR_KEY] = props;
+    // 还原
     isSvgMode = prevSvgMode;
     return out;
 }
 
-function innerDiffNode(
+/**
+ * 比较子元素进行更新
+ * @param dom 原dom
+ * @param vchildren 虚拟子元素数组
+ * @param context 上下文
+ * @param mountAll 是否需要挂载
+ * @param isHydrating 是否
+ * @param domChild
+ */
+function diffChildren(
     dom: Node,
     vchildren: any[],
     context: any,
@@ -207,6 +246,7 @@ function innerDiffNode(
     isHydrating: boolean,
     domChild: any,
 ) {
+    // 取出上次的子元素
     let originalChildren = domChild.children;
     const children = [];
     const keyed: {
@@ -224,7 +264,7 @@ function innerDiffNode(
     const pchildren = [];
     const childNodes = dom.childNodes;
     const unChildren = [];
-
+    // 处理真实子元素与上次的dom上下文中存放的子元素数量不对的情况
     if (childNodes.length !== originalChildren.length) {
         let offset = 0;
         const nodeList = childNodes;

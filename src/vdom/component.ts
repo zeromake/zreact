@@ -1,15 +1,27 @@
+import options from "../options";
 import { enqueueRender } from "../render-queue";
 import { Component } from "../component";
-import { ASYNC_RENDER, ATTR_KEY, FORCE_RENDER, NO_RENDER, SYNC_RENDER } from "../constants";
-import options from "../options";
 import { VNode } from "../vnode";
 import { createComponent, collectComponent } from "./component-recycler";
 import { getNodeProps } from "./index";
 import { removeNode } from "../dom/index";
 import { extend } from "../util";
 import { IKeyValue } from "../types";
-
-import { diff, diffLevel, flushMounts, mounts, recollectNodeTree, removeChildren } from "./diff";
+import {
+    ASYNC_RENDER,
+    ATTR_KEY,
+    FORCE_RENDER,
+    NO_RENDER,
+    SYNC_RENDER,
+} from "../constants";
+import {
+    diff,
+    diffLevel,
+    flushMounts,
+    mounts,
+    recollectNodeTree,
+    removeChildren,
+} from "./diff";
 
 /**
  * 设置props，通常来自jsx
@@ -318,7 +330,7 @@ export function buildComponentFromVNode(
     context: IKeyValue,
     mountALL: boolean,
     child: any,
-) {
+): Element {
     // 获取根组件缓存
     let c = child && child._component;
     const originalComponent = c;
@@ -326,28 +338,40 @@ export function buildComponentFromVNode(
     // 判断是否为同一个组件类
     const isDiectOwner = c && child._componentConstructor === vnode.nodeName;
     let isOwner = isDiectOwner;
-    // 获取jsx上的属性及其它如
+    // 获取jsx上的属性
     const props = getNodeProps(vnode);
     while (c && !isOwner && (c = c._parentComponent)) {
+        // 向上查找
         isOwner = c.constructor === vnode.nodeName;
     }
 
     if (c && isOwner && (!mountALL || c._component)) {
+        // 获取到可复用的组件，重新设置props，复用状态下有dom所有为了流畅使用异步
         setComponentProps(c, props, ASYNC_RENDER, context, mountALL);
         dom = c.base;
     } else {
+        // 不存在可以复用的组件
         if (originalComponent && !isDiectOwner) {
+            // 存在旧组件卸载它
             unmountComponent(originalComponent);
             dom = oldDom = null;
         }
-
+        // 通过缓存组件的方式创建组件实例
         c = createComponent(vnode.nodeName, props, context);
         if (dom && !c.nextBase) {
+            // 上次这个标签为原生组件，把将要卸载的组件dom缓存
             c.nextBase = dom;
             oldDom = null;
         }
+        // 留下旧的上下文等待卸载
+        const oldChild = extend({}, child);
+        if (child.base) {
+            // 清空等待新的上下文
+            removeDomChild(child);
+        }
+        // 保证dom上下文的索引
         c.child = child;
-        // child._component = c;
+        // 设置props，并创建dom
         setComponentProps(
             c,
             props,
@@ -355,31 +379,44 @@ export function buildComponentFromVNode(
             context,
             mountALL,
         );
+        // 获取dom
         dom = c.base;
         if (oldDom && dom !== oldDom) {
-            // oldDom._component = null;
-            recollectNodeTree(oldDom, false);
+            // 需要卸载dom
+            oldChild._component = null;
+            recollectNodeTree(oldChild, false);
         }
     }
     return dom;
 }
 
+/**
+ * 卸载组件
+ * @param component 组件
+ */
 export function unmountComponent(component: Component) {
     if (options.beforeUnmount) {
+        // 触发全局钩子
         options.beforeUnmount(component);
     }
     const base = component.base;
+    // 停用组件
     component._disable = true;
     if (component.componentWillUnmount) {
+        // 钩子
         component.componentWillUnmount();
     }
+    // 清理dom索引
     component.base = undefined;
+    // 获取子组件
     const inner = component._component;
     const anyBase: any = base;
     if (inner) {
+
         unmountComponent(inner);
     } else if (anyBase && component.child) {
         if (component.child[ATTR_KEY] && component.child[ATTR_KEY].ref) {
+            // 触发dom卸载时的ref事件解除dom索引
             component.child[ATTR_KEY].ref(null);
         }
         // 卸载组件dom前把它存到nextBase
@@ -388,13 +425,19 @@ export function unmountComponent(component: Component) {
         removeNode(anyBase);
         // 放入全局缓存对象保存
         collectComponent(component);
+        // 清空上下文
         removeChildren(component.child);
     }
     if (component._ref) {
+        // 解除外部对组件实例的索引
         component._ref(null);
     }
 }
 
+/**
+ * 额外的dom上下文清空，preact没有这个，自己加的。
+ * @param child
+ */
 export function removeDomChild(child: any) {
     child.base = null;
     child._component = null;
