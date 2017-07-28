@@ -37,7 +37,7 @@ export function h(nodeName: string | typeof Component | ((props?: IKeyValue, sta
     }
     // 把stack一次一次取出
     while (stack.length) {
-        let num = 0;
+        // let num = 0;
         // 取出最后一个
         let child: any = stack.pop();
         if (child && child.pop !== undefined) {
@@ -45,10 +45,10 @@ export function h(nodeName: string | typeof Component | ((props?: IKeyValue, sta
             for (let i = child.length; i-- ; ) {
                 const item = child[i];
                 // 修复多个map时不同map的key相同
-                if (typeof item === "object" && item.key) {
-                    item.key = `L${num}-${item.key}`;
-                    num ++;
-                }
+                // if (typeof item === "object" && item.key) {
+                //     item.key = `L${num}-${item.key}`;
+                //     num ++;
+                // }
                 stack.push(item);
             }
         } else {

@@ -383,7 +383,7 @@ export function buildComponentFromVNode(
         dom = c.base;
         if (oldDom && dom !== oldDom) {
             // 需要卸载dom
-            oldChild._component = null;
+            child._component = null;
             recollectNodeTree(oldChild, false);
         }
     }

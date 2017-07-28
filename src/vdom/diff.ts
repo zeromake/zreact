@@ -141,6 +141,9 @@ function idiff(
                 if (dom.parentNode) {
                     dom.parentNode.replaceChild(out, dom);
                 }
+                if (child.base !== dom) {
+                    child.base = dom;
+                }
                 recollectNodeTree(child, true);
             }
         }
@@ -171,6 +174,9 @@ function idiff(
             // 把新dom挂载到旧dom上的位置
             if (dom.parentNode) {
                 dom.parentNode.replaceChild(out, dom);
+            }
+            if (child.base !== dom) {
+                child.base = dom;
             }
             // 卸载旧dom
             recollectNodeTree(child, true);
@@ -210,6 +216,9 @@ function idiff(
             fc.nodeValue = vchildren[0];
         }
     } else if (vchildren && vchildren.length || fc != null) {
+        if (!child.children) {
+            child.children = [];
+        }
         // vnode子元素需要渲染或者为空但dom子元素需要清空
         diffChildren(
             out,
@@ -265,6 +274,7 @@ function diffChildren(
     const childNodes = dom.childNodes;
     const unChildren = [];
     // 处理真实子元素与上次的dom上下文中存放的子元素数量不对的情况
+    // 这种方式只能处理原生添加dom和删除dom。
     if (childNodes.length !== originalChildren.length) {
         let offset = 0;
         const nodeList = childNodes;
@@ -345,7 +355,7 @@ function diffChildren(
                 }
             }
             // 获取上一次的props存储对象
-            tchild = child || {};
+            tchild = child || { base: child ? child.base : undefined };
             // morph the matched/found/created DOM child to match vchild (deep)
             child = idiff(child && child.base, vchild, context, mountAll, false, tchild);
             // 把新的props存储对象存储起来
