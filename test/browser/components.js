@@ -1,4 +1,4 @@
-import { h, cloneElement, render, rerender, Component } from '../../build/zreact';
+import { h, cloneElement, render, rerender, Component, buildVDom } from '../../build/zreact';
 /** @jsx h */
 
 let spyAll = obj => Object.keys(obj).forEach( key => sinon.spy(obj,key) );
@@ -34,7 +34,7 @@ describe('Components', () => {
 
 	beforeEach( () => {
 		let c = scratch.firstElementChild;
-		if (c) render(<Empty />, scratch, c);
+		if (c) render(<Empty />, scratch, buildVDom(c));
 		scratch.innerHTML = '';
 	});
 

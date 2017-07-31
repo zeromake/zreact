@@ -1,6 +1,6 @@
 /* global DISABLE_FLAKEY */
 
-import { h, render, Component } from '../../build/zreact';
+import { h, render, Component, buildVDom } from '../../build/zreact';
 /** @jsx h */
 
 function getAttributes(node) {
@@ -153,7 +153,7 @@ describe('render()', () => {
 	});
 
 	it('should clear falsey input values', () => {
-		let root = render((
+		let vdom = render((
 			<div>
 				<input value={0} />
 				<input value={false} />
@@ -161,7 +161,7 @@ describe('render()', () => {
 				<input value={undefined} />
 			</div>
 		), scratch);
-
+        const root = vdom.base
 		expect(root.children[0]).to.have.property('value', '0');
 		expect(root.children[1]).to.have.property('value', 'false');
 		expect(root.children[2]).to.have.property('value', '');
@@ -274,7 +274,7 @@ describe('render()', () => {
 			on.dispatchEvent(e);
 		}
 
-		render(<div onClick={ () => click(1) } onMouseDown={ mousedown } />, scratch);
+		let vdom = render(<div onClick={ () => click(1) } onMouseDown={ mousedown } />, scratch);
 
 		expect(proto.addEventListener).to.have.been.calledTwice
 			.and.to.have.been.calledWith('click')
@@ -287,7 +287,7 @@ describe('render()', () => {
 		proto.addEventListener.reset();
 		click.reset();
 
-		render(<div onClick={ () => click(2) } />, scratch, scratch.firstChild);
+		vdom = render(<div onClick={ () => click(2) } />, scratch, vdom);
 
 		expect(proto.addEventListener).not.to.have.been.called;
 
@@ -306,7 +306,7 @@ describe('render()', () => {
 		click.reset();
 		mousedown.reset();
 
-		render(<div />, scratch, scratch.firstChild);
+		vdom = render(<div />, scratch, vdom);
 
 		expect(proto.removeEventListener)
 			.to.have.been.calledOnce
@@ -323,12 +323,12 @@ describe('render()', () => {
 		let click = sinon.spy(),
 			focus = sinon.spy();
 
-		let root = render((
+		let vdom = render((
 			<div onClickCapture={click} onFocusCapture={focus}>
 				<button />
 			</div>
 		), scratch);
-
+        const root = vdom.base
 		root.firstElementChild.click();
 		root.firstElementChild.focus();
 
@@ -345,7 +345,7 @@ describe('render()', () => {
 	});
 
 	it('should serialize style objects', () => {
-		let root = render((
+		let vdom = render((
 			<div style={{
 				color: 'rgb(255, 255, 255)',
 				background: 'rgb(255, 100, 0)',
@@ -368,23 +368,23 @@ describe('render()', () => {
 		expect(style).to.have.property('top', '100px');
 		expect(style).to.have.property('left', '100%');
 
-		root = render((
+		vdom = render((
 			<div style={{ color: 'rgb(0, 255, 255)' }}>test</div>
-		), scratch, root);
+		), scratch, vdom);
 
-		expect(root.style).to.have.property('cssText').that.equals('color: rgb(0, 255, 255);');
+		expect(vdom.base.style).to.have.property('cssText').that.equals('color: rgb(0, 255, 255);');
 
-		root = render((
+		vdom = render((
 			<div style="display: inline;">test</div>
-		), scratch, root);
+		), scratch, vdom);
 
-		expect(root.style).to.have.property('cssText').that.equals('display: inline;');
+		expect(vdom.base.style).to.have.property('cssText').that.equals('display: inline;');
 
-		root = render((
+		vdom = render((
 			<div style={{ backgroundColor: 'rgb(0, 255, 255)' }}>test</div>
-		), scratch, root);
+		), scratch, vdom);
 
-		expect(root.style).to.have.property('cssText').that.equals('background-color: rgb(0, 255, 255);');
+		expect(vdom.base.style).to.have.property('cssText').that.equals('background-color: rgb(0, 255, 255);');
 	});
 
 	it('should support dangerouslySetInnerHTML', () => {
@@ -434,14 +434,14 @@ describe('render()', () => {
 	it('should hydrate with dangerouslySetInnerHTML', () => {
 		let html = '<b>foo &amp; bar</b>';
 		scratch.innerHTML = `<div>${html}</div>`;
-		render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, scratch.lastChild);
+		render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, buildVDom(scratch.lastChild));
 
 		expect(scratch.firstChild).to.have.property('innerHTML', html);
 		expect(scratch.innerHTML).to.equal(`<div>${html}</div>`);
 	});
 
 	it('should reconcile mutated DOM attributes', () => {
-		let check = p => render(<input type="checkbox" checked={p} />, scratch, scratch.lastChild),
+		let check = p => render(<input type="checkbox" checked={p} />, scratch, buildVDom(scratch.lastChild)),
 			value = () => scratch.lastChild.checked,
 			setValue = p => scratch.lastChild.checked = p;
 		check(true);
@@ -503,7 +503,7 @@ describe('render()', () => {
 		const DOMElement = html`<div><a foo="bar"></a></div>`;
         const preactElement = <div><a></a></div>;
 
-		render(preactElement, scratch, DOMElement);
+		render(preactElement, scratch, buildVDom(DOMElement));
 		expect(scratch).to.have.property('innerHTML', '<div><a></a></div>');
 	});
 
@@ -525,11 +525,11 @@ describe('render()', () => {
 
 		let c = document.createElement('c');
 		c.textContent = 'baz';
-		comp.base.appendChild(c);
+		comp.vdom.base.appendChild(c);
 
 		let b = document.createElement('b');
 		b.textContent = 'bat';
-		comp.base.appendChild(b);
+		comp.vdom.base.appendChild(b);
 
 		expect(scratch.firstChild.children, 'append').to.have.length(4);
 
@@ -602,7 +602,7 @@ describe('render()', () => {
 				return (
 						<div onKeyDown={ this.addTodo }>
 								{ todos.map( todo => (<div>{todo.text}</div> )) }
-								<input value={text} onInput={this.setText} ref={(i) => input = i} />
+								<input value={text} onInput={this.setText} ref={(i) => input = i.base} />
 						</div>
 				);
 			}
@@ -610,10 +610,10 @@ describe('render()', () => {
 		const root = render(<TodoList />, scratch);
 		input.focus();
 		input.value = 1;
-		root._component.setText({
+		root.component.setText({
 			target: input
 		});
-		root._component.addTodo();
+		root.component.addTodo();
 		expect(document.activeElement).to.equal(input);
 		setTimeout(() =>{
 			expect(/1/.test(scratch.innerHTML)).to.equal(true);

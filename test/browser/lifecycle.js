@@ -1,4 +1,4 @@
-import { h, render, rerender, Component } from '../../build/zreact';
+import { h, render, rerender, Component, buildVDom } from '../../build/zreact';
 /** @jsx h */
 
 let spyAll = obj => Object.keys(obj).forEach( key => sinon.spy(obj,key) );
@@ -101,7 +101,7 @@ describe('Lifecycle methods', () => {
 
 					// Verify that the component is actually mounted when this
 					// callback is invoked.
-					expect(scratch.querySelector('#inner')).to.equal(this.base);
+					expect(scratch.querySelector('#inner')).to.equal(this.vdom.base);
 				}
 
 				render() {
@@ -236,14 +236,14 @@ describe('Lifecycle methods', () => {
 			spyAll(Foo.prototype);
 			spyAll(Bar.prototype);
 
-			render(<Foo />, scratch, scratch.lastChild);
+			let vdom = render(<Foo />, scratch, buildVDom(scratch.lastChild));
 			expect(Foo.prototype.componentDidMount, 'initial render').to.have.been.calledOnce;
 
-			render(<Bar />, scratch, scratch.lastChild);
+			vdom = render(<Bar />, scratch, vdom);
 			expect(Foo.prototype.componentWillUnmount, 'when replaced').to.have.been.calledOnce;
 			expect(Bar.prototype.componentDidMount, 'when replaced').to.have.been.calledOnce;
 
-			render(<div />, scratch, scratch.lastChild);
+			vdom = render(<div />, scratch, vdom);
 			expect(Bar.prototype.componentWillUnmount, 'when removed').to.have.been.calledOnce;
 		});
 	});
@@ -548,9 +548,9 @@ describe('Lifecycle methods', () => {
 			let createComponent = (name, fn) => {
 				class C extends Component {
 					componentWillUnmount() {
-						expect(this.base, `${name}.componentWillUnmount`).to.exist;
+						expect(this.vdom, `${name}.componentWillUnmount`).to.exist;
 						setTimeout( () => {
-							expect(this.base, `after ${name}.componentWillUnmount`).not.to.exist;
+							expect(this.vdom, `after ${name}.componentWillUnmount`).not.to.exist;
 						}, 0);
 					}
 					render(props) { return fn(props); }

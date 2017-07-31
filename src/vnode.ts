@@ -14,7 +14,7 @@ export class VNode {
     /**
      * 子组件
      */
-    public children: Array<VNode|string>;
+    public children: Array<string|number|boolean|VNode>;
     /**
      * 组件所属的属性
      */

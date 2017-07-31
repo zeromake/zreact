@@ -1,4 +1,4 @@
-import { h, render, Component } from '../../build/zreact';
+import { h, render, Component, buildVDom } from '../../build/zreact';
 /** @jsx h */
 
 // gives call count and argument errors names (otherwise sinon just uses "spy"):
@@ -27,8 +27,8 @@ describe('refs', () => {
 
 	it('should invoke refs in render()', () => {
 		let ref = spy('ref');
-		render(<div ref={ref} />, scratch);
-		expect(ref).to.have.been.calledOnce.and.calledWith(scratch.firstChild);
+		const vdom = render(<div ref={ref} />, scratch);
+		expect(ref).to.have.been.calledOnce.and.calledWith(vdom);
 	});
 
 	it('should invoke refs in Component.render()', () => {
@@ -43,10 +43,10 @@ describe('refs', () => {
 				);
 			}
 		}
-		render(<Foo />, scratch);
+		const vdom = render(<Foo />, scratch);
 
-		expect(outer).to.have.been.calledWith(scratch.firstChild);
-		expect(inner).to.have.been.calledWith(scratch.firstChild.firstChild);
+		expect(outer).to.have.been.calledWith(vdom);
+		expect(inner).to.have.been.calledWith(vdom.children[0]);
 	});
 
 	it('should pass components to ref functions', () => {
@@ -75,11 +75,11 @@ describe('refs', () => {
 		expect(ref).to.have.been.calledOnce;
 
 		ref.reset();
-		render(<Foo ref={ref} />, scratch, root);
+		root = render(<Foo ref={ref} />, scratch, root);
 		expect(ref).to.have.been.calledOnce;
 
 		ref.reset();
-		render(<span />, scratch, root);
+		root = render(<span />, scratch, root);
 		expect(ref).to.have.been.calledOnce.and.calledWith(null);
 	});
 
@@ -114,7 +114,7 @@ describe('refs', () => {
 		let root = render(<Outer />, scratch);
 
 		expect(outer).to.have.been.calledOnce.and.calledWith(inst);
-		expect(inner).to.have.been.calledOnce.and.calledWith(inst.base);
+		expect(inner).to.have.been.calledOnce.and.calledWith(inst.vdom);
 
 		outer.reset();
 		inner.reset();
@@ -129,13 +129,13 @@ describe('refs', () => {
 		rerender();
 		expect(inner, 're-render swap');
 		expect(inner.firstCall, 're-render swap').to.have.been.calledWith(null);
-		expect(inner.secondCall, 're-render swap').to.have.been.calledWith(inst.base);
+		expect(inner.secondCall, 're-render swap').to.have.been.calledWith(inst.vdom);
 		InnermostComponent = 'span';
 
 		outer.reset();
 		inner.reset();
 
-		render(<div />, scratch, root);
+		root = render(<div />, scratch, root);
 
 		expect(outer, 'unrender').to.have.been.calledOnce.and.calledWith(null);
 		expect(inner, 'unrender').to.have.been.calledOnce.and.calledWith(null);
@@ -171,7 +171,7 @@ describe('refs', () => {
 
 		expect(outer, 'outer initial').to.have.been.calledOnce.and.calledWith(outerInst);
 		expect(inner, 'inner initial').to.have.been.calledOnce.and.calledWith(innerInst);
-		expect(innermost, 'innerMost initial').to.have.been.calledOnce.and.calledWith(innerInst.base);
+		expect(innermost, 'innerMost initial').to.have.been.calledOnce.and.calledWith(innerInst.vdom);
 
 		outer.reset();
 		inner.reset();
@@ -187,13 +187,13 @@ describe('refs', () => {
 		root = render(<Outer ref={outer} />, scratch, root);
 		expect(innermost, 'innerMost swap');
 		expect(innermost.firstCall, 'innerMost swap').to.have.been.calledWith(null);
-		expect(innermost.secondCall, 'innerMost swap').to.have.been.calledWith(innerInst.base);
+		expect(innermost.secondCall, 'innerMost swap').to.have.been.calledWith(innerInst.vdom);
 		InnermostComponent = 'span';
 
 		outer.reset();
 		inner.reset();
 		innermost.reset();
-		render(<div />, scratch, root);
+		root = render(<div />, scratch, root);
 
 		expect(outer, 'outer unmount').to.have.been.calledOnce.and.calledWith(null);
 		expect(inner, 'inner unmount').to.have.been.calledOnce.and.calledWith(null);
@@ -228,8 +228,8 @@ describe('refs', () => {
 
 		class TestUnmount extends Component {
 			componentWillUnmount() {
-				expect(this).to.have.property('outer', outer);
-				expect(this).to.have.property('inner', inner);
+				expect(this.outer).to.have.property('base', outer);
+				expect(this.inner).to.have.property('base', inner);
 
 				setTimeout( () => {
 					expect(this).to.have.property('outer', null);
@@ -254,7 +254,7 @@ describe('refs', () => {
 
 		expect(TestUnmount.prototype.componentWillUnmount).not.to.have.been.called;
 
-		render(<div />, scratch, root);
+		root = render(<div />, scratch, root);
 
 		expect(TestUnmount.prototype.componentWillUnmount).to.have.been.calledOnce;
 	});
@@ -274,7 +274,8 @@ describe('refs', () => {
 				this.state = { show:false };
 				inst = this;
 			}
-			handleMount(){}
+			handleMount(){
+            }
 			render(_, { show }) {
 				if (!show) return <div id="div" ref={this.handleMount}></div>;
 				return <span id="span" ref={this.handleMount}>some test content</span>;
@@ -282,22 +283,22 @@ describe('refs', () => {
 		}
 		sinon.spy(Child.prototype, 'handleMount');
 
-		render(<App />, scratch);
-		expect(inst.handleMount).to.have.been.calledOnce.and.calledWith(scratch.querySelector('#div'));
+		const vdom = render(<App />, scratch);
+		expect(inst.handleMount).to.have.been.calledOnce.and.calledWith(vdom.children[0]);
 		inst.handleMount.reset();
 
 		inst.setState({ show:true });
 		inst.forceUpdate();
 		expect(inst.handleMount).to.have.been.calledTwice;
-		expect(inst.handleMount.firstCall).to.have.been.calledWith(null);
-		expect(inst.handleMount.secondCall).to.have.been.calledWith(scratch.querySelector('#span'));
+        expect(inst.handleMount.firstCall).to.have.been.calledWith(null);
+		expect(inst.handleMount.secondCall).to.have.been.calledWith(vdom.children[0]);
 		inst.handleMount.reset();
 
 		inst.setState({ show:false });
 		inst.forceUpdate();
 		expect(inst.handleMount).to.have.been.calledTwice;
 		expect(inst.handleMount.firstCall).to.have.been.calledWith(null);
-		expect(inst.handleMount.secondCall).to.have.been.calledWith(scratch.querySelector('#div'));
+		expect(inst.handleMount.secondCall).to.have.been.calledWith(vdom.children[0]);
 	});
 
 
@@ -316,7 +317,7 @@ describe('refs', () => {
 			}
 		}
 
-		render(<div><Wrapper ref={ c => ref(c.base) } /></div>, scratch, scratch.firstChild);
-		expect(ref).to.have.been.calledOnce.and.calledWith(scratch.firstChild.firstChild);
+		const vdom = render(<div><Wrapper ref={ c => ref(c.vdom) } /></div>, scratch, buildVDom(scratch.firstChild));
+		expect(ref).to.have.been.calledOnce.and.calledWith(vdom.children[0]);
 	});
 });

@@ -14,6 +14,9 @@ var options = {
     eventBind: true,
 };
 
+/**
+ * 虚拟的Node，与VDom不同，用于生成真实的dom
+ */
 var VNode = (function () {
     function VNode() {
     }
@@ -57,12 +60,19 @@ function h(nodeName, attributes) {
     }
     // 把stack一次一次取出
     while (stack.length) {
+        // let num = 0;
         // 取出最后一个
         var child = stack.pop();
         if (child && child.pop !== undefined) {
             // 如果是个数组就倒序放入stack
             for (var i = child.length; i--;) {
-                stack.push(child[i]);
+                var item = child[i];
+                // 修复多个map时不同map的key相同
+                // if (typeof item === "object" && item.key) {
+                //     item.key = `L${num}-${item.key}`;
+                //     num ++;
+                // }
+                stack.push(item);
             }
         }
         else {
@@ -120,6 +130,9 @@ function h(nodeName, attributes) {
     return p;
 }
 
+/**
+ * 异步调度方法，异步的执行传入的方法
+ */
 var defer;
 if (typeof Promise === "function") {
     var promiseDefer_1 = Promise.resolve();
@@ -128,6 +141,9 @@ if (typeof Promise === "function") {
 else {
     defer = setTimeout;
 }
+/**
+ * Object.assign的兼容
+ */
 var extend = Object.assign || function assign_(t) {
     for (var s = void 0, i = 1, n = arguments.length; i < n; i++) {
         s = arguments[i];
@@ -140,12 +156,19 @@ var extend = Object.assign || function assign_(t) {
     return t;
 };
 
+/**
+ * 通过VNode对象新建一个自定义的props，children的VNode对象
+ * @param vnode 旧vnode
+ * @param props 新的props
+ * @param children 新的子组件
+ */
 function cloneElement(vnode, props) {
     var children = [];
     for (var _i = 2; _i < arguments.length; _i++) {
         children[_i - 2] = arguments[_i];
     }
-    return h(vnode.nodeName, extend({}, vnode.attributes, props), children.length > 2 ? children : vnode.children);
+    var child = children.length > 0 ? children : vnode.children;
+    return h(vnode.nodeName, extend({}, vnode.attributes, props), child);
 }
 
 // 不进行render
@@ -156,58 +179,92 @@ var SYNC_RENDER = 1;
 var FORCE_RENDER = 2;
 // 异步render标记
 var ASYNC_RENDER = 3;
-var ATTR_KEY = "__preactattr_";
+// dom的props属性key
+
 // 使用number值的style属性
 var IS_NON_DIMENSIONAL = /acit|ex(?:s|g|n|p|$)|rph|ows|mnc|ntw|ine[ch]|zoo|^ord/i;
 
 var items = [];
+/**
+ * 把Component放入队列中等待更新
+ * @param component 组件
+ */
 function enqueueRender(component) {
     if (!component._dirty) {
+        // 防止多次render
         component._dirty = true;
         var len = items.push(component);
         if (len === 1) {
+            // 在第一次时添加一个异步render，保证同步代码执行完只有一个异步render。
             var deferFun = options.debounceRendering || defer;
             deferFun(rerender);
         }
     }
 }
+/**
+ * 根据Component队列更新dom。
+ * 可以setState后直接执行这个方法强制同步更新dom
+ */
 function rerender() {
     var p;
     var list = items;
     items = [];
-    p = list.pop();
-    while (p) {
+    while (p = list.pop()) {
         if (p._dirty) {
+            // 防止多次render。
             renderComponent(p);
         }
-        p = list.pop();
     }
 }
 
+/**
+ * 缓存卸载自定义组件对象列表
+ */
 var components = {};
+/**
+ * 缓存卸载后的自定义组件
+ * @param component 卸载后的组件
+ */
 function collectComponent(component) {
     var constructor = component.constructor;
+    // 获取组件名
     var name = constructor.name;
-    var list = components[name] || [];
+    // 获取该组件名所属的列表
+    var list = components[name];
+    if (!list) {
+        list = components[name] = [];
+    }
+    // 设置
     list.push(component);
 }
+/**
+ * 复用已卸载的组件
+ * @param Ctor 要创建的组件对象
+ * @param props
+ * @param context
+ */
 function createComponent(Ctor, props, context) {
     var list = components[Ctor.name];
     var inst;
+    // 创建组件实例
     if (Ctor.prototype && Ctor.prototype.render) {
         inst = new Ctor(props, context);
         Component.call(inst, props, context);
     }
     else {
+        // 一个方法
         inst = new Component(props, context);
+        // 设置到constructor上
         inst.constructor = Ctor;
+        // render用doRender代替
         inst.render = doRender;
     }
+    // 查找之前的卸载缓存
     if (list) {
         for (var i = list.length; i--;) {
             var item = list[i];
             if (item.constructor === Ctor) {
-                inst.nextBase = item.nextBase;
+                inst.nextVDom = item.nextVDom;
                 list.splice(i, 1);
                 break;
             }
@@ -215,54 +272,88 @@ function createComponent(Ctor, props, context) {
     }
     return inst;
 }
-function doRender(props, state, tcontext) {
-    return this.constructor(props, tcontext);
+/**
+ * 代理render,去除state
+ * @param props
+ * @param state
+ * @param context
+ */
+function doRender(props, state, context) {
+    return this.constructor(props, context);
 }
 
+/**
+ * 创建一个原生html组件
+ * @param nodeName 标签名
+ * @param isSvg 是否为svg
+ */
 function createNode(nodeName, isSvg) {
     var node = isSvg
         ? document.createElementNS("http://www.w3.org/2000/svg", nodeName)
         : document.createElement(nodeName);
-    node.normalizedNodeName = nodeName;
+    // 设置原始的nodeName到dom上normalizedNodeName
+    // node.normalizedNodeName = nodeName;
     return node;
 }
+/**
+ * 移除dom
+ * @param node 需要移除的node
+ */
 function removeNode(node) {
     var parentNode = node.parentNode;
     if (parentNode) {
         parentNode.removeChild(node);
     }
 }
-function setAccessor(node, name, old, value, isSvg, child) {
+/**
+ * 通过VNode的props设置真实的dom
+ * @param node dom节点
+ * @param name 属性名
+ * @param old 旧属性值
+ * @param value 新属性值
+ * @param isSvg 是否为svg
+ * @param child VDom原dom上的props，和上下文环境，事件就在其中
+ */
+function setAccessor(vdom, name, old, value, isSvg) {
+    var node = vdom.base;
     if (name === "className") {
+        // 把className重名为class
         name = "class";
     }
     if (name === "key") {
-        // no set
+        // 不对key属性做dom设置
     }
     else if ("ref" === name) {
         if (old) {
+            // 对旧的ref设置null保证原方法里的引用移除
             old(null);
         }
         if (value) {
-            value(node);
+            // 给新方法设置vdom
+            value(vdom);
         }
     }
     else if ("class" === name && !isSvg) {
+        // 直接通过className设置class
         node.className = value || "";
     }
     else if ("style" === name) {
         if (!value || typeof value === "string" || typeof old === "string") {
+            // 对于字符串型的直接设置到style.cssText
             node.style.cssText = value || "";
         }
         if (value && typeof value === "object") {
+            // 如果是一个对象遍历设置
             if (typeof old !== "string") {
                 for (var i in old) {
                     if (!(i in value)) {
+                        // 清理旧属性且不在新的里
                         node.style[i] = "";
                     }
                 }
             }
             for (var i in value) {
+                // 设置新属性
                 node.style[i] = typeof value[i] === "number"
                     && IS_NON_DIMENSIONAL.test(i) === false ? (value[i] + "px") : value[i];
             }
@@ -270,6 +361,7 @@ function setAccessor(node, name, old, value, isSvg, child) {
     }
     else if ("dangerouslySetInnerHTML" === name) {
         if (value) {
+            // innerHTML
             node.innerHTML = value.__html || "";
             // child.children = [];
             // const childNodes = node.childNodes;
@@ -281,30 +373,38 @@ function setAccessor(node, name, old, value, isSvg, child) {
         }
     }
     else if (name[0] === "o" && name[1] === "n") {
+        // 事件绑定
         var oldName = name;
         name = name.replace(/Capture$/, "");
+        // 判断是否 事件代理(事件委托)
         var useCapture = oldName !== name;
+        // 去除前面的on并转换为小写
         name = name.toLowerCase().substring(2);
         if (value) {
             if (!old) {
-                addEventListener(node, name, useCapture, child);
+                // 保证只有一次绑定事件
+                addEventListener(vdom, name, useCapture);
             }
         }
         else {
-            removeEventListener(node, name, useCapture, child);
+            // 移除事件
+            removeEventListener(vdom, name, useCapture);
         }
-        if (!child._listeners) {
-            child._listeners = {};
+        if (!vdom.listeners) {
+            // 在上下文中创建存放绑定的方法的对象
+            vdom.listeners = {};
         }
-        child._listeners[name] = value;
+        vdom.listeners[name] = value;
     }
     else if (name !== "list" && name !== "type" && !isSvg && name in node) {
+        // 安全设置属性
         setProperty(node, name, value == null ? "" : value);
         if (value == null || value === false) {
             node.removeAttribute(name);
         }
     }
     else {
+        // 设置Attribute
         var ns = isSvg && (name !== (name = name.replace(/^xlink\:?/, "")));
         // null || undefined || void 0 || false
         if (value == null || value === false) {
@@ -325,43 +425,85 @@ function setAccessor(node, name, old, value, isSvg, child) {
         }
     }
 }
+var isIe8 = typeof document.addEventListener !== "function";
 function setProperty(node, name, value) {
     try {
         node[name] = value;
     }
     catch (e) { }
 }
-function eventProxy(child) {
+/**
+ * 生成用于绑定事件的方法，保证每次更新props上的事件方法不会重新绑定事件
+ * @param child 上下文
+ * @param useCapture 是否冒泡(兼容ie8)
+ */
+function eventProxy(vdom, useCapture) {
     return function (e) {
-        var listener = child._listeners[e.type];
-        var event = options.event && options.event(e) || e;
-        if (options.eventBind) {
-            return listener.call(child._component, event);
+        if (isIe8 && !useCapture) {
+            // ie8事件默认冒泡所以需要阻止
+            e.cancelBubble = !useCapture;
         }
-        return listener(event);
+        // 取出对于的props事件
+        var listener = vdom.listeners && vdom.listeners[e.type];
+        // 事件钩子
+        var event = options.event && options.event(e) || e;
+        if (listener) {
+            if (options.eventBind && vdom.component) {
+                // 自动使用所属自定义组件来做this
+                return listener.call(vdom.component, event);
+            }
+            // 直接调用事件
+            return listener(event);
+        }
     };
 }
 
 
+/**
+ * 判断是否为Text节点
+ * @param node
+ */
 function isTextNode(node) {
     return node.splitText !== undefined;
 }
-function addEventListener(node, name, useCapture, child) {
-    var eventProxyFun = eventProxy(child);
-    if (!child.event) {
-        child.event = {};
+/**
+ * 绑定代理事件
+ * @param node dom节点
+ * @param name 事件名
+ * @param useCapture 是否冒泡
+ * @param child 上下文
+ */
+function addEventListener(vdom, name, useCapture) {
+    // 生成当前事件的代理方法
+    var eventProxyFun = eventProxy(vdom, useCapture);
+    if (!vdom.eventProxy) {
+        vdom.eventProxy = {};
     }
-    child.event[name] = eventProxyFun;
-    if (node.addEventListener) {
+    // 把事件代理方法挂载到child.event上等待卸载时使用
+    vdom.eventProxy[name] = eventProxyFun;
+    var node = vdom.base;
+    if (!isIe8) {
         node.addEventListener(name, eventProxyFun, useCapture);
     }
     else {
         node.attachEvent("on" + name, eventProxyFun);
     }
 }
-function removeEventListener(node, name, useCapture, child) {
-    var eventProxyFun = child.event[name];
-    if (node.removeEventListener) {
+/**
+ * 移除事件
+ * @param node dom节点
+ * @param name 事件名
+ * @param useCapture 是否冒泡
+ * @param child 上下文
+ */
+function removeEventListener(vdom, name, useCapture) {
+    // 把上下文中的存储的代理事件解绑
+    var eventProxyFun = vdom.eventProxy && vdom.eventProxy[name];
+    if (vdom.eventProxy && eventProxyFun) {
+        vdom.eventProxy[name] = undefined;
+    }
+    var node = vdom.base;
+    if (!isIe8) {
         node.removeEventListener(name, eventProxyFun, useCapture);
     }
     else {
@@ -369,27 +511,42 @@ function removeEventListener(node, name, useCapture, child) {
     }
 }
 
+/**
+ * dom节点与vnode是否相同的标签
+ * @param node
+ * @param vnode
+ * @param hydrating
+ */
 function isSameNodeType(node, vnode, hydrating) {
-    if (typeof vnode === "string" || typeof vnode === "number") {
+    if (typeof vnode === "string" || typeof vnode === "number" || typeof vnode === "boolean") {
+        // vnode是文本节点,判断dom是否为文本节点
         return isTextNode(node.base);
     }
     if (typeof vnode.nodeName === "string") {
-        return !node._componentConstructor && isNamedNode(node.base, vnode.nodeName);
+        // vnode是原生组件,判断dom非组件的根节点且标签名相同
+        return !node.componentConstructor && isNamedNode(node, vnode.nodeName);
     }
-    return hydrating || node._componentConstructor === vnode.nodeName;
+    return hydrating || node.componentConstructor === vnode.nodeName;
 }
-/** Check if an Element has a given normalized name.
+/** 判断标签名是否相同.
  * @param {Element} node
  * @param {String} nodeName
  */
 function isNamedNode(node, nodeName) {
     return node.normalizedNodeName === nodeName
-        || node.nodeName.toLowerCase() === nodeName.toLowerCase();
+        || (node.base && node.base.nodeName.toLowerCase() === nodeName.toLowerCase());
 }
+/**
+ * 获取当前组件所有地方来的props
+ * @param vnode
+ */
 function getNodeProps(vnode) {
+    // jsx上的属性
     var props = extend({}, vnode.attributes);
     props.children = vnode.children;
+    // 组件类
     var nodeName = vnode.nodeName;
+    // 组件默认props
     var defaultProps = nodeName.defaultProps;
     if (defaultProps !== undefined) {
         for (var i in defaultProps) {
@@ -400,14 +557,41 @@ function getNodeProps(vnode) {
     }
     return props;
 }
+/**
+ * 真正dom绑定的一些数据
+ * @constructor
+ */
+var VDom = (function () {
+    function VDom(base) {
+        this.base = base;
+    }
+    VDom.prototype.clear = function () {
+        this.children = undefined;
+        this.component = undefined;
+        this.eventProxy = undefined;
+        this.listeners = undefined;
+        this.normalizedNodeName = undefined;
+        this.props = undefined;
+        this.componentConstructor = undefined;
+    };
+    return VDom;
+}());
+function buildVDom(base) {
+    if (base) {
+        return new VDom(base);
+    }
+}
 
 var mounts = [];
 var diffLevel = 0;
 var isSvgMode = false;
 var hydrating = false;
+/**
+ * 对挂载队列触发挂载完成钩子
+ */
 function flushMounts() {
-    var c = mounts.pop();
-    while (c) {
+    var c;
+    while (c = mounts.pop()) {
         var afterMount = options.afterMount;
         if (afterMount) {
             afterMount(c);
@@ -415,114 +599,145 @@ function flushMounts() {
         if (c.componentDidMount) {
             c.componentDidMount();
         }
-        c = mounts.pop();
     }
 }
 /**
  * 比较dom差异
- * @param dom 原dom
+ * @param vdom 原vdom
  * @param vnode jsx
  * @param context 通过render来的是一个空对象。
  * @param mountAll 是否已全部挂载
  * @param parent 挂载元素
  * @param componentRoot 是否为componentRoot
  */
-function diff(dom, vnode, context, mountAll, parent, componentRoot, child) {
-    if (child.base && dom !== child.base) {
-        // 原preact使用dom存放数据，现在，如果dom不存在，且pchild内有dom就卸载掉
-        removeDomChild(child);
-    }
+function diff(vdom, vnode, context, mountAll, parent, componentRoot) {
+    // if (child.base && dom !== child.base) {
+    //     // 原preact使用dom存放数据，现在，如果dom不存在，且pchild内有dom就卸载掉
+    //     removeDomChild(child);
+    // }
     if (!diffLevel++) {
         // 在diff调用递归层数为0时设置isSvgMode，hydrating
+        // 判断是否为svg
         isSvgMode = parent != null && parent.ownerSVGDocument !== undefined;
-        hydrating = dom != null && !(child && child[ATTR_KEY]);
+        // 判断是否在上次渲染过了
+        hydrating = vdom != null && !(vdom.props);
     }
     // 调用idiff生成dom
-    var ret = idiff(dom, vnode, context, mountAll, componentRoot, child);
+    var ret = idiff(vdom, vnode, context, mountAll, componentRoot);
     // 如果有父dom直接appendChild
-    if (parent && ret.parentNode !== parent) {
-        parent.appendChild(ret);
+    if (parent && ret.base.parentNode !== parent) {
+        parent.appendChild(ret.base);
     }
     if (!--diffLevel) {
-        // diff调用递归层为0
+        // diff调用递归层为0,说明已经全部diff完毕
         hydrating = false;
         if (!componentRoot) {
+            // 非renderComponent执行的diff如render，触发挂载完成生命周期
+            // 通过renderComponent执行的是更新状态，无需重新触发挂载生命周期
             flushMounts();
         }
     }
     return ret;
 }
-function idiff(dom, vnode, context, mountAll, componentRoot, child) {
-    // if (child.base && dom !== child.base) {
-    //     // 原preact使用dom存放数据，现在，如果dom不存在，且pchild内有dom就卸载掉
-    //     removeDomChild(child);
-    // }
-    var out = dom;
+/**
+ * 比较dom和vnode，进行新建dom，复用dom，或者新建组件，复用组件
+ * @param vdom 原dom
+ * @param vnode 用于创建dom的虚拟对象
+ * @param context 组件上下文用于组件创建时使用
+ * @param mountAll 是否需要挂载
+ * @param componentRoot 是否来自renderComponent
+ */
+function idiff(vdom, vnode, context, mountAll, componentRoot) {
     var prevSvgMode = isSvgMode;
+    var out = vdom && vdom.base;
     if (vnode == null || typeof vnode === "boolean") {
+        // 去除空，布尔值转为空字符串
         vnode = "";
     }
     if (typeof vnode === "string" || typeof vnode === "number") {
-        if (dom
-            && isTextNode(dom)
-            && dom.parentNode
-            && (!child._component || componentRoot)) {
-            if (dom.nodeValue !== vnode) {
-                dom.nodeValue = vnode;
+        // 文本节点处理
+        if (vdom
+            && isTextNode(vdom.base)
+            && vdom.base.parentNode
+            && (!vdom.component || componentRoot)) {
+            // 原dom就是文本节点，更新文本内容
+            if (vdom.base.nodeValue !== vnode) {
+                vdom.base.nodeValue = String(vnode);
             }
         }
         else {
-            var data = vnode;
-            out = document.createTextNode(data);
-            if (dom) {
-                if (dom.parentNode) {
-                    dom.parentNode.replaceChild(out, dom);
+            // 新建一个文本dom
+            var dom = document.createTextNode(String(vnode));
+            var newVDom = new VDom(dom);
+            if (vdom) {
+                // 来自renderComponent判断并处理vdom的子vdom更换
+                if (componentRoot) {
+                    replaceVDomParent(vdom, newVDom);
                 }
-                // if (child.base !== dom) {
-                //     child.base = dom;
-                // }
-                recollectNodeTree(child, true);
+                // 如果有旧dom，就替换并卸载旧的。
+                if (vdom.base.parentNode) {
+                    vdom.base.parentNode.replaceChild(dom, vdom.base);
+                }
+                recollectNodeTree(vdom, true);
             }
+            vdom = newVDom;
         }
-        child[ATTR_KEY] = true;
-        child.base = out;
-        return out;
+        // 文本节点的props直接设置为true
+        vdom.props = true;
+        return vdom;
     }
     var vnodeName = vnode.nodeName;
     if (typeof vnodeName === "function") {
-        return buildComponentFromVNode(dom, vnode, context, mountAll, child);
+        // 是一个组件,创建或复用组件实例，返回dom
+        return buildComponentFromVNode(vdom, vnode, context, mountAll);
     }
+    // 重新判断一下是否要创建svg
     isSvgMode = vnodeName === "svg"
         ? true : vnodeName === "foreignObject" ? false : isSvgMode;
+    // 一般通过babel的jsx无法发生非字符串的vnodeName
     vnodeName = String(vnodeName);
-    if (!dom || !isNamedNode(dom, vnodeName)) {
+    if (!vdom || !isNamedNode(vdom, vnodeName) || !out) {
+        // 没有原dom或者原dom与vnode里的不同，新建一个
         out = createNode(vnodeName, isSvgMode);
-        if (dom) {
-            while (dom.firstChild) {
-                out.appendChild(dom.firstChild);
+        var newVDom = new VDom(out);
+        if (vdom) {
+            // 来自renderComponent判断并处理vdom的子vdom更换
+            if (componentRoot) {
+                replaceVDomParent(vdom, newVDom);
             }
-            if (dom.parentNode) {
-                dom.parentNode.replaceChild(out, dom);
+            // 旧dom存在时的一些处理
+            // 把旧dom的子元素全部移动到新dom中
+            while (vdom.base.firstChild) {
+                out.appendChild(vdom.base.firstChild);
             }
-            // if (child.base !== dom) {
-            //     child.base = dom;
-            // }
-            recollectNodeTree(child, true);
+            // 把新dom挂载到旧dom上的位置
+            if (vdom.base.parentNode) {
+                vdom.base.parentNode.replaceChild(out, vdom.base);
+            }
+            // 卸载旧dom
+            recollectNodeTree(vdom, true);
         }
+        vdom = newVDom;
+        vdom.normalizedNodeName = vnodeName;
     }
     var fc = out.firstChild;
-    var props = child[ATTR_KEY];
+    // 取出上次存放的props
+    var props = vdom.props;
+    // 获取虚拟的子节点
     var vchildren = vnode.children;
-    if (props == null) {
-        props = child[ATTR_KEY] = {};
+    if (props == null || typeof props === "boolean") {
+        // 上回的props不存在说明，这次一般为新建（preact有可能通过原生dom操作删除）
+        vdom.props = props = {};
+        // 把dom中的attributes也就是我们常见的setAttribute的属性，取出
+        // 据说ie6-7的property也在attributes，就是style，id，class这种
         for (var a = out.attributes, i = a.length; i--;) {
             var attr = a[i];
             props[attr.name] = attr.value;
         }
     }
-    if (child.base !== out) {
-        child.base = out;
-    }
+    // if (vdom.base !== out) {
+    //     vdom.base = out;
+    // }
     if (!hydrating
         && vchildren
         && vchildren.length === 1
@@ -530,22 +745,39 @@ function idiff(dom, vnode, context, mountAll, componentRoot, child) {
         && fc != null
         && isTextNode(fc)
         && fc.nextSibling == null) {
+        // 如果未渲染过，且vnode的子元素和dom子元素长度都为1且为文本
+        // 替换文本
         if (fc.nodeValue !== vchildren[0]) {
-            fc.nodeValue = vchildren[0];
+            fc.nodeValue = String(vchildren[0]);
         }
     }
     else if (vchildren && vchildren.length || fc != null) {
-        if (!child.children) {
-            child.children = [];
+        if (vdom.children == null) {
+            vdom.children = [];
         }
-        innerDiffNode(out, vchildren, context, mountAll, hydrating || props.dangerouslySetInnerHTML != null, child);
+        // vnode子元素需要渲染或者为空但dom子元素需要清空
+        var childrenHydrating = hydrating || (typeof props === "object" && props.dangerouslySetInnerHTML != null);
+        diffChildren(vdom, vchildren, context, mountAll, childrenHydrating);
     }
-    diffAttributes(out, vnode.attributes, props, child);
+    // 设置dom属性
+    diffAttributes(vdom, vnode.attributes, props);
+    // 把props存到dom上下文中
+    // child[ATTR_KEY] = props;
+    // 还原
     isSvgMode = prevSvgMode;
-    return out;
+    return vdom;
 }
-function innerDiffNode(dom, vchildren, context, mountAll, isHydrating, domChild) {
-    var originalChildren = domChild.children;
+/**
+ * 比较子元素进行更新
+ * @param vdom 原vdom
+ * @param vchildren 虚拟子元素数组
+ * @param context 上下文
+ * @param mountAll 是否需要挂载
+ * @param isHydrating 是否
+ */
+function diffChildren(vdom, vchildren, context, mountAll, isHydrating) {
+    // 取出上次的子元素
+    var originalChildren = vdom.children || [];
     var children = [];
     var keyed = {};
     var keyedLen = 0;
@@ -558,8 +790,10 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating, domChild)
     var vchild;
     var child;
     var pchildren = [];
-    var childNodes = dom.childNodes;
+    var childNodes = vdom.base && vdom.base.childNodes;
     var unChildren = [];
+    // 处理真实子元素与上次的dom上下文中存放的子元素数量不对的情况
+    // 这种方式只能处理原生添加dom和删除dom。
     if (childNodes.length !== originalChildren.length) {
         var offset = 0;
         var nodeList = childNodes;
@@ -567,18 +801,17 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating, domChild)
         var newChildren = [];
         for (var i = 0; i < nodeLen; i++) {
             var node = nodeList[i];
-            var vdom = originalChildren[i + offset];
-            while (vdom && node !== vdom.base) {
+            var childVdom = originalChildren[i + offset];
+            while (childVdom && node !== childVdom.base) {
                 offset++;
-                vdom = originalChildren[i + offset];
+                childVdom = originalChildren[i + offset];
             }
-            if (vdom) {
-                newChildren.push(vdom);
+            if (childVdom) {
+                newChildren.push(childVdom);
             }
             else {
-                newChildren.push({
-                    base: node,
-                });
+                var newVdom = new VDom(node);
+                newChildren.push(newVdom);
             }
         }
         originalChildren = newChildren;
@@ -588,11 +821,11 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating, domChild)
     if (len !== 0) {
         for (var i = 0; i < len; i++) {
             var pchild = originalChildren[i];
-            var props = pchild[ATTR_KEY];
+            var props = pchild.props;
             var key = vlen && props
-                ? pchild._component
-                    ? pchild._component.__key
-                    : props.key
+                ? pchild.component
+                    ? pchild.component._key
+                    : typeof props === "object" && props.key
                 : null;
             if (key != null) {
                 keyedLen++;
@@ -600,7 +833,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating, domChild)
             }
             else if (props
                 || (isTextNode(pchild.base)
-                    ? (isHydrating ? pchild.base.nodeValue.trim() : true)
+                    ? (isHydrating ? pchild.base.nodeValue && pchild.base.nodeValue.trim() : true)
                     : isHydrating)) {
                 children[childrenLen++] = pchild;
             }
@@ -610,9 +843,8 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating, domChild)
         for (var i = 0; i < vlen; i++) {
             vchild = vchildren[i];
             child = null;
-            var tchild = null;
             // attempt to find a node based on key matching
-            var key = vchild.key;
+            var key = typeof vchild === "object" && vchild.key;
             if (key != null) {
                 if (keyedLen && keyed[key] !== undefined) {
                     child = keyed[key];
@@ -624,7 +856,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating, domChild)
                 // attempt to pluck a node of the same type from the existing children
                 for (j = min; j < childrenLen; j++) {
                     c = children[j];
-                    if (children[j] !== undefined && isSameNodeType(c, vchild, isHydrating)) {
+                    if (c !== undefined && isSameNodeType(c, vchild, isHydrating)) {
                         child = c;
                         children[j] = undefined;
                         if (j === childrenLen - 1) {
@@ -637,35 +869,37 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating, domChild)
                     }
                 }
             }
-            // 获取上一次的props存储对象
-            tchild = child || {};
             // morph the matched/found/created DOM child to match vchild (deep)
-            child = idiff(child && child.base, vchild, context, mountAll, false, tchild);
+            var pchild = idiff(child, vchild, context, mountAll, false);
+            if (pchild.parent !== vdom) {
+                pchild.parent = vdom;
+            }
             // 把新的props存储对象存储起来
-            pchildren.push(tchild);
+            pchildren.push(pchild);
             // 获取真实
             f = childNodes[i];
-            if (child && child !== dom && child !== f) {
+            if (pchild.base !== vdom.base && pchild.base !== f) {
                 if (f == null) {
-                    dom.appendChild(child);
+                    vdom.base.appendChild(pchild.base);
                 }
-                else if (child === f.nextSibling) {
+                else if (pchild.base === f.nextSibling) {
                     var t = f;
                     removeNode(t);
                 }
                 else {
-                    dom.insertBefore(child, f);
+                    vdom.base.insertBefore(pchild.base, f);
                 }
             }
         }
     }
-    domChild.children = pchildren;
+    vdom.children = pchildren;
     // remove unused keyed children:
     if (keyedLen) {
         for (var i in keyed) {
-            if (keyed[i] !== undefined) {
+            var keyItem = keyed[i];
+            if (keyItem != null) {
                 // removeNode(keyed[i].base);
-                recollectNodeTree(keyed[i], false);
+                recollectNodeTree(keyItem, false);
             }
         }
     }
@@ -684,19 +918,18 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating, domChild)
  */
 function recollectNodeTree(node, unmountOnly) {
     // 获取dom上的组件索引
-    var component = node._component;
+    var component = node.component;
     if (component) {
         // 如果存在
         unmountComponent(component);
-        node._component = null;
-        removeDomChild(node);
+        node.component = undefined;
     }
     else {
-        if (node[ATTR_KEY] != null && node[ATTR_KEY].ref) {
+        if (typeof node.props === "object" && node.props.ref) {
             // ref用于取消引用dom
-            node[ATTR_KEY].ref(null);
+            node.props.ref(null);
         }
-        if (unmountOnly === false || node[ATTR_KEY] == null) {
+        if (unmountOnly === false || node.props == null) {
             // 移除dom
             removeNode(node.base);
         }
@@ -707,82 +940,115 @@ function recollectNodeTree(node, unmountOnly) {
 function removeChildren(node) {
     // 去除最后一个子元素
     var nodeList = node.children;
-    node.children = [];
+    node.children = undefined;
     var len = nodeList ? nodeList.length : 0;
     // node = getLastChild(node && node.base);
-    while (len--) {
+    while (nodeList && len--) {
         // 不需要移除因为父级已经移除
         recollectNodeTree(nodeList[len], true);
     }
-    // removeDomChild
-    removeDomChild(node);
 }
-function diffAttributes(dom, attrs, old, child) {
+function diffAttributes(vdom, attrs, old) {
+    var dom = vdom.base;
     var name;
     for (name in old) {
         if (!(attrs && attrs[name] != null) && old[name] != null) {
             var oldValue = old[name];
             var value = old[name] = undefined;
-            setAccessor(dom, name, oldValue, value, isSvgMode, child);
+            setAccessor(vdom, name, oldValue, value, isSvgMode);
         }
     }
-    for (name in attrs) {
-        if (name !== "children"
-            && name !== "innerHTML"
-            && (!(name in old)
-                || attrs[name] !== (name === "value"
-                    || name === "checked"
-                    ? dom[name]
-                    : old[name]))) {
-            var oldValue = old[name];
-            var value = old[name] = attrs[name];
-            setAccessor(dom, name, oldValue, value, isSvgMode, child);
+    if (attrs) {
+        for (name in attrs) {
+            if (name !== "children"
+                && name !== "innerHTML"
+                && (!(name in old)
+                    || attrs[name] !== (name === "value"
+                        || name === "checked"
+                        ? dom[name]
+                        : old[name]))) {
+                var oldValue = old[name];
+                var value = old[name] = attrs[name];
+                setAccessor(vdom, name, oldValue, value, isSvgMode);
+            }
+        }
+    }
+}
+function replaceVDomParent(oldVDom, vdom) {
+    if (oldVDom.parent && oldVDom.parent.children) {
+        vdom.parent = oldVDom.parent;
+        var index = oldVDom.parent.children.indexOf(oldVDom);
+        if (index !== -1) {
+            oldVDom.parent.children[index] = vdom;
         }
     }
 }
 
+/**
+ * 设置props，通常来自jsx
+ * @param component 组件
+ * @param props 新的props
+ * @param opts render的执行方式
+ * @param context 新的context
+ * @param mountAll 是否已挂载
+ */
 function setComponentProps(component, props, opts, context, mountAll) {
     if (component._disable) {
+        // 如果组件已停用就什么都不做
         return;
     }
+    // 阻止在异步时再次进入
     component._disable = true;
+    // 取出ref设置到组件上
     var ref = component._ref = props.ref;
     if (ref) {
+        // 清理掉props中的ref
         delete props.ref;
     }
+    // 同上
     var key = component._key = props.key;
     if (key) {
+        // 清理掉props中的key
         delete props.key;
     }
-    if (!component.base || mountAll) {
+    if (!component.vdom || mountAll) {
+        // 如果没有插入到DOM树或正在被render渲染执行钩子
         if (component.componentWillMount) {
             component.componentWillMount();
         }
     }
     else if (component.componentWillReceiveProps) {
+        // 更新的钩子
         component.componentWillReceiveProps(props, context);
     }
     if (context && context !== component.context) {
+        // 保存旧的context，设置新的context
         if (!component.prevContext) {
             component.prevContext = component.context;
         }
         component.context = context;
     }
+    // 同上
     if (!component.prevProps) {
         component.prevProps = component.props;
     }
     component.props = props;
+    // 进入renderComponent前启用组件
     component._disable = false;
     if (opts !== NO_RENDER) {
+        // 进行renderComponent
         if (opts === SYNC_RENDER
             || options.syncComponentUpdates !== false
-            || !component.base) {
+            || !component.vdom) {
+            // 同步执行
             renderComponent(component, SYNC_RENDER, mountAll);
         }
         else {
+            // 异步执行
             enqueueRender(component);
         }
     }
+    // 用于react的标准ref用于dom实例化完成后组件引用，多用于函数组件。
     if (component._ref) {
         component._ref(component);
     }
@@ -811,16 +1077,17 @@ function renderComponent(component, opts, mountALL, isChild) {
     var previousState = component.prevState || state;
     // 获取组件上一次的context没有取当前
     var previousContext = component.prevContext || context;
-    // 判断是否已有dom元素
-    var isUpdate = component.base;
-    // 被移除过时保存的dom
-    var nextBase = component.nextBase;
-    var initialBase = isUpdate || nextBase;
+    // 判断是否已有vdom
+    var isUpdate = component.vdom;
+    // 上次移除的vdom
+    var nextVDom = component.nextVDom;
+    // 组件vdom
+    var initialVDom = isUpdate || nextVDom;
     // 获取当前组件的子组件
     var initialChildComponent = component._component;
     // 略过dom更新标记
     var skip = false;
-    var cbase;
+    var cvdom;
     if (isUpdate) {
         // 有dom元素在组件上说明是更新操作.
         // 把组件上的props，state，context都返回到更新前
@@ -846,10 +1113,10 @@ function renderComponent(component, opts, mountALL, isChild) {
         component.context = context;
     }
     // 清理掉
-    component.prevProps = null;
-    component.prevState = null;
-    component.prevContext = null;
-    component.nextBase = undefined;
+    component.prevProps = undefined;
+    component.prevState = undefined;
+    component.prevContext = undefined;
+    component.nextVDom = undefined;
     // 重置_dirty
     component._dirty = false;
     if (!skip) {
@@ -863,7 +1130,7 @@ function renderComponent(component, opts, mountALL, isChild) {
         // 取出VNode的nodeName
         var childComponent = rendered && rendered.nodeName;
         var toUnmount = void 0;
-        var base = void 0;
+        var vdom = void 0;
         if (typeof childComponent === "function" && rendered) {
             // 如果是自定义组件
             // if (component.child) {
@@ -880,111 +1147,99 @@ function renderComponent(component, opts, mountALL, isChild) {
                 if (inst) {
                     // 设置到toUnmount等待unmount
                     toUnmount = inst;
-                    toUnmount.child = extend({}, toUnmount.child);
-                    // 防止共享子dom
-                    inst.child.children = [];
                 }
                 // 新建Component
                 inst = createComponent(childComponent, childProps, context);
                 // 子组件索引保证下次相同子组件不会重新创建
                 component._component = inst;
                 // 设置好缓存dom
-                inst.nextBase = inst.nextBase || nextBase;
+                inst.nextVDom = inst.nextVDom || nextVDom;
                 // 设置父组件索引
                 inst._parentComponent = component;
-                // 设置domchild
-                inst.child = component.child;
                 // 设置props但是不进行render
                 setComponentProps(inst, childProps, NO_RENDER, context, false);
                 // 递归调用renderComponent保证子组件的子组件创建
                 renderComponent(inst, SYNC_RENDER, mountALL, true);
             }
             // 把子组件dom设置到base
-            base = inst.base;
+            vdom = inst.vdom;
         }
         else {
             // 原生组件
             // 获取原dom或缓存dom
-            cbase = initialBase;
+            cvdom = initialVDom;
             // 把自定义子组件放到卸载，对应使用if分支控制自定义组件和原生组件
             toUnmount = initialChildComponent;
             if (toUnmount) {
                 // 如果存在说明上次渲染时是一个自定义组件
                 // 清理子组件索引
                 component._component = undefined;
-                // 清理dom索引
-                cbase = undefined;
+                // 清理vdom索引
+                cvdom = undefined;
             }
-            if (initialBase || opts === SYNC_RENDER) {
+            if (initialVDom || opts === SYNC_RENDER) {
                 // 组件dom，缓存dom，同步渲染
-                if (component.child && component.child._component) {
+                if (component.vdom && component.vdom.component) {
                     // 清理component索引防止使用同一个component情况下却卸载了。
-                    component.child._component = undefined;
+                    component.vdom.component = undefined;
                     //
                     // const b: any = cbase;
                     // b._component = undefined;
                 }
-                if (!component.child) {
-                    component.child = {};
-                }
                 // 渲染原生组件
-                base = diff(
+                vdom = diff(
                 // 原dom
-                cbase, 
+                cvdom, 
                 // VNode
                 rendered, context, 
-                // 父级组件需要挂载，或者dom不存在也需要挂载
+                // 父级或者该原生组件，原dom不存在说明必须触发生命周期
                 mountALL || !isUpdate, 
                 // 把组件挂载到缓存dom的父级
-                initialBase && initialBase.parentNode, 
+                initialVDom && initialVDom.base.parentNode, 
                 // 以原生组件这里执行说明是自定义组件的第一个原生组件
-                true, component.child);
+                true);
             }
         }
-        if (initialBase && base !== initialBase && inst !== initialChildComponent) {
+        if (initialVDom && vdom !== initialVDom && inst !== initialChildComponent) {
             // 存在缓存dom，现dom和缓存dom不相同且新建过自定义子组件
             // 获取当前组件缓存dom的父级dom
-            var baseParent = initialBase.parentNode;
-            if (base && baseParent && base !== baseParent) {
+            var baseParent = initialVDom.base.parentNode;
+            if (vdom && baseParent && vdom.base !== baseParent) {
                 // 替换到新dom
-                baseParent.replaceChild(base, initialBase);
+                baseParent.replaceChild(vdom.base, initialVDom.base);
                 if (!toUnmount) {
                     // 没有
-                    // const initBase: any = initialBase;
-                    // 去除dom上的component索引
-                    // initBase._component = null;
-                    component.child.base = initialBase;
-                    component.child._component = null;
-                    recollectNodeTree(component.child, false);
-                    component.child.base = null;
+                    initialVDom.component = undefined;
+                    recollectNodeTree(initialVDom, false);
                 }
             }
         }
         if (toUnmount) {
+            // 卸载无用的自定义组件
             unmountComponent(toUnmount);
         }
-        component.base = base;
-        if (base && !isChild) {
+        // 当前自定义组件的根dom
+        component.vdom = vdom;
+        if (vdom && !isChild) {
+            // 创建了dom且不是子组件渲染
             var componentRef = component;
             var t = component;
+            // 获取根自定义组件，有可能是一个子组件变化数据
             while ((t = t._parentComponent)) {
                 componentRef = t;
-                componentRef.base = base;
+                componentRef.vdom = vdom;
             }
-            // const _base: any = base;
-            // try {
-            //     _base._component = componentRef;
-            //     _base._componentConstructor = componentRef.constructor;
-            // } catch (e) {}
-            component.child._component = componentRef;
-            component.child._componentConstructor = componentRef.constructor;
-            // component.child.base = base;
+            // 保证dom的上下文为根自定义组件
+            vdom.component = componentRef;
+            vdom.componentConstructor = componentRef.constructor;
         }
     }
     if (!isUpdate || mountALL) {
+        // 新建dom的需要触发componentDidMount放入mounts等待生命周期触发
         mounts.unshift(component);
     }
     else if (!skip) {
+        // 没有skip render的话触发component.componentDidUpdate，options.afterUpdate钩子
         if (component.componentDidUpdate) {
             component.componentDidUpdate(previousProps, previousState, previousContext);
         }
@@ -993,88 +1248,116 @@ function renderComponent(component, opts, mountALL, isChild) {
         }
     }
     if (component._renderCallbacks != null) {
+        // 触发所有回调
         while (component._renderCallbacks.length) {
             component._renderCallbacks.pop().call(component);
         }
     }
     if (!diffLevel && !isChild) {
+        // 根状态下触发生命周期
         flushMounts();
     }
 }
-function buildComponentFromVNode(dom, vnode, context, mountALL, child) {
-    var c = child && child._component;
+/**
+ * 创建Component实例，buildComponentFromVNode创建的一般为父级为原生，或没有
+ * @param dom 原dom
+ * @param vnode VNode实例
+ * @param context 父组件来的上下文
+ * @param mountALL 是否需要挂载om
+ * @param child 父组件用来对dom元素的上下文
+ */
+function buildComponentFromVNode(vdom, vnode, context, mountALL) {
+    // 获取根组件缓存
+    var c = vdom && vdom.component;
     var originalComponent = c;
-    var oldDom = dom;
-    var isDiectOwner = c && child._componentConstructor === vnode.nodeName;
+    // 判断是否为同一个组件类
+    var isDiectOwner = vdom && vdom.componentConstructor === vnode.nodeName;
     var isOwner = isDiectOwner;
+    // 获取jsx上的属性
     var props = getNodeProps(vnode);
     while (c && !isOwner && (c = c._parentComponent)) {
+        // 向上查找
         isOwner = c.constructor === vnode.nodeName;
     }
     if (c && isOwner && (!mountALL || c._component)) {
+        // 获取到可复用的组件，重新设置props，复用状态下有dom所有为了流畅使用异步
         setComponentProps(c, props, ASYNC_RENDER, context, mountALL);
-        dom = c.base;
+        vdom = c.vdom;
     }
     else {
+        var oldVDom = vdom;
+        // 不存在可以复用的组件
         if (originalComponent && !isDiectOwner) {
+            // 存在旧组件卸载它
             unmountComponent(originalComponent);
-            dom = oldDom = null;
+            vdom = oldVDom = null;
         }
+        // 通过缓存组件的方式创建组件实例
         c = createComponent(vnode.nodeName, props, context);
-        if (dom && !c.nextBase) {
-            c.nextBase = dom;
-            oldDom = null;
+        if (vdom && !c.nextVDom) {
+            // 上次这个标签为原生组件，把将要卸载的组件dom缓存
+            c.nextVDom = vdom;
+            oldVDom = null;
         }
-        c.child = child;
-        // child._component = c;
+        // 留下旧的上下文等待卸载
+        // const oldChild = extend({}, child);
+        // if (child.base) {
+        //     // 清空等待新的上下文
+        //     removeDomChild(child);
+        // }
+        // 设置props，并创建dom
         setComponentProps(c, props, SYNC_RENDER, context, mountALL);
-        dom = c.base;
-        if (oldDom && dom !== oldDom) {
-            // oldDom._component = null;
-            recollectNodeTree(oldDom, false);
+        // 获取dom
+        vdom = c.vdom;
+        if (oldVDom && vdom !== oldVDom) {
+            // 需要卸载dom
+            oldVDom.component = undefined;
+            recollectNodeTree(oldVDom, false);
         }
     }
-    return dom;
+    return vdom;
 }
+/**
+ * 卸载组件
+ * @param component 组件
+ */
 function unmountComponent(component) {
     if (options.beforeUnmount) {
+        // 触发全局钩子
         options.beforeUnmount(component);
     }
-    var base = component.base;
+    var vdom = component.vdom;
+    // 停用组件
     component._disable = true;
     if (component.componentWillUnmount) {
+        // 钩子
         component.componentWillUnmount();
     }
-    component.base = undefined;
+    // 清理dom索引
+    component.vdom = undefined;
+    // 获取子组件
     var inner = component._component;
-    var anyBase = base;
     if (inner) {
         unmountComponent(inner);
     }
-    else if (anyBase && component.child) {
-        if (component.child[ATTR_KEY] && component.child[ATTR_KEY].ref) {
-            component.child[ATTR_KEY].ref(null);
+    else if (vdom) {
+        if (typeof vdom.props === "object" && vdom.props.ref) {
+            // 触发dom卸载时的ref事件解除dom索引
+            vdom.props.ref(null);
         }
         // 卸载组件dom前把它存到nextBase
-        component.nextBase = anyBase;
+        component.nextVDom = vdom;
         // 从dom上移除
-        removeNode(anyBase);
+        removeNode(vdom.base);
         // 放入全局缓存对象保存
         collectComponent(component);
-        removeChildren(component.child);
+        // 清空上下文
+        removeChildren(vdom);
     }
     if (component._ref) {
+        // 解除外部对组件实例的索引
         component._ref(null);
     }
-}
-function removeDomChild(child) {
-    child.base = null;
-    child._component = null;
-    child[ATTR_KEY] = null;
-    child.event = null;
-    child._listeners = null;
-    child._componentConstructor = null;
-    child.children = [];
 }
 
 var Component = (function () {
@@ -1096,6 +1379,7 @@ var Component = (function () {
             // 把旧的状态保存起来
             this.prevState = extend({}, s);
         }
+        // 把新的state和并到this.state
         if (typeof state === "function") {
             var newState = state(s, this.props);
             if (newState) {
@@ -1110,7 +1394,7 @@ var Component = (function () {
             this._renderCallbacks = this._renderCallbacks || [];
             this._renderCallbacks.push(callback);
         }
-        // 更新dom
+        // 异步队列更新dom，通过enqueueRender方法可以保证在一个任务栈下多次setState但是只会发生一次render
         enqueueRender(this);
     };
     /**
@@ -1122,6 +1406,7 @@ var Component = (function () {
             this._renderCallbacks = this._renderCallbacks || [];
             this._renderCallbacks.push(callback);
         }
+        // 重新执行render
         renderComponent(this, FORCE_RENDER);
     };
     /**
@@ -1172,32 +1457,36 @@ function shallowDiffers(a, b) {
     return false;
 }
 
-var child = {};
 /**
  * 创建组件到dom上
  * @param vnode jsx
  * @param parent 挂载的dom元素
  * @param merge 原dom元素
+ * @param domChild 虚拟dom用于挂载原来挂载在dom元素上的属性
  */
-function render(vnode, parent, merge, domChild) {
-    var pchild = domChild || child;
-    var base = diff(merge, vnode, {}, false, parent, false, pchild);
-    if (pchild._component) {
-        base._component = pchild._component;
-    }
+function render(vnode, parent, vdom) {
+    var base = diff(vdom, vnode, {}, false, parent, false);
     return base;
 }
 
+/**
+ * 类似React.createClass, 但未bind(this)
+ * @param obj
+ */
 function createClass(obj) {
     var cl = function (props, context) {
-        Component.call(this, props, context, {});
+        Component.call(this, props, context);
     };
+    // 保证后面的实例的constructor指向cl
     obj = extend({ constructor: cl }, obj);
     if (obj.defaultProps) {
+        // 获取defaultProps
         cl.defaultProps = obj.defaultProps;
     }
+    // prototype链
     F.prototype = Component.prototype;
     cl.prototype = extend(new F(), obj);
+    // 组件名
     cl.displayName = obj.displayName || "Component";
     return cl;
 }
@@ -1210,6 +1499,7 @@ var F = (function () {
 var zreact = {
     Component: Component,
     PureComponent: PureComponent,
+    buildVDom: buildVDom,
     cloneElement: cloneElement,
     createClass: createClass,
     createElement: h,
@@ -1222,6 +1512,7 @@ var zreact = {
 exports['default'] = zreact;
 exports.Component = Component;
 exports.PureComponent = PureComponent;
+exports.buildVDom = buildVDom;
 exports.cloneElement = cloneElement;
 exports.createClass = createClass;
 exports.createElement = h;

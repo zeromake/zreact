@@ -51,7 +51,7 @@ export function createComponent(Ctor: any, props: IKeyValue, context: IKeyValue)
         for (let i = list.length; i-- ; ) {
             const item = list[i];
             if (item.constructor === Ctor) {
-                inst.nextBase = item.nextBase;
+                inst.nextVDom = item.nextVDom;
                 list.splice(i, 1);
                 break;
             }

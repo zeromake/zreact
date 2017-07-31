@@ -7,6 +7,7 @@ import { getNodeProps } from "./index";
 import { removeNode } from "../dom/index";
 import { extend } from "../util";
 import { IKeyValue } from "../types";
+import { VDom } from "./index";
 import {
     ASYNC_RENDER,
     ATTR_KEY,
@@ -50,7 +51,7 @@ export function setComponentProps(component: Component, props: IKeyValue, opts: 
         // 清理掉props中的key
         delete props.key;
     }
-    if (!component.base || mountAll) {
+    if (!component.vdom || mountAll) {
         // 如果没有插入到DOM树或正在被render渲染执行钩子
         if (component.componentWillMount) {
             component.componentWillMount();
@@ -78,7 +79,7 @@ export function setComponentProps(component: Component, props: IKeyValue, opts: 
         if (
             opts === SYNC_RENDER
             || options.syncComponentUpdates !== false
-            || !component.base
+            || !component.vdom
         ) {
             // 同步执行
             renderComponent(component, SYNC_RENDER, mountAll);
@@ -117,17 +118,17 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
     const previousState = component.prevState || state;
     // 获取组件上一次的context没有取当前
     const previousContext = component.prevContext || context;
-    // 判断是否已有dom元素
-    const isUpdate = component.base;
-    // 上次移除的dom
-    const nextBase = component.nextBase;
-    // 组件dom
-    const initialBase = isUpdate || nextBase;
+    // 判断是否已有vdom
+    const isUpdate = component.vdom;
+    // 上次移除的vdom
+    const nextVDom = component.nextVDom;
+    // 组件vdom
+    const initialVDom = isUpdate || nextVDom;
     // 获取当前组件的子组件
     const initialChildComponent = component._component;
     // 略过dom更新标记
     let skip = false;
-    let cbase: Element | undefined;
+    let cvdom: VDom | undefined;
     if (isUpdate) {
         // 有dom元素在组件上说明是更新操作.
         // 把组件上的props，state，context都返回到更新前
@@ -156,7 +157,7 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
     component.prevProps = undefined;
     component.prevState = undefined;
     component.prevContext = undefined;
-    component.nextBase = undefined;
+    component.nextVDom = undefined;
     // 重置_dirty
     component._dirty = false;
 
@@ -171,7 +172,7 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
         // 取出VNode的nodeName
         const childComponent = rendered && rendered.nodeName;
         let toUnmount: Component | undefined;
-        let base: Element | undefined;
+        let vdom: VDom | undefined;
 
         if (typeof childComponent === "function" && rendered) {
             // 如果是自定义组件
@@ -189,85 +190,73 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
                 if (inst) {
                     // 设置到toUnmount等待unmount
                     toUnmount = inst;
-                    toUnmount.child = extend({}, toUnmount.child);
-                    // 清理
-                    removeDomChild(inst.child);
                 }
                 // 新建Component
                 inst = createComponent(childComponent, childProps, context);
                 // 子组件索引保证下次相同子组件不会重新创建
                 component._component = inst;
                 // 设置好缓存dom
-                inst.nextBase = inst.nextBase || nextBase;
+                inst.nextVDom = inst.nextVDom || nextVDom;
                 // 设置父组件索引
                 inst._parentComponent = component;
-                // 设置domchild
-                inst.child = component.child;
                 // 设置props但是不进行render
                 setComponentProps(inst, childProps, NO_RENDER, context, false);
                 // 递归调用renderComponent保证子组件的子组件创建
                 renderComponent(inst, SYNC_RENDER, mountALL, true);
             }
             // 把子组件dom设置到base
-            base = inst.base;
+            vdom = inst.vdom;
         } else {
             // 原生组件
             // 获取原dom或缓存dom
-            cbase = initialBase;
+            cvdom = initialVDom;
             // 把自定义子组件放到卸载，对应使用if分支控制自定义组件和原生组件
             toUnmount = initialChildComponent;
             if (toUnmount) {
                 // 如果存在说明上次渲染时是一个自定义组件
                 // 清理子组件索引
                 component._component = undefined;
-                // 清理dom索引
-                cbase = undefined;
+                // 清理vdom索引
+                cvdom = undefined;
             }
 
-            if (initialBase || opts === SYNC_RENDER) {
+            if (initialVDom || opts === SYNC_RENDER) {
                 // 组件dom，缓存dom，同步渲染
-                if (component.child && component.child._component) {
+                if (component.vdom && component.vdom.component) {
                     // 清理component索引防止使用同一个component情况下却卸载了。
-                    component.child._component = undefined;
+                    component.vdom.component = undefined;
                     //
                     // const b: any = cbase;
                     // b._component = undefined;
                 }
                 // 渲染原生组件
-                base = diff(
+                vdom = diff(
                     // 原dom
-                    cbase,
+                    cvdom,
                     // VNode
                     rendered,
                     context,
                     // 父级或者该原生组件，原dom不存在说明必须触发生命周期
                     mountALL || !isUpdate,
                     // 把组件挂载到缓存dom的父级
-                    initialBase && initialBase.parentNode,
+                    initialVDom && initialVDom.base.parentNode,
                     // 以原生组件这里执行说明是自定义组件的第一个原生组件
                     true,
-                    // dom上下文
-                    component.child,
                 );
             }
         }
 
-        if (initialBase && base !== initialBase && inst !== initialChildComponent) {
+        if (initialVDom && vdom !== initialVDom && inst !== initialChildComponent) {
             // 存在缓存dom，现dom和缓存dom不相同且新建过自定义子组件
             // 获取当前组件缓存dom的父级dom
-            const baseParent = initialBase.parentNode;
-            if (base && baseParent && base !== baseParent) {
+            const baseParent = initialVDom.base.parentNode;
+            if (vdom && baseParent && vdom.base !== baseParent) {
                 // 替换到新dom
-                baseParent.replaceChild(base, initialBase);
+                baseParent.replaceChild(vdom.base, initialVDom.base);
                 if (!toUnmount) {
                     // 没有
-                    // const initBase: any = initialBase;
-                    // 去除dom上的component索引
-                    // initBase._component = null;
-                    component.child.base = initialBase;
-                    component.child._component = null;
-                    recollectNodeTree(component.child, false);
-                    component.child.base = base;
+                    initialVDom.component = undefined;
+                    recollectNodeTree(initialVDom, false);
                 }
             }
         }
@@ -276,19 +265,19 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
             unmountComponent(toUnmount);
         }
         // 当前自定义组件的根dom
-        component.base = base;
-        if (base && !isChild) {
+        component.vdom = vdom;
+        if (vdom && !isChild) {
             // 创建了dom且不是子组件渲染
             let componentRef: Component | undefined = component;
             let t: Component | undefined = component;
             // 获取根自定义组件，有可能是一个子组件变化数据
             while ((t = t._parentComponent)) {
                 componentRef = t;
-                componentRef.base = base;
+                componentRef.vdom = vdom;
             }
             // 保证dom的上下文为根自定义组件
-            component.child._component = componentRef;
-            component.child._componentConstructor = componentRef.constructor;
+            vdom.component = componentRef;
+            vdom.componentConstructor = componentRef.constructor;
         }
     }
     if (!isUpdate || mountALL) {
@@ -325,18 +314,16 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
  * @param child 父组件用来对dom元素的上下文
  */
 export function buildComponentFromVNode(
-    dom: any,
+    vdom: VDom | undefined | null,
     vnode: VNode,
     context: IKeyValue,
     mountALL: boolean,
-    child: any,
-): Element {
+): VDom {
     // 获取根组件缓存
-    let c = child && child._component;
+    let c = vdom && vdom.component;
     const originalComponent = c;
-    let oldDom = dom;
     // 判断是否为同一个组件类
-    const isDiectOwner = c && child._componentConstructor === vnode.nodeName;
+    const isDiectOwner = vdom && vdom.componentConstructor === vnode.nodeName;
     let isOwner = isDiectOwner;
     // 获取jsx上的属性
     const props = getNodeProps(vnode);
@@ -345,32 +332,31 @@ export function buildComponentFromVNode(
         isOwner = c.constructor === vnode.nodeName;
     }
 
-    if (c && isOwner && (!mountALL || c._component)) {
+    if (c && c.vdom && isOwner && (!mountALL || c._component)) {
         // 获取到可复用的组件，重新设置props，复用状态下有dom所有为了流畅使用异步
         setComponentProps(c, props, ASYNC_RENDER, context, mountALL);
-        dom = c.base;
+        vdom = c.vdom;
     } else {
+        let oldVDom = vdom;
         // 不存在可以复用的组件
         if (originalComponent && !isDiectOwner) {
             // 存在旧组件卸载它
             unmountComponent(originalComponent);
-            dom = oldDom = null;
+            vdom = oldVDom = null;
         }
         // 通过缓存组件的方式创建组件实例
         c = createComponent(vnode.nodeName, props, context);
-        if (dom && !c.nextBase) {
+        if (vdom && !c.nextVDom) {
             // 上次这个标签为原生组件，把将要卸载的组件dom缓存
-            c.nextBase = dom;
-            oldDom = null;
+            c.nextVDom = vdom;
+            oldVDom = null;
         }
         // 留下旧的上下文等待卸载
-        const oldChild = extend({}, child);
-        if (child.base) {
-            // 清空等待新的上下文
-            removeDomChild(child);
-        }
-        // 保证dom上下文的索引
-        c.child = child;
+        // const oldChild = extend({}, child);
+        // if (child.base) {
+        //     // 清空等待新的上下文
+        //     removeDomChild(child);
+        // }
         // 设置props，并创建dom
         setComponentProps(
             c,
@@ -379,15 +365,15 @@ export function buildComponentFromVNode(
             context,
             mountALL,
         );
-        // 获取dom
-        dom = c.base;
-        if (oldDom && dom !== oldDom) {
+        // 获取vdom,实际上通过setComponentProps已经有了c.vdom,但是typescript无法识别
+        vdom = c.vdom; // || new VDom(document.createElement("div"));
+        if (oldVDom && vdom !== oldVDom) {
             // 需要卸载dom
-            child._component = null;
-            recollectNodeTree(oldChild, false);
+            oldVDom.component = undefined;
+            recollectNodeTree(oldVDom, false);
         }
     }
-    return dom;
+    return vdom;
 }
 
 /**
@@ -399,7 +385,7 @@ export function unmountComponent(component: Component) {
         // 触发全局钩子
         options.beforeUnmount(component);
     }
-    const base = component.base;
+    const vdom = component.vdom;
     // 停用组件
     component._disable = true;
     if (component.componentWillUnmount) {
@@ -407,43 +393,28 @@ export function unmountComponent(component: Component) {
         component.componentWillUnmount();
     }
     // 清理dom索引
-    component.base = undefined;
+    component.vdom = undefined;
     // 获取子组件
     const inner = component._component;
-    const anyBase: any = base;
     if (inner) {
 
         unmountComponent(inner);
-    } else if (anyBase && component.child) {
-        if (component.child[ATTR_KEY] && component.child[ATTR_KEY].ref) {
+    } else if (vdom) {
+        if (typeof vdom.props === "object" && vdom.props.ref) {
             // 触发dom卸载时的ref事件解除dom索引
-            component.child[ATTR_KEY].ref(null);
+            vdom.props.ref(null);
         }
         // 卸载组件dom前把它存到nextBase
-        component.nextBase = anyBase;
+        component.nextVDom = vdom;
         // 从dom上移除
-        removeNode(anyBase);
+        removeNode(vdom.base);
         // 放入全局缓存对象保存
         collectComponent(component);
         // 清空上下文
-        removeChildren(component.child);
+        removeChildren(vdom);
     }
     if (component._ref) {
         // 解除外部对组件实例的索引
         component._ref(null);
     }
-}
-
-/**
- * 额外的dom上下文清空，preact没有这个，自己加的。
- * @param child
- */
-export function removeDomChild(child: any) {
-    child.base = null;
-    child._component = null;
-    child[ATTR_KEY] = null;
-    child.event = null;
-    child._listeners = null;
-    child._componentConstructor = null;
-    child.children = [];
 }

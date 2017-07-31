@@ -6,10 +6,12 @@ import { render } from "./render";
 import options from "./options";
 import { createClass } from "./create-class";
 import { rerender } from "./render-queue";
+import { buildVDom } from "./vdom/index";
 
 export default {
     Component,
     PureComponent,
+    buildVDom,
     cloneElement,
     createClass,
     createElement,
@@ -22,6 +24,7 @@ export default {
 export {
     Component,
     PureComponent,
+    buildVDom,
     cloneElement,
     createClass,
     createElement,

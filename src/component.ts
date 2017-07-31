@@ -4,6 +4,7 @@ import { VNode } from "./vnode";
 import { enqueueRender } from "./render-queue";
 import { extend } from "./util";
 import { IKeyValue } from "./types";
+import { VDom } from "./vdom/index";
 
 export class Component {
     /**
@@ -23,9 +24,13 @@ export class Component {
      */
     public context: IKeyValue;
     /**
-     * 组件挂载后的dom
+     * 组件挂载后的vdom
      */
-    public base?: Element;
+    public vdom?: VDom;
+    /**
+     * 被移除时的vdom缓存
+     */
+    public nextVDom?: VDom;
     /**
      * 自定义组件名
      */
@@ -42,10 +47,6 @@ export class Component {
      * 上一次的上下文
      */
     public prevContext?: IKeyValue;
-    /**
-     * 被移除时的dom缓存
-     */
-    public nextBase?: Element;
     /**
      * 在一个组件被渲染到 DOM 之前
      */
@@ -118,10 +119,6 @@ export class Component {
      * react标准用于设置component实例
      */
     public _ref?: (component: Component | null) => void;
-    /**
-     * VDom暂定用于存放组件根dom的上下文
-     */
-    public child?: any;
     constructor(props: IKeyValue, context: IKeyValue) {
         // 初始化为true
         this._dirty = true;

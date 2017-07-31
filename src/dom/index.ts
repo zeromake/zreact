@@ -1,4 +1,5 @@
 import { IS_NON_DIMENSIONAL } from "../constants";
+import { VDom } from "../vdom/index";
 import options from "../options";
 
 /**
@@ -11,7 +12,7 @@ export function createNode(nodeName: string, isSvg: boolean): HTMLElement {
         ? document.createElementNS("http://www.w3.org/2000/svg", nodeName)
         : document.createElement(nodeName);
     // 设置原始的nodeName到dom上normalizedNodeName
-    node.normalizedNodeName = nodeName;
+    // node.normalizedNodeName = nodeName;
     return node;
 }
 
@@ -19,7 +20,7 @@ export function createNode(nodeName: string, isSvg: boolean): HTMLElement {
  * 移除dom
  * @param node 需要移除的node
  */
-export function removeNode(node: HTMLElement) {
+export function removeNode(node: Element | Text | Node) {
     const parentNode = node.parentNode;
     if (parentNode) {
         parentNode.removeChild(node);
@@ -36,13 +37,13 @@ export function removeNode(node: HTMLElement) {
  * @param child VDom原dom上的props，和上下文环境，事件就在其中
  */
 export function setAccessor(
-    node: any,
+    vdom: VDom,
     name: string,
     old: any,
     value: any,
     isSvg: boolean,
-    child: any,
 ) {
+    const node: any = vdom.base;
     if (name === "className") {
         // 把className重名为class
         name = "class";
@@ -55,8 +56,8 @@ export function setAccessor(
             old(null);
         }
         if (value) {
-            // 给新方法设置dom
-            value(node);
+            // 给新方法设置vdom
+            value(vdom);
         }
     } else if ("class" === name && !isSvg) {
         // 直接通过className设置class
@@ -106,17 +107,17 @@ export function setAccessor(
         if (value) {
             if (!old) {
                 // 保证只有一次绑定事件
-                addEventListener(node, name, useCapture, child);
+                addEventListener(vdom, name, useCapture);
             }
         } else {
             // 移除事件
-            removeEventListener(node, name, useCapture, child);
+            removeEventListener(vdom, name, useCapture);
         }
-        if (!child._listeners) {
+        if (!vdom.listeners) {
             // 在上下文中创建存放绑定的方法的对象
-            child._listeners = {};
+            vdom.listeners = {};
         }
-        child._listeners[name] = value;
+        vdom.listeners[name] = value;
     } else if (name !== "list" && name !== "type" && !isSvg && name in node) {
         // 安全设置属性
         setProperty(node, name, value == null ? "" : value);
@@ -150,6 +151,8 @@ export function setAccessor(
     }
 }
 
+const isIe8 = typeof document.addEventListener !== "function";
+
 function setProperty(node: any, name: string, value: string) {
     try {
         node[name] = value;
@@ -161,22 +164,24 @@ function setProperty(node: any, name: string, value: string) {
  * @param child 上下文
  * @param useCapture 是否冒泡(兼容ie8)
  */
-function eventProxy(child: any, useCapture: boolean): (e: Event) => void {
+function eventProxy(vdom: VDom, useCapture: boolean): (e: Event) => void {
     return (e: Event) => {
-        if (child.isIe8 && !useCapture) {
+        if (isIe8 && !useCapture) {
             // ie8事件默认冒泡所以需要阻止
             e.cancelBubble = !useCapture;
         }
         // 取出对于的props事件
-        const listener = child._listeners[e.type];
+        const listener = vdom.listeners && vdom.listeners[e.type];
         // 事件钩子
         const event = options.event && options.event(e) || e;
-        if (options.eventBind && child._component) {
-            // 自动使用所属自定义组件来做this
-            return listener.call(child._component, event);
+        if (listener) {
+            if (options.eventBind && vdom.component) {
+                // 自动使用所属自定义组件来做this
+                return listener.call(vdom.component, event);
+            }
+            // 直接调用事件
+            return listener(event);
         }
-        // 直接调用事件
-        return listener(event);
     };
 }
 
@@ -203,19 +208,16 @@ export function isTextNode(node: Text | any): boolean {
  * @param useCapture 是否冒泡
  * @param child 上下文
  */
-function addEventListener(node: any, name: string, useCapture: boolean, child: any) {
-    if (typeof child.isIe8 !== "number") {
-        // 判断是否为ie9以下的浏览器
-        child.isIe8 = node.addEventListener ? 0 : 1;
-    }
+function addEventListener(vdom: VDom, name: string, useCapture: boolean) {
     // 生成当前事件的代理方法
-    const eventProxyFun = eventProxy(child, useCapture);
-    if (!child.event) {
-        child.event = {};
+    const eventProxyFun = eventProxy(vdom, useCapture);
+    if (!vdom.eventProxy) {
+        vdom.eventProxy = {};
     }
     // 把事件代理方法挂载到child.event上等待卸载时使用
-    child.event[name] = eventProxyFun;
-    if (!child.isIe8) {
+    vdom.eventProxy[name] = eventProxyFun;
+    const node: any = vdom.base;
+    if (!isIe8) {
         node.addEventListener(name, eventProxyFun, useCapture);
     } else {
         node.attachEvent("on" + name, eventProxyFun);
@@ -229,11 +231,14 @@ function addEventListener(node: any, name: string, useCapture: boolean, child: a
  * @param useCapture 是否冒泡
  * @param child 上下文
  */
-function removeEventListener(node: any, name: string, useCapture: boolean, child: any) {
+function removeEventListener(vdom: VDom, name: string, useCapture: boolean) {
     // 把上下文中的存储的代理事件解绑
-    const eventProxyFun = child.event[name];
-    child.event[name] = undefined;
-    if (!child.isIe8) {
+    const eventProxyFun = vdom.eventProxy && vdom.eventProxy[name];
+    if (vdom.eventProxy && eventProxyFun) {
+        vdom.eventProxy[name] = undefined;
+    }
+    const node: any = vdom.base;
+    if (!isIe8) {
         node.removeEventListener(name, eventProxyFun, useCapture);
     } else {
         node.detachEvent("on" + name, eventProxyFun);

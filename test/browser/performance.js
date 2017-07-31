@@ -2,7 +2,7 @@
 /*eslint no-console:0*/
 /** @jsx h */
 
-let { h, Component, render } = require(NODE_ENV==='production' ? '../../dist/zreact.min.js' : '../../build/zreact');
+let { h, Component, render, buildVDom } = require(NODE_ENV==='production' ? '../../dist/zreact.min.js' : '../../build/zreact');
 
 const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
 
@@ -347,13 +347,12 @@ describe('performance', function() {
 				);
 			}
 		}
-
-		render(<App />, scratch, scratch.firstChild);
+        let vdom = render(<App />, scratch, buildVDom(scratch.firstChild));
 		let html = scratch.innerHTML;
 
 		benchmark( () => {
 			scratch.innerHTML = html;
-			render(<App />, scratch, scratch.firstChild);
+			vdom = render(<App />, scratch, vdom);
 		}, ({ ticks, message }) => {
 			console.log(`PERF: SSR Hydrate: ${message}`);
 			expect(ticks).to.be.below(3000 * MULTIPLIER);
