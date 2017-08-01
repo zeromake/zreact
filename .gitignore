@@ -59,4 +59,7 @@ typings/
 /test/test.js
 /build/
 /test/coverage/
+/dist/
+/devtools.js
+/devtools.js.map
 

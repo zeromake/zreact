@@ -1,41 +1,62 @@
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(require('zreact')) :
-	typeof define === 'function' && define.amd ? define(['zreact'], factory) :
-	(factory(global.zreact));
-}(this, (function (zreact) { 'use strict';
-/**
- * Object.assign的兼容
- */
-var extend = Object.assign || function assign_(t) {
-    for (var s = void 0, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) {
-            if (Object.prototype.hasOwnProperty.call(s, p)) {
-                t[p] = s[p];
-            }
-        }
-    }
-    return t;
+import { options, Component} from "./zreact";
+import { IKeyValue } from "./types";
+import { VDom } from "./vdom/index";
+import { extend } from "./util";
+
+interface IReactElement {
+    props?: boolean|IKeyValue;
+    type: any;
+    ref?: ((c: Component|null) => void)|null;
+    key?: string;
+}
+interface IReactComponent {
+    _currentElement: IReactElement|string|null;
+    node?: Text|Element|Node;
+    _instance?: Component;
+    _renderedComponent?: IReactComponent;
+    forceUpdate?: () => void;
+    getName?: () => void;
+    props?: IKeyValue;
+    setState?: () => void;
+    state?: IKeyValue;
+    _inDevTools?: boolean;
+    _renderedChildren?: IReactComponent[];
+    _stringText?: null|string;
+    _rootID?: string;
+    _component?: any;
+}
+
+declare const window: {
+    $zreact: VDom,
+    __REACT_DEVTOOLS_GLOBAL_HOOK__?: any,
 };
+
+declare class Map {
+    public has(key: any): boolean;
+    public get(key: any): any;
+    public set(key: any, val: any): void;
+    public delete(key: any): void;
+}
 
 /**
  * 将zreact的component实例转换为React的
  * @param  component
  */
-function createReactElement(component) {
-    var element = {
+function createReactElement(component: Component): IReactElement {
+    const element: IReactElement = {
         key: component._key,
         props: component.props,
-        ref: null,
+        ref: null, // Unsupported
         type: component.constructor,
     };
     return element;
 }
+
 /**
  * 获取组件名
  * @param  element
  */
-function typeName(element) {
+function typeName(element: IReactElement): string {
     if (typeof element.type === "function") {
         return element.type.displayName || element.type.name;
     }
@@ -45,42 +66,41 @@ function typeName(element) {
  * 将component转换实例
  * @param component
  */
-function createReactCompositeComponent(component) {
-    var _currentElement = createReactElement(component);
-    var node = component.vdom && component.vdom.base;
-    var instance = {
-        _currentElement: _currentElement,
+function createReactCompositeComponent(component: Component): IReactComponent {
+    const _currentElement = createReactElement(component);
+    const node = component.vdom && component.vdom.base;
+    const instance: IReactComponent = {
+        _currentElement,
         _instance: component,
         forceUpdate: component.forceUpdate && component.forceUpdate.bind(component),
         getName: function getName() {
             return typeName(_currentElement);
         },
-        node: node,
+        node,
         props: component.props,
         setState: component.setState && component.setState.bind(component),
         state: component.state,
     };
     if (component._component) {
         instance._renderedComponent = updateReactComponent(component._component);
-    }
-    else if (component.vdom) {
+    } else if (component.vdom) {
         instance._renderedComponent = updateReactComponent(component.vdom);
     }
     return instance;
 }
+
 /**
  * 将vdom转换为实例
  * @param vdom
  */
-function createReactDOMComponent(vdom) {
-    var node = vdom.base;
-    var childVDom = vdom.children ? vdom.children : [];
-    var isText = node.nodeType === Node.TEXT_NODE;
-    var element;
+function createReactDOMComponent(vdom: VDom): IReactComponent {
+    const node = vdom.base;
+    const childVDom = vdom.children ? vdom.children : [];
+    const isText = node.nodeType === Node.TEXT_NODE;
+    let element: string|IReactElement|null;
     if (isText) {
         element = node.textContent;
-    }
-    else {
+    } else {
         element = {
             props: vdom.props,
             type: node.nodeName.toLowerCase(),
@@ -96,40 +116,42 @@ function createReactDOMComponent(vdom) {
             return updateReactComponent(child);
         }),
         _stringText: isText ? node.textContent : null,
-        node: node,
+        node,
     };
 }
-var instanceMap = new Map();
+const instanceMap = new Map();
 /**
  * 将vdom或component转换为实例
  * @param componentOrVDom
  */
-function updateReactComponent(componentOrVDom) {
-    var isVDom = componentOrVDom.base != null;
-    var newInstance = isVDom ? createReactDOMComponent(componentOrVDom) : createReactCompositeComponent(componentOrVDom);
-    var base = isVDom ? componentOrVDom.base : componentOrVDom;
+function updateReactComponent(componentOrVDom: any): IReactComponent {
+    const isVDom = componentOrVDom.base != null;
+    const newInstance = isVDom ? createReactDOMComponent(componentOrVDom) : createReactCompositeComponent(componentOrVDom);
+    const base = isVDom ? componentOrVDom.base : componentOrVDom;
     if (instanceMap.has(base)) {
-        var inst = instanceMap.get(base);
+        const inst = instanceMap.get(base);
         extend(inst, newInstance);
         return inst;
     }
     instanceMap.set(base, newInstance);
     return newInstance;
 }
-function nextRootKey(roots) {
+
+function nextRootKey(roots: IKeyValue) {
     return "." + Object.keys(roots).length;
 }
-function findRoots(node, roots) {
-    Array.prototype.forEach.call(node.childNodes, function _(child) {
+
+function findRoots(node: Element, roots: IKeyValue) {
+    Array.prototype.forEach.call(node.childNodes, function _(child: any) {
         if (child._vdom && child._vdom.component) {
             roots[nextRootKey(roots)] = updateReactComponent(child._vdom.component);
-        }
-        else {
+        } else {
             findRoots(child, roots);
         }
     });
 }
-function isRootComponent(component) {
+
+function isRootComponent(component: Component) {
     if (component._parentComponent) {
         return false;
     }
@@ -138,14 +160,14 @@ function isRootComponent(component) {
     }
     return true;
 }
-function visitNonCompositeChildren(component, visitor) {
+
+function visitNonCompositeChildren(component: IReactComponent, visitor: (arg: IReactComponent) => void) {
     if (component._renderedComponent) {
         if (!component._renderedComponent._component) {
             visitor(component._renderedComponent);
             visitNonCompositeChildren(component._renderedComponent, visitor);
         }
-    }
-    else if (component._renderedChildren) {
+    } else if (component._renderedChildren) {
         component._renderedChildren.forEach(function _(child) {
             visitor(child);
             if (!child._component) {
@@ -154,49 +176,52 @@ function visitNonCompositeChildren(component, visitor) {
         });
     }
 }
-function createDevToolsBridge(vdom) {
-    var ComponentTree = {
-        getClosestInstanceFromNode: function getClosestInstanceFromNode(node) {
+
+function createDevToolsBridge(vdom?: VDom) {
+    const ComponentTree = {
+        getClosestInstanceFromNode: function getClosestInstanceFromNode(node: any) {
             while (node && !node._vdom) {
                 node = node.parentNode;
             }
             return node ? updateReactComponent(node._vdom) : null;
         },
-        getNodeFromInstance: function getNodeFromInstance(instance) {
+        getNodeFromInstance: function getNodeFromInstance(instance: IReactComponent) {
             return instance.node;
         },
     };
-    var roots = {};
+
+    const roots: {
+        [name: string]: IReactComponent;
+    } = {};
     if (vdom && vdom.component) {
         roots[".0"] = updateReactComponent(vdom.component);
-    }
-    else {
+    } else {
         if (window.$zreact) {
-            var keys = Object.keys(roots);
+            const keys = Object.keys(roots);
             if (keys.length > 0) {
-                keys.forEach(function (key) {
+                keys.forEach((key) => {
                     delete roots[key];
                 });
             }
             roots[".0"] = updateReactComponent(window.$zreact);
-        }
-        else {
+        } else {
             findRoots(document.body, roots);
         }
     }
     // findRoots(document.body, roots);
-    var Mount = {
+
+    const Mount = {
         _instancesByReactRootID: roots,
-        _renderNewRootComponent: function _renderNewRootComponent(arg) { },
+        _renderNewRootComponent: function _renderNewRootComponent(arg: IReactComponent){},
     };
-    var Reconciler = {
-        mountComponent: function mountComponent(arg) { },
-        performUpdateIfNecessary: function performUpdateIfNecessary() { },
-        receiveComponent: function receiveComponent(arg) { },
-        unmountComponent: function unmountComponent(arg) { },
+    const Reconciler = {
+        mountComponent: function mountComponent(arg: IReactComponent){},
+        performUpdateIfNecessary: function performUpdateIfNecessary(){},
+        receiveComponent: function receiveComponent(arg: IReactComponent){},
+        unmountComponent: function unmountComponent(arg: IReactComponent){},
     };
-    var componentAdded = function componentAdded_(component) {
-        var instance = updateReactComponent(component);
+    const componentAdded = function componentAdded_(component: Component) {
+        const instance = updateReactComponent(component);
         if (isRootComponent(component)) {
             instance._rootID = nextRootKey(roots);
             roots[instance._rootID] = instance;
@@ -208,31 +233,30 @@ function createDevToolsBridge(vdom) {
         });
         Reconciler.mountComponent(instance);
     };
-    var componentUpdated = function componentUpdated_(component) {
-        var prevRenderedChildren = [];
-        visitNonCompositeChildren(instanceMap.get(component), function _(childInst) {
+    const componentUpdated = function componentUpdated_(component: Component) {
+        const prevRenderedChildren: IReactComponent[] = [];
+        visitNonCompositeChildren(instanceMap.get(component), function _(childInst: IReactComponent) {
             prevRenderedChildren.push(childInst);
         });
-        var instance = updateReactComponent(component);
+        const instance = updateReactComponent(component);
         Reconciler.receiveComponent(instance);
-        visitNonCompositeChildren(instance, function _(childInst) {
+        visitNonCompositeChildren(instance, function _(childInst: IReactComponent) {
             if (!childInst._inDevTools) {
                 childInst._inDevTools = true;
                 Reconciler.mountComponent(childInst);
-            }
-            else {
+            } else {
                 Reconciler.receiveComponent(childInst);
             }
         });
-        prevRenderedChildren.forEach(function _(childInst) {
+        prevRenderedChildren.forEach(function _(childInst: IReactComponent) {
             if (childInst.node && !document.body.contains(childInst.node)) {
                 instanceMap.delete(childInst.node);
                 Reconciler.unmountComponent(childInst);
             }
         });
     };
-    var componentRemoved = function componentRemoved_(component) {
-        var instance = updateReactComponent(component);
+    const componentRemoved = function componentRemoved_(component: Component) {
+        const instance = updateReactComponent(component);
         visitNonCompositeChildren(instance, function _(childInst) {
             instanceMap.delete(childInst.node);
             Reconciler.unmountComponent(childInst);
@@ -244,50 +268,52 @@ function createDevToolsBridge(vdom) {
         }
     };
     return {
-        ComponentTree: ComponentTree,
-        Mount: Mount,
-        Reconciler: Reconciler,
-        componentAdded: componentAdded,
-        componentRemoved: componentRemoved,
-        componentUpdated: componentUpdated,
+        ComponentTree,
+        Mount,
+        Reconciler,
+        componentAdded,
+        componentRemoved,
+        componentUpdated,
     };
 }
-function initDevTools(vdom) {
+
+export function initDevTools(vdom?: VDom) {
+
     if (typeof window.__REACT_DEVTOOLS_GLOBAL_HOOK__ === "undefined") {
         return;
     }
-    var bridge = createDevToolsBridge(vdom);
-    var nextAfterMount = zreact.options.afterMount;
-    zreact.options.afterMount = function (component) {
+    const bridge = createDevToolsBridge(vdom);
+
+    const nextAfterMount = options.afterMount;
+    options.afterMount = (component: Component) => {
         bridge.componentAdded(component);
         if (nextAfterMount) {
             nextAfterMount(component);
         }
     };
-    var nextAfterUpdate = zreact.options.afterUpdate;
-    zreact.options.afterUpdate = function (component) {
+
+    const nextAfterUpdate = options.afterUpdate;
+    options.afterUpdate = (component: Component) => {
         bridge.componentUpdated(component);
         if (nextAfterUpdate) {
             nextAfterUpdate(component);
         }
     };
-    var nextBeforeUnmount = zreact.options.beforeUnmount;
-    zreact.options.beforeUnmount = function (component) {
+
+    const nextBeforeUnmount = options.beforeUnmount;
+    options.beforeUnmount = (component: Component) => {
         bridge.componentRemoved(component);
         if (nextBeforeUnmount) {
             nextBeforeUnmount(component);
         }
     };
+
     // Notify devtools about this instance of "React"
     window.__REACT_DEVTOOLS_GLOBAL_HOOK__.inject(bridge);
-    return function () {
-        zreact.options.afterMount = nextAfterMount;
-        zreact.options.afterUpdate = nextAfterUpdate;
-        zreact.options.beforeUnmount = nextBeforeUnmount;
+
+    return () => {
+        options.afterMount = nextAfterMount;
+        options.afterUpdate = nextAfterUpdate;
+        options.beforeUnmount = nextBeforeUnmount;
     };
 }
-
-initDevTools();
-
-})));
-//# sourceMappingURL=devtools.js.map
