@@ -1,7 +1,7 @@
 {
   "name": "zreact",
   "version": "0.0.1",
-  "description": "React mini",
+  "description": "React like,copy by preact",
   "main": "dist/zreact.js",
   "module": "dist/zreact.esm.js",
   "jsnext:main": "dist/zreact.esm.js",
@@ -9,6 +9,10 @@
   "repository": "https://github.com/zeromake/zreact",
   "author": "zeromake <a390720046@gmail.com>",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zeromake/zreact/issues"
+  },
+  "homepage": "https://github.com/zeromake/zreact",
   "scripts": {
     "clean": "rimraf dist/ devtools.js devtools.js.map",
     "build:all": "npm run clean && npm run build:dev && npm run build && npm run build:devtools && npm run build:devtools1",
@@ -22,6 +26,25 @@
     "test:karma:watch": "npm run test:karma -- no-single-run",
     "changelog": "conventional-changelog -p angular-i CHANGELOG.md -s -r 0"
   },
+  "keywords": [
+    "zreact",
+    "react",
+    "virtual dom",
+    "vdom",
+    "components",
+    "virtual",
+    "dom"
+  ],
+  "files": [
+    "src",
+    "dist",
+    "devtools.js",
+    "devtools.js.map",
+    "typings.json",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-loader": "^7.1.1",

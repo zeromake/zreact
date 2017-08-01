@@ -1,24 +1,23 @@
-import { h, render, Component } from 'preact';
+import { h, render, Component } from "zreact";
 
 interface DummyProps {
-	initialInput: string;
+    initialInput: string;
 }
 
 interface DummyState {
-	input: string;
+    input: string;
 }
 
 class DummyComponent extends Component<DummyProps, DummyState> {
-	constructor(props: DummyProps) {
-		super(props);
-		this.state = {
-			input: `x${this.props}x`
-		}
-	}
-
-	render({ initialInput }: DummyProps, { input }: DummyState) {
-		return <DummerComponent initialInput={initialInput} input={input} />
-	}
+    constructor(props: DummyProps) {
+        super(props);
+        this.state = {
+            input: `x${this.props}x`,
+        };
+    }
+    public render({ initialInput }: DummyProps, { input }: DummyState) {
+        return <DummerComponent initialInput={initialInput} input={input} />
+    }
 }
 
 interface DummerComponentProps extends DummyProps, DummyState {
@@ -26,7 +25,7 @@ interface DummerComponentProps extends DummyProps, DummyState {
 }
 
 function DummerComponent({ input, initialInput }: DummerComponentProps) {
-	return <div>Input: {input}, initial: {initialInput}</div>;
+    return <div>Input: {input}, initial: {initialInput}</div>;
 }
 
 render(h(DummerComponent, { initialInput: "The input" }), document.getElementById("xxx"));
