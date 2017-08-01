@@ -1745,6 +1745,10 @@ estraverse@^4.1.0, estraverse@^4.1.1:
   version "4.2.0"
   resolved "http://registry.npm.taobao.org/estraverse/download/estraverse-4.2.0.tgz#0dee3fed31fcd469618ce7342099fc1afa0bdb13"
 
+estree-walker@^0.2.1:
+  version "0.2.1"
+  resolved "http://registry.npm.taobao.org/estree-walker/download/estree-walker-0.2.1.tgz#bdafe8095383d8414d5dc2ecf4c9173b6db9412e"
+
 estree-walker@^0.3.0:
   version "0.3.1"
   resolved "http://registry.npm.taobao.org/estree-walker/download/estree-walker-0.3.1.tgz#e6b1a51cf7292524e7237c312e5fe6660c1ce1aa"
@@ -2883,6 +2887,12 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
+magic-string@^0.15.2:
+  version "0.15.2"
+  resolved "http://registry.npm.taobao.org/magic-string/download/magic-string-0.15.2.tgz#0681d7388741bbc3addaa65060992624c6c09e9c"
+  dependencies:
+    vlq "^0.2.1"
+
 make-dir@^1.0.0:
   version "1.0.0"
   resolved "http://registry.npm.taobao.org/make-dir/download/make-dir-1.0.0.tgz#97a011751e91dd87cfadef58832ebb04936de978"
@@ -3389,6 +3399,10 @@ pkg-dir@^2.0.0:
   dependencies:
     find-up "^2.1.0"
 
+preact@^8.2.1:
+  version "8.2.1"
+  resolved "http://registry.npm.taobao.org/preact/download/preact-8.2.1.tgz#674243df0c847884d019834044aa2fcd311e72ed"
+
 preserve@^0.2.0:
   version "0.2.0"
   resolved "http://registry.npm.taobao.org/preserve/download/preserve-0.2.0.tgz#815ed1f6ebc65926f865b310c0713bcb3315ce4b"
@@ -3733,6 +3747,20 @@ ripemd160@^2.0.0, ripemd160@^2.0.1:
     hash-base "^2.0.0"
     inherits "^2.0.1"
 
+rollup-plugin-alias@^1.3.1:
+  version "1.3.1"
+  resolved "http://registry.npm.taobao.org/rollup-plugin-alias/download/rollup-plugin-alias-1.3.1.tgz#a9152fec4b6a6510dae93989517ca7853c32a6fa"
+  dependencies:
+    slash "^1.0.0"
+
+rollup-plugin-replace@^1.1.1:
+  version "1.1.1"
+  resolved "http://registry.npm.taobao.org/rollup-plugin-replace/download/rollup-plugin-replace-1.1.1.tgz#396315ded050a6ce43b9518a886a3f60efb1ea33"
+  dependencies:
+    magic-string "^0.15.2"
+    minimatch "^3.0.2"
+    rollup-pluginutils "^1.5.0"
+
 rollup-plugin-typescript@zeromake/rollup-plugin-typescript:
   version "0.8.3"
   resolved "https://codeload.github.com/zeromake/rollup-plugin-typescript/tar.gz/8ac76d8834bc0ea08d82e2dc40e8110d61666ea9"
@@ -3748,6 +3776,13 @@ rollup-plugin-uglify@^2.0.1:
   resolved "http://registry.npm.taobao.org/rollup-plugin-uglify/download/rollup-plugin-uglify-2.0.1.tgz#67b37ad1efdafbd83af4c36b40c189ee4866c969"
   dependencies:
     uglify-js "^3.0.9"
+
+rollup-pluginutils@^1.5.0:
+  version "1.5.2"
+  resolved "http://registry.npm.taobao.org/rollup-pluginutils/download/rollup-pluginutils-1.5.2.tgz#1e156e778f94b7255bfa1b3d0178be8f5c552408"
+  dependencies:
+    estree-walker "^0.2.1"
+    minimatch "^3.0.2"
 
 rollup-pluginutils@^2.0.1:
   version "2.0.1"
@@ -4358,6 +4393,10 @@ verror@1.3.6:
   resolved "http://registry.npm.taobao.org/verror/download/verror-1.3.6.tgz#cff5df12946d297d2baaefaa2689e25be01c005c"
   dependencies:
     extsprintf "1.0.2"
+
+vlq@^0.2.1:
+  version "0.2.2"
+  resolved "http://registry.npm.taobao.org/vlq/download/vlq-0.2.2.tgz#e316d5257b40b86bb43cb8d5fea5d7f54d6b0ca1"
 
 vm-browserify@0.0.4:
   version "0.0.4"

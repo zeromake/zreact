@@ -275,6 +275,8 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
                 componentRef = t;
                 componentRef.vdom = vdom;
             }
+            // const dom: any = vdom.base;
+            // dom._vdom = vdom;
             // 保证dom的上下文为根自定义组件
             vdom.component = componentRef;
             vdom.componentConstructor = componentRef.constructor;

@@ -602,7 +602,7 @@ describe('render()', () => {
 				return (
 						<div onKeyDown={ this.addTodo }>
 								{ todos.map( todo => (<div>{todo.text}</div> )) }
-								<input value={text} onInput={this.setText} ref={(i) => input = i.base} />
+								<input value={text} onInput={this.setText} ref={(i) => input = i && i.base} />
 						</div>
 				);
 			}

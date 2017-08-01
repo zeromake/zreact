@@ -1,6 +1,14 @@
 import { diff } from "./vdom/diff";
 import { VNode } from "./vnode";
 import { VDom } from "./vdom/index";
+import { initDevTools } from "./devtools";
+
+declare const DEVTOOLS_ENV: string;
+declare const ENV: string;
+declare const window: {
+    $zreact: VDom;
+    ZREACT_DEV: any;
+};
 
 /**
  * 创建组件到dom上
@@ -11,5 +19,15 @@ import { VDom } from "./vdom/index";
  */
 export function render(vnode: VNode, parent: Element, vdom: VDom): VDom {
     const base = diff(vdom, vnode, {}, false, parent, false);
+    if (DEVTOOLS_ENV !== "production") {
+        if (window.ZREACT_DEV) {
+            window.ZREACT_DEV();
+        }
+        window.ZREACT_DEV = initDevTools(base);
+    } else if (ENV !== "production") {
+        const dom: any = base.base;
+        dom._vdom = base;
+        // window.$zreact = base;
+    }
     return base;
 }

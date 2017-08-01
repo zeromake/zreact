@@ -1,7 +1,7 @@
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(factory((global.Zreact = {})));
+	(factory((global.zreact = {})));
 }(this, (function (exports) { 'use strict';
 
 function __extends(d, b) {
@@ -1229,6 +1229,8 @@ function renderComponent(component, opts, mountALL, isChild) {
                 componentRef = t;
                 componentRef.vdom = vdom;
             }
+            // const dom: any = vdom.base;
+            // dom._vdom = vdom;
             // 保证dom的上下文为根自定义组件
             vdom.component = componentRef;
             vdom.componentConstructor = componentRef.constructor;
@@ -1279,7 +1281,7 @@ function buildComponentFromVNode(vdom, vnode, context, mountALL) {
         // 向上查找
         isOwner = c.constructor === vnode.nodeName;
     }
-    if (c && isOwner && (!mountALL || c._component)) {
+    if (c && c.vdom && isOwner && (!mountALL || c._component)) {
         // 获取到可复用的组件，重新设置props，复用状态下有dom所有为了流畅使用异步
         setComponentProps(c, props, ASYNC_RENDER, context, mountALL);
         vdom = c.vdom;
@@ -1307,8 +1309,8 @@ function buildComponentFromVNode(vdom, vnode, context, mountALL) {
         // }
         // 设置props，并创建dom
         setComponentProps(c, props, SYNC_RENDER, context, mountALL);
-        // 获取dom
-        vdom = c.vdom;
+        // 获取vdom,实际上通过setComponentProps已经有了c.vdom,但是typescript无法识别
+        vdom = c.vdom; // || new VDom(document.createElement("div"));
         if (oldVDom && vdom !== oldVDom) {
             // 需要卸载dom
             oldVDom.component = undefined;
@@ -1466,6 +1468,11 @@ function shallowDiffers(a, b) {
  */
 function render(vnode, parent, vdom) {
     var base = diff(vdom, vnode, {}, false, parent, false);
+    {
+        var dom = base.base;
+        dom._vdom = base;
+        // window.$zreact = base;
+    }
     return base;
 }
 
