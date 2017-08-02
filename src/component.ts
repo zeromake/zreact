@@ -6,7 +6,7 @@ import { extend } from "./util";
 import { IKeyValue } from "./types";
 import { VDom } from "./vdom/index";
 
-export class Component {
+export class Component <PropsType extends IKeyValue, StateType extends IKeyValue> {
     /**
      * 默认props
      */
@@ -14,11 +14,11 @@ export class Component {
     /**
      * 当前组件的状态,可以修改
      */
-    public state: IKeyValue;
+    public state: StateType;
     /**
      * 由父级组件传递的状态，不可修改
      */
-    public props: IKeyValue;
+    public props: PropsType;
     /**
      * 组件上下文，由父组件传递
      */
@@ -38,11 +38,11 @@ export class Component {
     /**
      * 上一次的属性
      */
-    public prevProps?: IKeyValue;
+    public prevProps?: PropsType;
     /**
      * 上一次的状态
      */
-    public prevState?: IKeyValue;
+    public prevState?: StateType;
     /**
      * 上一次的上下文
      */
@@ -61,32 +61,32 @@ export class Component {
     public componentWillUnmount?: () => void;
     /**
      * 在新的 props 被接受之前
-     * @param { IKeyValue } nextProps
+     * @param { PropsType } nextProps
      * @param { IKeyValue } nextContext
      */
-    public componentWillReceiveProps?: (nextProps: IKeyValue, nextContext: IKeyValue) => void;
+    public componentWillReceiveProps?: (nextProps: PropsType, nextContext: IKeyValue) => void;
     /**
      * 在 render() 之前. 若返回 false，则跳过 render，与 componentWillUpdate 互斥
-     * @param { IKeyValue } nextProps
-     * @param { IKeyValue } nextState
+     * @param { PropsType } nextProps
+     * @param { StateType } nextState
      * @param { IKeyValue } nextContext
      * @returns { boolean }
      */
-    public shouldComponentUpdate?: (nextProps: IKeyValue, nextState: IKeyValue, nextContext: IKeyValue) => boolean;
+    public shouldComponentUpdate?: (nextProps: PropsType, nextState: StateType, nextContext: IKeyValue) => boolean;
     /**
      * 在 render() 之前，与 shouldComponentUpdate 互斥
-     * @param { IKeyValue } nextProps
-     * @param { IKeyValue } nextState
+     * @param { PropsType } nextProps
+     * @param { StateType } nextState
      * @param { IKeyValue } nextContext
      */
-    public componentWillUpdate?: (nextProps: IKeyValue, nextState: IKeyValue, nextContext: IKeyValue) => void;
+    public componentWillUpdate?: (nextProps: PropsType, nextState: StateType, nextContext: IKeyValue) => void;
     /**
      * 在 render() 之后
-     * @param { IKeyValue } previousProps
-     * @param { IKeyValue } previousState
+     * @param { PropsType } previousProps
+     * @param { StateType } previousState
      * @param { IKeyValue } previousContext
      */
-    public componentDidUpdate?: (previousProps: IKeyValue, previousState: IKeyValue, previousContext: IKeyValue) => void;
+    public componentDidUpdate?: (previousProps: PropsType, previousState: StateType, previousContext: IKeyValue) => void;
     /**
      * 获取上下文，会被传递到所有的子组件
      */
@@ -94,11 +94,11 @@ export class Component {
     /**
      * 子组件
      */
-    public _component?: Component;
+    public _component?: Component<IKeyValue, IKeyValue>;
     /**
      * 父组件
      */
-    public _parentComponent?: Component;
+    public _parentComponent?: Component<IKeyValue, IKeyValue>;
     /**
      * 是否加入更新队列
      */
@@ -106,7 +106,7 @@ export class Component {
     /**
      * render 执行完后的回调队列
      */
-    public _renderCallbacks?: any[];
+    public _renderCallbacks?: Array<() => void>;
     /**
      * 当前组件的key用于复用
      */
@@ -118,8 +118,8 @@ export class Component {
     /**
      * react标准用于设置component实例
      */
-    public _ref?: (component: Component | null) => void;
-    constructor(props: IKeyValue, context: IKeyValue) {
+    public _ref?: (component: Component<PropsType, StateType> | null) => void;
+    constructor(props: PropsType, context: IKeyValue) {
         // 初始化为true
         this._dirty = true;
         this.context = context;
@@ -131,8 +131,8 @@ export class Component {
      * @param state 对象或方法
      * @param callback render执行完后的回调。
      */
-    public setState(state: IKeyValue, callback?: () => void): void {
-        const s: IKeyValue = this.state;
+    public setState(state: StateType, callback?: () => void): void {
+        const s: StateType = this.state;
         if (!this.prevState) {
             // 把旧的状态保存起来
             this.prevState = extend({}, s);
@@ -172,7 +172,7 @@ export class Component {
      * @param state
      * @param context
      */
-    public render(props?: IKeyValue, state?: IKeyValue, context?: IKeyValue): VNode | void {
+    public render(props?: PropsType, state?: StateType, context?: IKeyValue): VNode | void {
         // console.error("not set render");
     }
 }

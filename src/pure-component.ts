@@ -5,9 +5,9 @@ import { IKeyValue } from "./types";
  * 简单组件state,props对象只有一层改变使用，超过一层改变就会无法更新
  * @constructor
  */
-export class PureComponent extends Component {
+export class PureComponent<PropsType extends IKeyValue, StateType extends IKeyValue> extends Component<PropsType, StateType> {
     public isPureReactComponent: boolean = true;
-    public shouldComponentUpdate (props: IKeyValue, state: IKeyValue): boolean  {
+    public shouldComponentUpdate = (props: PropsType, state: StateType): boolean => {
         // props,state只要一个不同就返回true
         return shallowDiffers(this.props, props) || shallowDiffers(this.state, state);
     }

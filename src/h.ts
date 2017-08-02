@@ -13,10 +13,10 @@ import { IKeyValue } from "./types";
  * @see http://jasonformat.com/wtf-is-jsx
  * @public
  */
-export function h(nodeName: string | typeof Component | ((props?: IKeyValue, state?: IKeyValue, context?: IKeyValue) => VNode), attributes: IKeyValue, ...args: Array<VNode|string>) {
+export function h(nodeName: string | typeof Component, attributes: IKeyValue, ...args: Array<VNode|string|number|boolean|Array<VNode|string|number|boolean>>) {
     // 初始化子元素列表
-    const stack: Array<VNode|string> = [];
-    const children: Array<VNode|string> = [];
+    const stack: Array<VNode|string|number|boolean|Array<VNode|string|number|boolean>> = [];
+    const children: Array<VNode|string|number|boolean> = [];
     // let i: number;
     // let child: any;
     // 是否为原生组件
@@ -40,7 +40,7 @@ export function h(nodeName: string | typeof Component | ((props?: IKeyValue, sta
         // let num = 0;
         // 取出最后一个
         let child: any = stack.pop();
-        if (child && child.pop !== undefined) {
+        if (typeof child === "object" && child.pop !== undefined) {
             // 如果是个数组就倒序放入stack
             for (let i = child.length; i-- ; ) {
                 const item = child[i];
@@ -54,7 +54,7 @@ export function h(nodeName: string | typeof Component | ((props?: IKeyValue, sta
         } else {
             // 清空布尔
             if (typeof child === "boolean") {
-                child = null;
+                child = undefined;
             }
             // 判断当前组件是否为自定义组件
             simple = typeof nodeName !== "function";

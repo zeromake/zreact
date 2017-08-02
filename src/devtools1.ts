@@ -6,13 +6,13 @@ import { extend } from "./util";
 interface IReactElement {
     props?: boolean|IKeyValue;
     type: any;
-    ref?: ((c: Component|null) => void)|null;
+    ref?: ((c: Component<IKeyValue, IKeyValue>|null) => void)|null;
     key?: string;
 }
 interface IReactComponent {
     _currentElement: IReactElement|string|null;
     node?: Text|Element|Node;
-    _instance?: Component;
+    _instance?: Component<IKeyValue, IKeyValue>;
     _renderedComponent?: IReactComponent;
     forceUpdate?: () => void;
     getName?: () => void;
@@ -42,7 +42,7 @@ declare class Map {
  * 将zreact的component实例转换为React的
  * @param  component
  */
-function createReactElement(component: Component): IReactElement {
+function createReactElement(component: Component<IKeyValue, IKeyValue>): IReactElement {
     const element: IReactElement = {
         key: component._key,
         props: component.props,
@@ -66,7 +66,7 @@ function typeName(element: IReactElement): string {
  * 将component转换实例
  * @param component
  */
-function createReactCompositeComponent(component: Component): IReactComponent {
+function createReactCompositeComponent(component: Component<IKeyValue, IKeyValue>): IReactComponent {
     const _currentElement = createReactElement(component);
     const node = component.vdom && component.vdom.base;
     const instance: IReactComponent = {
@@ -151,7 +151,7 @@ function findRoots(node: Element, roots: IKeyValue) {
     });
 }
 
-function isRootComponent(component: Component) {
+function isRootComponent(component: Component<IKeyValue, IKeyValue>) {
     if (component._parentComponent) {
         return false;
     }
@@ -220,7 +220,7 @@ function createDevToolsBridge(vdom?: VDom) {
         receiveComponent: function receiveComponent(arg: IReactComponent){},
         unmountComponent: function unmountComponent(arg: IReactComponent){},
     };
-    const componentAdded = function componentAdded_(component: Component) {
+    const componentAdded = function componentAdded_(component: Component<IKeyValue, IKeyValue>) {
         const instance = updateReactComponent(component);
         if (isRootComponent(component)) {
             instance._rootID = nextRootKey(roots);
@@ -233,7 +233,7 @@ function createDevToolsBridge(vdom?: VDom) {
         });
         Reconciler.mountComponent(instance);
     };
-    const componentUpdated = function componentUpdated_(component: Component) {
+    const componentUpdated = function componentUpdated_(component: Component<IKeyValue, IKeyValue>) {
         const prevRenderedChildren: IReactComponent[] = [];
         visitNonCompositeChildren(instanceMap.get(component), function _(childInst: IReactComponent) {
             prevRenderedChildren.push(childInst);
@@ -255,7 +255,7 @@ function createDevToolsBridge(vdom?: VDom) {
             }
         });
     };
-    const componentRemoved = function componentRemoved_(component: Component) {
+    const componentRemoved = function componentRemoved_(component: Component<IKeyValue, IKeyValue>) {
         const instance = updateReactComponent(component);
         visitNonCompositeChildren(instance, function _(childInst) {
             instanceMap.delete(childInst.node);
@@ -285,7 +285,7 @@ export function initDevTools(vdom?: VDom) {
     const bridge = createDevToolsBridge(vdom);
 
     const nextAfterMount = options.afterMount;
-    options.afterMount = (component: Component) => {
+    options.afterMount = (component: Component<IKeyValue, IKeyValue>) => {
         bridge.componentAdded(component);
         if (nextAfterMount) {
             nextAfterMount(component);
@@ -293,7 +293,7 @@ export function initDevTools(vdom?: VDom) {
     };
 
     const nextAfterUpdate = options.afterUpdate;
-    options.afterUpdate = (component: Component) => {
+    options.afterUpdate = (component: Component<IKeyValue, IKeyValue>) => {
         bridge.componentUpdated(component);
         if (nextAfterUpdate) {
             nextAfterUpdate(component);
@@ -301,7 +301,7 @@ export function initDevTools(vdom?: VDom) {
     };
 
     const nextBeforeUnmount = options.beforeUnmount;
-    options.beforeUnmount = (component: Component) => {
+    options.beforeUnmount = (component: Component<IKeyValue, IKeyValue>) => {
         bridge.componentRemoved(component);
         if (nextBeforeUnmount) {
             nextBeforeUnmount(component);

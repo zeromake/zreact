@@ -10,7 +10,7 @@ export class VNode {
      * {string} 为原生组件
      * {Component|function} 为自定义组件
      */
-    public nodeName: string | typeof Component | ((props?: IKeyValue, state?: IKeyValue, context?: IKeyValue) => VNode);
+    public nodeName: string | typeof Component;
     /**
      * 子组件
      */
@@ -22,5 +22,5 @@ export class VNode {
     /**
      * 属性中的key
      */
-    public key?: any;
+    public key?: string|number;
 }

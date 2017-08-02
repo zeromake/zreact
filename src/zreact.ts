@@ -7,6 +7,9 @@ import options from "./options";
 import { createClass } from "./create-class";
 import { rerender } from "./render-queue";
 import { buildVDom } from "./vdom/index";
+import { IKeyValue } from "./types";
+import { VDom } from "./vdom/index";
+import { VNode } from "./vnode";
 
 export default {
     Component,

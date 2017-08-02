@@ -1,5 +1,5 @@
 {
   "name": "zreact",
-  "main": "src/zreact.ts",
+  "main": "types/zreact.d.ts",
   "version": false
 }

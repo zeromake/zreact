@@ -18,7 +18,7 @@ import {
     isTextNode,
 } from "../dom/index";
 
-export const mounts: Component[] = [];
+export const mounts: Array<Component<any, any>> = [];
 
 export let diffLevel = 0;
 
@@ -326,16 +326,14 @@ function diffChildren(
         for (let i = 0; i < vlen; i++) {
             vchild = vchildren[i];
             child = null;
-            // attempt to find a node based on key matching
             const key = typeof vchild === "object" && vchild.key;
-            if (key != null) {
+            if (key != null && typeof key !== "boolean") {
                 if (keyedLen && keyed[key] !== undefined) {
                     child = keyed[key];
                     keyed[key] = undefined;
                     keyedLen--;
                 }
             } else if (!child && min < childrenLen) {
-            // attempt to pluck a node of the same type from the existing children
                 for (j = min; j < childrenLen; j++) {
                     c = children[j];
                     if (c !== undefined && isSameNodeType(c, vchild, isHydrating)) {

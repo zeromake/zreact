@@ -32,7 +32,7 @@ import {
  * @param context 新的context
  * @param mountAll 是否已挂载
  */
-export function setComponentProps(component: Component, props: IKeyValue, opts: number, context: IKeyValue, mountAll: boolean) {
+export function setComponentProps(component: Component<IKeyValue, IKeyValue>, props: IKeyValue, opts: number, context: IKeyValue, mountAll: boolean) {
     if (component._disable) {
         // 如果组件已停用就什么都不做
         return;
@@ -101,7 +101,7 @@ export function setComponentProps(component: Component, props: IKeyValue, opts: 
  * @param {boolean?} mountALL
  * @param {boolean?} isChild
  */
-export function renderComponent(component: Component, opts?: number, mountALL?: boolean, isChild?: boolean): void {
+export function renderComponent(component: Component<IKeyValue, IKeyValue>, opts?: number, mountALL?: boolean, isChild?: boolean): void {
     if (component._disable) {
         // 组件已停用直接不做操作。
         return;
@@ -165,13 +165,13 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
         // 当前组件的render函数返回的VNode
         const rendered: VNode | void = component.render(props, state, context);
         //
-        let inst: Component | undefined;
+        let inst: Component<IKeyValue, IKeyValue> | undefined;
         if (component.getChildContext) {
             context = extend(context, component.getChildContext());
         }
         // 取出VNode的nodeName
         const childComponent = rendered && rendered.nodeName;
-        let toUnmount: Component | undefined;
+        let toUnmount: Component<IKeyValue, IKeyValue> | undefined;
         let vdom: VDom | undefined;
 
         if (typeof childComponent === "function" && rendered) {
@@ -268,8 +268,8 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
         component.vdom = vdom;
         if (vdom && !isChild) {
             // 创建了dom且不是子组件渲染
-            let componentRef: Component | undefined = component;
-            let t: Component | undefined = component;
+            let componentRef: Component<IKeyValue, IKeyValue> | undefined = component;
+            let t: Component<IKeyValue, IKeyValue> | undefined = component;
             // 获取根自定义组件，有可能是一个子组件变化数据
             while ((t = t._parentComponent)) {
                 componentRef = t;
@@ -296,9 +296,10 @@ export function renderComponent(component: Component, opts?: number, mountALL?: 
     }
 
     if (component._renderCallbacks != null) {
+        let callback: (() => void) | undefined;
         // 触发所有回调
-        while (component._renderCallbacks.length) {
-            component._renderCallbacks.pop().call(component);
+        while (callback = component._renderCallbacks.pop()) {
+            callback.call(component);
         }
     }
     if (!diffLevel && !isChild) {
@@ -368,7 +369,7 @@ export function buildComponentFromVNode(
             mountALL,
         );
         // 获取vdom,实际上通过setComponentProps已经有了c.vdom,但是typescript无法识别
-        vdom = c.vdom; // || new VDom(document.createElement("div"));
+        vdom = c.vdom || new VDom(document.createElement("div"));
         if (oldVDom && vdom !== oldVDom) {
             // 需要卸载dom
             oldVDom.component = undefined;
@@ -382,7 +383,7 @@ export function buildComponentFromVNode(
  * 卸载组件
  * @param component 组件
  */
-export function unmountComponent(component: Component) {
+export function unmountComponent(component: Component<IKeyValue, IKeyValue>) {
     if (options.beforeUnmount) {
         // 触发全局钩子
         options.beforeUnmount(component);

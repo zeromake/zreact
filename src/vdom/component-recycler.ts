@@ -5,14 +5,14 @@ import { IKeyValue } from "../types";
  * 缓存卸载自定义组件对象列表
  */
 const components: {
-    [name: string]: Component[];
+    [name: string]: Array<Component<IKeyValue, IKeyValue>>;
 } = {};
 
 /**
  * 缓存卸载后的自定义组件
  * @param component 卸载后的组件
  */
-export function collectComponent(component: Component) {
+export function collectComponent(component: Component<IKeyValue, IKeyValue>) {
     const constructor: any = component.constructor;
     // 获取组件名
     const name = constructor.name;
@@ -31,9 +31,9 @@ export function collectComponent(component: Component) {
  * @param props
  * @param context
  */
-export function createComponent(Ctor: any, props: IKeyValue, context: IKeyValue) {
+export function createComponent(Ctor: any, props: IKeyValue, context: IKeyValue): Component<IKeyValue, IKeyValue> {
     const list = components[Ctor.name];
-    let inst: Component;
+    let inst: Component<IKeyValue, IKeyValue>;
     // 创建组件实例
     if (Ctor.prototype && Ctor.prototype.render) {
         inst = new Ctor(props, context);

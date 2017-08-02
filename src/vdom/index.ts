@@ -57,7 +57,7 @@ export function getNodeProps(vnode: VNode) {
     return props;
 }
 
-interface IEventFun {
+export interface IEventFun {
     [name: string]: (e: Event) => void;
 }
 
@@ -69,7 +69,7 @@ export class VDom {
     /**
      * dom所属的顶级Component
      */
-    public component?: Component;
+    public component?: Component<IKeyValue, IKeyValue>;
     /**
      * 子组件
      */
