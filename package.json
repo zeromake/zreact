@@ -26,7 +26,8 @@
     "test": "babel test/test.jsx -o test/test.js && node test/test.js",
     "test:karma": "karma start test/karma.conf.js --single-run",
     "test:karma:watch": "npm run test:karma -- no-single-run",
-    "changelog": "conventional-changelog -p angular-i CHANGELOG.md -s -r 0"
+    "changelog": "conventional-changelog -p angular-i CHANGELOG.md -s -r 0",
+    "prepublish": "npm run build:all"
   },
   "keywords": [
     "zreact",
