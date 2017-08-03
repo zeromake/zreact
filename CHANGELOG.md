@@ -1,3 +1,32 @@
+<a name="0.0.2"></a>
+## [0.0.2](https://github.com/zeromake/zreact/compare/v0.0.1...v0.0.2) (2017-08-03)
+
+
+### Bug Fixes
+
+* add Annotations ([1ca7126](https://github.com/zeromake/zreact/commit/1ca7126))
+* add context on dom patch ([19c0640](https://github.com/zeromake/zreact/commit/19c0640))
+* child.base lost ([ca1fd8c](https://github.com/zeromake/zreact/commit/ca1fd8c))
+* **typescript:** generate ([b1bf9fb](https://github.com/zeromake/zreact/commit/b1bf9fb))
+* **typescript:** package typings ([e62a453](https://github.com/zeromake/zreact/commit/e62a453))
+* delete docs ([4c7b868](https://github.com/zeromake/zreact/commit/4c7b868))
+* package file home add ([5ce4a52](https://github.com/zeromake/zreact/commit/5ce4a52))
+* up Annotations ([6a32ed4](https://github.com/zeromake/zreact/commit/6a32ed4))
+* up Annotations ([2a78b36](https://github.com/zeromake/zreact/commit/2a78b36))
+
+
+### Features
+
+* add typescript type ([ae206d3](https://github.com/zeromake/zreact/commit/ae206d3))
+* **devtools:** add devtools.js ([2bb5585](https://github.com/zeromake/zreact/commit/2bb5585))
+* **docs:** add docs ([8223280](https://github.com/zeromake/zreact/commit/8223280))
+* **tag:** v0.0.1 changlog ([cec803b](https://github.com/zeromake/zreact/commit/cec803b))
+* **vdom:** add VDom context replace dom context ([aac1783](https://github.com/zeromake/zreact/commit/aac1783))
+* build v0.0.2 ([43afdae](https://github.com/zeromake/zreact/commit/43afdae))
+* package cmd ([3e991e3](https://github.com/zeromake/zreact/commit/3e991e3))
+
+
+
 <a name="0.0.1"></a>
 ## [0.0.1](https://github.com/zeromake/zreact/compare/afddb4c...v0.0.1) (2017-07-24)
 
