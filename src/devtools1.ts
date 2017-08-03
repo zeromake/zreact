@@ -1,4 +1,4 @@
-import { options, Component} from "./zreact";
+import { options, Component} from "zreact";
 import { IKeyValue } from "./types";
 import { VDom } from "./vdom/index";
 import { extend } from "./util";

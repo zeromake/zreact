@@ -1,3 +1,3 @@
-import { initDevTools } from "./devtools";
+import { initDevTools } from "./devtools1";
 
 initDevTools();

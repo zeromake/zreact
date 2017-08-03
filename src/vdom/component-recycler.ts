@@ -66,6 +66,6 @@ export function createComponent(Ctor: any, props: IKeyValue, context: IKeyValue)
  * @param state
  * @param context
  */
-function doRender(props: IKeyValue, state: IKeyValue, context: IKeyValue) {
+function doRender(this: typeof Component, props: IKeyValue, state: IKeyValue, context: IKeyValue) {
     return this.constructor(props, context);
 }

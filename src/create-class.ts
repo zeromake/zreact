@@ -1,13 +1,13 @@
 import { Component } from "./component";
 import { extend } from "./util";
-import { IKeyValue } from "types";
+import { IKeyValue } from "./types";
 
 /**
  * 类似React.createClass, 但未bind(this)
  * @param obj
  */
 export function createClass(obj: any) {
-    const cl: any = function(props: IKeyValue, context: IKeyValue) {
+    const cl: any = function(this: any, props: IKeyValue, context: IKeyValue) {
         Component.call(this, props, context);
     };
     // 保证后面的实例的constructor指向cl

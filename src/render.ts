@@ -1,7 +1,7 @@
 import { diff } from "./vdom/diff";
 import { VNode } from "./vnode";
 import { VDom } from "./vdom/index";
-import { initDevTools } from "./devtools1";
+import { initDevTools } from "./devtools";
 
 declare const DEVTOOLS_ENV: string;
 declare const ENV: string;
