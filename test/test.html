@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-     <script src="../dist/zreact.devtools.js"></script>
+    <!-- <script src="../dist/zreact.js"></script> -->
+    <script src="https://cdn.bootcss.com/preact/8.2.1/preact.js"></script>
     <title>Document</title>
 </head>
 <body>
@@ -14,36 +15,192 @@
         if (typeof preact !== "undefined")
             var zreact = preact;
 
-        class Foo extends zreact.Component {
-            constructor(props, context) {
-                super(props, context)
-                this.state = {
-                    num: [1,2,3]
-                }
+        // class Foo extends zreact.Component {
+        //     constructor(props, context) {
+        //         super(props, context)
+        //         this.state = {
+        //             num: [1,2,3]
+        //         }
+        //     }
+        //     render(props, state) {
+        //         var self = this
+        //         var test = state.num.map(function(i, index) {
+        //             return zreact.h("li", null, i, zreact.h("button", { onClick: self["delete"].bind(self, index) }, "x"))
+        //         });
+        //         return zreact.h("div", null, zreact.h("ul", null, test), zreact.h("button", { onClick: this.test.bind(this) }, "添加"));
+        //     }
+        //     test() {
+        //         console.log("Foo test", this.state);
+        //         this.setState(function(state) {
+        //             state.num.push(state.num.length + 1);
+        //         })
+        //     }
+        //     "delete"(index) {
+        //         this.setState(function(state) {
+        //             state.num.splice(index, 1);
+        //         })
+        //     }
+        // }
+        // var scratch = document.querySelector("#app");
+        // zreact.render(zreact.h(Foo), scratch)
+        var Component = zreact.Component
+        var h = zreact.h
+        var render = zreact.render
+        var dotStyle = {
+            position: 'absolute',
+            background: '#61dafb',
+            font: 'normal 15px sans-serif',
+            textAlign: 'center',
+            cursor: 'pointer',
+        };
+        var containerStyle = {
+            position: 'absolute',
+            transformOrigin: '0 0',
+            left: '50%',
+            top: '50%',
+            width: '10px',
+            height: '10px',
+            background: '#eee',
+        };
+        var targetSize = 25;
+        class Dot extends Component {
+            constructor() {
+                super();
+                this.state = { hover: false };
             }
-            render(props, state) {
-                var self = this
-                var test = state.num.map(function(i, index) {
-                    return zreact.h("li", null, i, zreact.h("button", { onClick: self["delete"].bind(self, index) }, "x"))
+            enter() {
+                this.setState({
+                    hover: true
                 });
-                return zreact.h("div", null, zreact.h("ul", null, test), zreact.h("button", { onClick: this.test.bind(this) }, "添加"));
             }
-            test() {
-                console.log("Foo test", this.state);
-                this.setState(function(state) {
-                    state.num.push(state.num.length + 1);
-                })
+            leave() {
+                this.setState({
+                    hover: false
+                });
             }
-            "delete"(index) {
-                this.setState(function(state) {
-                    state.num.splice(index, 1);
-                })
+            render() {
+            var props = this.props;
+            var s = props.size * 1.3;
+            var style = Object.assign({}, dotStyle, {
+                width: s + 'px',
+                height: s + 'px',
+                left: props.x + 'px',
+                top: props.y + 'px',
+                borderRadius: s / 2 + 'px',
+                lineHeight: s + 'px',
+                background: this.state.hover ? '#ff0' : dotStyle.background
+            })
+            var _this2 = this
+            return h(
+                'div',
+                {
+                    style: style,
+                    onMouseEnter: function onMouseEnter() {
+                        return _this2.enter();
+                    },
+                    onMouseLeave: function onMouseLeave() {
+                        return _this2.leave();
+                    }
+                },
+                this.state.hover ? '*' + props.text + '*' : props.text
+            );
             }
         }
-        var scratch = document.querySelector("#app");
-        zreact.render(zreact.h(Foo), scratch)
+        function SierpinskiTriangle({ x, y, s, children }) {
+            if (s <= targetSize) {
+                return h(Dot, {
+                    x: x - targetSize / 2,
+                    y: y - targetSize / 2,
+                    size: targetSize,
+                    text: children
+                });
+                return r;
+            }
+            var newSize = s / 2;
+            var slowDown = true;
+            if (slowDown) {
+                var e = performance.now() + 0.8;
+                while (performance.now() < e) {
+                    // Artificially long execution time.
+                }
+            }
+            s /= 2;
+            return h("div", null,
+                h(
+                    SierpinskiTriangle,
+                    { x: x, y: y - s / 2, s: s },
+                    children
+                ),
+                h(
+                    SierpinskiTriangle,
+                    { x: x - s, y: y + s / 2, s: s },
+                    children
+                ),
+                h(
+                    SierpinskiTriangle,
+                    { x: x + s, y: y + s / 2, s: s },
+                    children
+                )
+            );
+        }
+        SierpinskiTriangle.shouldComponentUpdate = function(oldProps, newProps) {
+            var o = oldProps;
+            var n = newProps;
+            return !(
+                o.x === n.x &&
+                o.y === n.y &&
+                o.s === n.s &&
+                o.children === n.children
+            );
+        };
+        class ExampleApplication extends Component {
+            constructor() {
+                super();
+                this.state = { seconds: 0 };
+                this.tick = this.tick.bind(this);
+            }
+            componentDidMount() {
+                this.intervalID = setInterval(this.tick, 1000);
+            }
+            tick() {
+                //ReactDOMFiber.unstable_deferredUpdates(() =>
+                    this.setState(state => ({ seconds: (state.seconds % 10) + 1 }))
+                //);
+            }
+            componentWillUnmount() {
+                clearInterval(this.intervalID);
+            }
+            render() {
+                const seconds = this.state.seconds;
+                const elapsed = this.props.elapsed;
+                const t = (elapsed / 1000) % 10;
+                const scale = 1 + (t > 5 ? 10 - t : t) / 10;
+                const transform = 'scaleX(' + (scale / 2.1) + ') scaleY(0.7) translateZ(0.1px)';
+                return (
+                    h("div", { style: Object.assign({}, containerStyle, { transform: transform }) },
+                        h("div", null,
+                            h(SierpinskiTriangle, { x: 0, y: 0, s: 1000 },
+                                this.state.seconds
+                            )
+                        )
+                    )
+                );
+            }
+        }
+        var start = new Date().getTime();
+        var vdom
+        var root = document.getElementById('app')
+        function update() {
+            vdom = render(
+                h(ExampleApplication, {elapsed: new Date().getTime() - start}),
+                root,
+                vdom
+            );
+            requestAnimationFrame(update);
+        }
+        requestAnimationFrame(update);
     </script>
-     <!-- <script src="../dist/devtools.js"></script> -->
+    <!-- <script src="../devtools.js"></script> -->
     <!-- <script src="../node_modules/preact/devtools.js"></script> -->
 </body>
 </html>
