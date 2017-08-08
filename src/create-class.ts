@@ -9,6 +9,9 @@ import { IKeyValue } from "./types";
 export function createClass(obj: any) {
     const cl: any = function(this: any, props: IKeyValue, context: IKeyValue) {
         Component.call(this, props, context);
+        if (obj.$init) {
+            obj.$init.call(this, props, context);
+        }
     };
     // 保证后面的实例的constructor指向cl
     obj = extend({ constructor: cl }, obj);
