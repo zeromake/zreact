@@ -151,7 +151,7 @@ export function setAccessor(
     }
 }
 
-const isIe8 = typeof document.addEventListener !== "function";
+const isIe8 = typeof document !== "undefined" && typeof document.addEventListener !== "function";
 
 function setProperty(node: any, name: string, value: string) {
     try {
