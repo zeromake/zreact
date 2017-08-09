@@ -401,7 +401,7 @@ export function recollectNodeTree(node: VDom, unmountOnly: boolean) {
     if (component) {
         // 如果存在
         unmountComponent(component);
-        node.component = undefined;
+        // node.component = undefined;
     } else {
         if (typeof node.props === "object" && node.props.ref) {
             // ref用于取消引用dom
@@ -417,9 +417,9 @@ export function recollectNodeTree(node: VDom, unmountOnly: boolean) {
 }
 
 export function removeChildren(node: VDom) {
-    // 去除最后一个子元素
+    // 触发子元素的生命周期
     const nodeList = node.children;
-    node.children = undefined;
+    // node.children = undefined;
     let len = nodeList ? nodeList.length : 0;
     // node = getLastChild(node && node.base);
     while (nodeList && len--) {
