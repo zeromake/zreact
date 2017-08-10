@@ -8,8 +8,8 @@ import { createClass } from "./create-class";
 import { rerender } from "./render-queue";
 import { buildVDom } from "./vdom/index";
 import { IKeyValue } from "./types";
-import { VDom } from "./vdom/index";
-import { VNode } from "./vnode";
+import { IVDom } from "./vdom/index";
+import { IVNode } from "./vnode";
 
 export default {
     Component,

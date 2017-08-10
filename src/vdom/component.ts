@@ -1,16 +1,16 @@
 import options from "../options";
 import { enqueueRender } from "../render-queue";
 import { Component } from "../component";
-import { VNode } from "../vnode";
+import { IVNode } from "../vnode";
 import { createComponent, collectComponent } from "./component-recycler";
 import { getNodeProps } from "./index";
 import { removeNode } from "../dom/index";
 import { extend } from "../util";
 import { IKeyValue } from "../types";
-import { VDom } from "./index";
+import { IVDom } from "./index";
 import {
     ASYNC_RENDER,
-    ATTR_KEY,
+    // ATTR_KEY,
     FORCE_RENDER,
     NO_RENDER,
     SYNC_RENDER,
@@ -128,7 +128,7 @@ export function renderComponent(component: Component<IKeyValue, IKeyValue>, opts
     const initialChildComponent = component._component;
     // 略过dom更新标记
     let skip = false;
-    let cvdom: VDom | undefined;
+    let cvdom: IVDom | undefined;
     if (isUpdate) {
         // 有dom元素在组件上说明是更新操作.
         // 把组件上的props，state，context都返回到更新前
@@ -163,7 +163,7 @@ export function renderComponent(component: Component<IKeyValue, IKeyValue>, opts
 
     if (!skip) {
         // 当前组件的render函数返回的VNode
-        const rendered: VNode | void = component.render(props, state, context);
+        const rendered: IVNode | void = component.render(props, state, context);
         //
         let inst: Component<IKeyValue, IKeyValue> | undefined;
         if (component.getChildContext) {
@@ -172,7 +172,7 @@ export function renderComponent(component: Component<IKeyValue, IKeyValue>, opts
         // 取出VNode的nodeName
         const childComponent = rendered && rendered.nodeName;
         let toUnmount: Component<IKeyValue, IKeyValue> | undefined;
-        let vdom: VDom | undefined;
+        let vdom: IVDom | undefined;
 
         if (typeof childComponent === "function" && rendered) {
             // 如果是自定义组件
@@ -317,11 +317,11 @@ export function renderComponent(component: Component<IKeyValue, IKeyValue>, opts
  * @param child 父组件用来对dom元素的上下文
  */
 export function buildComponentFromVNode(
-    vdom: VDom | undefined | null,
-    vnode: VNode,
+    vdom: IVDom | undefined | null,
+    vnode: IVNode,
     context: IKeyValue,
     mountALL: boolean,
-): VDom {
+): IVDom {
     // 获取根组件缓存
     let c = vdom && vdom.component;
     const originalComponent = c;
@@ -368,8 +368,8 @@ export function buildComponentFromVNode(
             context,
             mountALL,
         );
-        // 获取vdom,实际上通过setComponentProps已经有了c.vdom,但是typescript无法识别
-        vdom = c.vdom || new VDom(document.createElement("div"));
+        // 获取vdom,实际上通过setComponentProps已经有了c.vdom,但是typescript无法识别,直接强制转换
+        vdom = c.vdom as IVDom;
         if (oldVDom && vdom !== oldVDom) {
             // 需要卸载dom
             oldVDom.component = undefined;

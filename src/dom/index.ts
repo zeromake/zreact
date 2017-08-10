@@ -1,5 +1,5 @@
 import { IS_NON_DIMENSIONAL } from "../constants";
-import { VDom } from "../vdom/index";
+import { IVDom } from "../vdom/index";
 import options from "../options";
 
 /**
@@ -37,7 +37,7 @@ export function removeNode(node: Element | Text | Node) {
  * @param child VDom原dom上的props，和上下文环境，事件就在其中
  */
 export function setAccessor(
-    vdom: VDom,
+    vdom: IVDom,
     name: string,
     old: any,
     value: any,
@@ -164,7 +164,7 @@ function setProperty(node: any, name: string, value: string) {
  * @param child 上下文
  * @param useCapture 是否冒泡(兼容ie8)
  */
-function eventProxy(vdom: VDom, useCapture: boolean): (e: Event) => void {
+function eventProxy(vdom: IVDom, useCapture: boolean): (e: Event) => void {
     return (e: Event) => {
         if (isIe8 && !useCapture) {
             // ie8事件默认冒泡所以需要阻止
@@ -208,7 +208,7 @@ export function isTextNode(node: Text | any): boolean {
  * @param useCapture 是否冒泡
  * @param child 上下文
  */
-function addEventListener(vdom: VDom, name: string, useCapture: boolean) {
+function addEventListener(vdom: IVDom, name: string, useCapture: boolean) {
     // 生成当前事件的代理方法
     const eventProxyFun = eventProxy(vdom, useCapture);
     if (!vdom.eventProxy) {
@@ -231,7 +231,7 @@ function addEventListener(vdom: VDom, name: string, useCapture: boolean) {
  * @param useCapture 是否冒泡
  * @param child 上下文
  */
-function removeEventListener(vdom: VDom, name: string, useCapture: boolean) {
+function removeEventListener(vdom: IVDom, name: string, useCapture: boolean) {
     // 把上下文中的存储的代理事件解绑
     const eventProxyFun = vdom.eventProxy && vdom.eventProxy[name];
     if (vdom.eventProxy && eventProxyFun) {

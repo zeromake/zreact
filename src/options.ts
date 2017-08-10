@@ -1,4 +1,4 @@
-import { VNode } from "./vnode";
+import { IVNode } from "./vnode";
 import { Component } from "component";
 import { IKeyValue } from "./types";
 
@@ -26,7 +26,7 @@ const options: {
     /**
      * vnode实例创建时的钩子
      */
-    vnode?: (vnode: VNode) => void;
+    vnode?: (vnode: IVNode) => void;
     /**
      * 事件钩子，可以对event过滤返回的会代替event参数
      */

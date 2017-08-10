@@ -1,10 +1,10 @@
 import options from "../options";
-import { ATTR_KEY } from "../constants";
+// import { ATTR_KEY } from "../constants";
 import { isSameNodeType, isNamedNode } from "./index";
-import { VNode } from "../vnode";
+import { IVNode } from "../vnode";
 import { Component } from "../component";
 import { IKeyValue } from "../types";
-import { VDom } from "./index";
+import { IVDom } from "./index";
 import {
     buildComponentFromVNode,
     unmountComponent,
@@ -52,13 +52,13 @@ export function flushMounts() {
  * @param componentRoot 是否为componentRoot
  */
 export function diff(
-    vdom: VDom | undefined,
-    vnode: VNode | void,
+    vdom: IVDom | undefined,
+    vnode: IVNode | void,
     context: IKeyValue,
     mountAll: boolean,
     parent: any,
     componentRoot: boolean,
-): VDom {
+): IVDom {
     // if (child.base && dom !== child.base) {
     //     // 原preact使用dom存放数据，现在，如果dom不存在，且pchild内有dom就卸载掉
     //     removeDomChild(child);
@@ -103,12 +103,12 @@ export function diff(
  * @param componentRoot 是否来自renderComponent
  */
 function idiff(
-    vdom: VDom | undefined | null,
-    vnode: VNode|string|number|boolean| void,
+    vdom: IVDom | undefined | null,
+    vnode: IVNode | string | number | boolean | void,
     context: IKeyValue,
     mountAll: boolean,
     componentRoot?: boolean,
-): VDom {
+): IVDom {
     const prevSvgMode = isSvgMode;
     let out = vdom && vdom.base;
 
@@ -131,7 +131,9 @@ function idiff(
         } else {
             // 新建一个文本dom
             const dom = document.createTextNode(String(vnode));
-            const newVDom = new VDom(dom);
+            const newVDom: IVDom = {
+                base: dom,
+            }; // new VDom(dom);
             if (vdom) {
                 // 来自renderComponent判断并处理vdom的子vdom更换
                 if (componentRoot) {
@@ -162,7 +164,9 @@ function idiff(
     if (!vdom || !isNamedNode(vdom, vnodeName) || !out) {
         // 没有原dom或者原dom与vnode里的不同，新建一个
         out = createNode(vnodeName, isSvgMode);
-        const newVDom = new VDom(out);
+        const newVDom: IVDom = {
+            base: out,
+        };
         if (vdom) {
             // 来自renderComponent判断并处理vdom的子vdom更换
             if (componentRoot) {
@@ -248,17 +252,17 @@ function idiff(
  * @param isHydrating 是否
  */
 function diffChildren(
-    vdom: VDom,
-    vchildren: Array<string|number|boolean|VNode>,
+    vdom: IVDom,
+    vchildren: Array<string | number | boolean | IVNode>,
     context: any,
     mountAll: boolean,
     isHydrating: boolean,
 ) {
     // 取出上次的子元素
     let originalChildren = vdom.children || [];
-    const children: Array<VDom|undefined> = [];
+    const children: Array<IVDom|undefined> = [];
     const keyed: {
-        [name: string]: VDom | undefined;
+        [name: string]: IVDom | undefined;
     } = {};
     let keyedLen = 0;
     let min = 0;
@@ -267,9 +271,9 @@ function diffChildren(
     let j;
     let c;
     let f;
-    let vchild: string|number|boolean|VNode;
-    let child: VDom | null | undefined;
-    const pchildren: VDom[] = [];
+    let vchild: string | number | boolean | IVNode;
+    let child: IVDom | null | undefined;
+    const pchildren: IVDom[] = [];
     const childNodes = vdom.base && vdom.base.childNodes;
     const unChildren = [];
     // 处理真实子元素与上次的dom上下文中存放的子元素数量不对的情况
@@ -278,7 +282,7 @@ function diffChildren(
         let offset = 0;
         const nodeList = childNodes;
         const nodeLen = nodeList.length;
-        const newChildren: VDom[] = [];
+        const newChildren: IVDom[] = [];
         for (let i = 0; i < nodeLen; i++) {
             const node = nodeList[i];
             let childVdom = originalChildren[i + offset];
@@ -289,7 +293,9 @@ function diffChildren(
             if (childVdom) {
                 newChildren.push(childVdom);
             } else {
-                const newVdom = new VDom(node);
+                const newVdom: IVDom = {
+                    base: node,
+                };
                 newChildren.push(newVdom);
             }
         }
@@ -395,7 +401,7 @@ function diffChildren(
  * @param node 要被卸载的dom
  * @param unmountOnly 为true则只触发生命周期，跳过删除(仅在dom上的组件索引不存在有效)
  */
-export function recollectNodeTree(node: VDom, unmountOnly: boolean) {
+export function recollectNodeTree(node: IVDom, unmountOnly: boolean) {
     // 获取dom上的组件索引
     const component = node.component;
     if (component) {
@@ -416,7 +422,7 @@ export function recollectNodeTree(node: VDom, unmountOnly: boolean) {
     }
 }
 
-export function removeChildren(node: VDom) {
+export function removeChildren(node: IVDom) {
     // 触发子元素的生命周期
     const nodeList = node.children;
     // node.children = undefined;
@@ -428,7 +434,7 @@ export function removeChildren(node: VDom) {
     }
 }
 
-function diffAttributes(vdom: VDom, attrs: IKeyValue | undefined, old: IKeyValue) {
+function diffAttributes(vdom: IVDom, attrs: IKeyValue | undefined, old: IKeyValue) {
     const dom: any = vdom.base;
     let name: string;
     for (name in old) {
@@ -461,7 +467,7 @@ function diffAttributes(vdom: VDom, attrs: IKeyValue | undefined, old: IKeyValue
     }
 }
 
-function replaceVDomParent(oldVDom: VDom, vdom: VDom): void {
+function replaceVDomParent(oldVDom: IVDom, vdom: IVDom): void {
     if (oldVDom.parent && oldVDom.parent.children) {
         vdom.parent = oldVDom.parent;
         const index = oldVDom.parent.children.indexOf(oldVDom);

@@ -1,10 +1,10 @@
 import { FORCE_RENDER } from "./constants";
 import { renderComponent } from "./vdom/component";
-import { VNode } from "./vnode";
+import { IVNode } from "./vnode";
 import { enqueueRender } from "./render-queue";
 import { extend } from "./util";
 import { IKeyValue } from "./types";
-import { VDom } from "./vdom/index";
+import { IVDom } from "./vdom/index";
 
 export class Component <PropsType extends IKeyValue, StateType extends IKeyValue> {
     /**
@@ -26,11 +26,11 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
     /**
      * 组件挂载后的vdom
      */
-    public vdom?: VDom;
+    public vdom?: IVDom;
     /**
      * 被移除时的vdom缓存
      */
-    public nextVDom?: VDom;
+    public nextVDom?: IVDom;
     /**
      * 自定义组件名
      */
@@ -172,7 +172,7 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
      * @param state
      * @param context
      */
-    public render(props?: PropsType, state?: StateType, context?: IKeyValue): VNode | void {
+    public render(props?: PropsType, state?: StateType, context?: IKeyValue): IVNode | void {
         // console.error("not set render");
     }
 }

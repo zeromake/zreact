@@ -1,6 +1,6 @@
 import { Component } from "./component";
 import options from "./options";
-import { VNode } from "./vnode";
+import { IVNode } from "./vnode";
 import { IKeyValue } from "./types";
 
 // const EMPTY_CHILDREN: any[] = [];
@@ -13,10 +13,10 @@ import { IKeyValue } from "./types";
  * @see http://jasonformat.com/wtf-is-jsx
  * @public
  */
-export function h(nodeName: string | typeof Component, attributes: IKeyValue, ...args: Array<VNode|string|number|boolean|Array<VNode|string|number|boolean>>) {
+export function h(nodeName: string | typeof Component, attributes: IKeyValue, ...args: Array<IVNode|string|number|boolean|Array<IVNode|string|number|boolean>>) {
     // 初始化子元素列表
-    const stack: Array<VNode|string|number|boolean|Array<VNode|string|number|boolean>> = [];
-    const children: Array<VNode|string|number|boolean> = [];
+    const stack: Array<IVNode|string|number|boolean|Array<IVNode|string|number|boolean>> = [];
+    const children: Array<IVNode|string|number|boolean> = [];
     // let i: number;
     // let child: any;
     // 是否为原生组件
@@ -87,15 +87,16 @@ export function h(nodeName: string | typeof Component, attributes: IKeyValue, ..
             lastSimple = simple;
         }
     }
-    const p = new VNode();
-    // 设置原生组件名字或自定义组件class(function)
-    p.nodeName = nodeName;
-    // 设置子元素
-    p.children = children;
-    // 设置属性
-    p.attributes = attributes == null ? undefined : attributes;
-    // 设置key
-    p.key = attributes == null ? undefined : attributes.key;
+    const p: IVNode = {
+        // 设置属性
+        attributes: attributes == null ? undefined : attributes,
+        // 设置子元素
+        children,
+        // 设置key
+        key: attributes == null ? undefined : attributes.key,
+        // 设置原生组件名字或自定义组件class(function)
+        nodeName,
+    };
     // vnode 钩子
     if (options.vnode !== undefined) {
         options.vnode(p);

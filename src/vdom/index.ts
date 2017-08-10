@@ -1,7 +1,7 @@
-import { VNode } from "../vnode";
+import { IVNode } from "../vnode";
 import { Component } from "../component";
 import { isTextNode } from "../dom/index";
-import { ATTR_KEY } from "../constants";
+// import { ATTR_KEY } from "../constants";
 import { extend } from "../util";
 import { IKeyValue } from "../types";
 
@@ -11,7 +11,7 @@ import { IKeyValue } from "../types";
  * @param vnode
  * @param hydrating
  */
-export function isSameNodeType(node: VDom, vnode: string|number|boolean|VNode, hydrating: boolean) {
+export function isSameNodeType(node: IVDom, vnode: string|number|boolean|IVNode, hydrating: boolean) {
     if (typeof vnode === "string" || typeof vnode === "number" || typeof vnode === "boolean") {
         // vnode是文本节点,判断dom是否为文本节点
         return isTextNode(node.base);
@@ -28,7 +28,7 @@ export function isSameNodeType(node: VDom, vnode: string|number|boolean|VNode, h
  * @param {String} nodeName
  */
 export function isNamedNode(
-    node: VDom,
+    node: IVDom,
     nodeName: string,
 ) {
     return node.normalizedNodeName === nodeName
@@ -39,7 +39,7 @@ export function isNamedNode(
  * 获取当前组件所有地方来的props
  * @param vnode
  */
-export function getNodeProps(vnode: VNode) {
+export function getNodeProps(vnode: IVNode) {
     // jsx上的属性
     const props = extend({}, vnode.attributes);
     props.children = vnode.children;
@@ -65,56 +65,58 @@ export interface IEventFun {
  * 真正dom绑定的一些数据
  * @constructor
  */
-export class VDom {
+export interface IVDom {
     /**
      * dom所属的顶级Component
      */
-    public component?: Component<IKeyValue, IKeyValue>;
+    component?: Component<IKeyValue, IKeyValue>;
     /**
      * 子组件
      */
-    public children?: VDom[];
+    children?: IVDom[];
     /**
      * 真实dom索引
      */
-    public base: Element| Text | Node;
+    base: Element| Text | Node;
     /**
      * 每种事件的代理方法存放点, 真实绑定到dom上的方法。
      */
-    public eventProxy?: { [name: string]: ((e: Event) => void) | undefined };
+    eventProxy?: { [name: string]: ((e: Event) => void) | undefined };
     /**
      * dom所属的props
      */
-    public props?: IKeyValue | boolean;
+    props?: IKeyValue | boolean;
     /**
      * 通过props设置的事件方法, 通过eventProxy来调用, 保证在不停的props变化时不会一直绑定与解绑。
      */
-    public listeners?: IEventFun;
+    listeners?: IEventFun;
     /**
      * dom标签名
      */
-    public normalizedNodeName?: string;
-    public parent?: VDom;
+    normalizedNodeName?: string;
+    parent?: IVDom;
     /**
      * component类(原型)
      */
-    public componentConstructor?: any;
-    constructor(base: Element| Text | Node) {
-        this.base = base;
-    }
-    public clear() {
-        this.children = undefined;
-        this.component = undefined;
-        this.eventProxy = undefined;
-        this.listeners = undefined;
-        this.normalizedNodeName = undefined;
-        this.props = undefined;
-        this.componentConstructor = undefined;
-    }
+    componentConstructor?: any;
+    // constructor(base: Element| Text | Node) {
+    //     this.base = base;
+    // }
+    // public clear() {
+    //     this.children = undefined;
+    //     this.component = undefined;
+    //     this.eventProxy = undefined;
+    //     this.listeners = undefined;
+    //     this.normalizedNodeName = undefined;
+    //     this.props = undefined;
+    //     this.componentConstructor = undefined;
+    // }
 }
 
-export function buildVDom(base?: Element|Text|Node) {
+export function buildVDom(base?: Element|Text|Node): IVDom | undefined {
     if (base) {
-        return new VDom(base);
+        return {
+            base,
+        };
     }
 }

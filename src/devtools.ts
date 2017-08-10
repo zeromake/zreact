@@ -1,6 +1,6 @@
 import { options, Component} from "./zreact";
 import { IKeyValue } from "./types";
-import { VDom } from "./vdom/index";
+import { IVDom } from "./vdom/index";
 import { extend } from "./util";
 
 interface IReactElement {
@@ -27,7 +27,7 @@ interface IReactComponent {
 }
 
 declare const window: {
-    $zreact: VDom,
+    $zreact: IVDom,
     __REACT_DEVTOOLS_GLOBAL_HOOK__?: any,
 };
 
@@ -93,7 +93,7 @@ function createReactCompositeComponent(component: Component<IKeyValue, IKeyValue
  * 将vdom转换为实例
  * @param vdom
  */
-function createReactDOMComponent(vdom: VDom): IReactComponent {
+function createReactDOMComponent(vdom: IVDom): IReactComponent {
     const node = vdom.base;
     const childVDom = vdom.children ? vdom.children : [];
     const isText = node.nodeType === Node.TEXT_NODE;
@@ -177,7 +177,7 @@ function visitNonCompositeChildren(component: IReactComponent, visitor: (arg: IR
     }
 }
 
-function createDevToolsBridge(vdom?: VDom) {
+function createDevToolsBridge(vdom?: IVDom) {
     const ComponentTree = {
         getClosestInstanceFromNode: function getClosestInstanceFromNode(node: any) {
             while (node && !node._vdom) {
@@ -277,7 +277,7 @@ function createDevToolsBridge(vdom?: VDom) {
     };
 }
 
-export function initDevTools(vdom?: VDom) {
+export function initDevTools(vdom?: IVDom) {
 
     if (typeof window.__REACT_DEVTOOLS_GLOBAL_HOOK__ === "undefined") {
         return;
