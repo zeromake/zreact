@@ -40,7 +40,7 @@ export function h(nodeName: string | typeof Component, attributes: IKeyValue, ..
         // let num = 0;
         // 取出最后一个
         let child: any = stack.pop();
-        if (typeof child === "object" && child.pop !== undefined) {
+        if (child && child.pop !== undefined) {
             // 如果是个数组就倒序放入stack
             for (let i = child.length; i-- ; ) {
                 const item = child[i];

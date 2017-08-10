@@ -20,10 +20,10 @@ declare const window: {
 export function render(vnode: IVNode, parent: Element, vdom: IVDom): IVDom {
     const newVDom = diff(vdom, vnode, {}, false, parent, false);
     if (DEVTOOLS_ENV !== "production") {
-        if (window.ZREACT_DEV) {
-            window.ZREACT_DEV();
+        if (!window.ZREACT_DEV) {
+            // window.ZREACT_DEV();
+            window.ZREACT_DEV = initDevTools(newVDom);
         }
-        window.ZREACT_DEV = initDevTools(newVDom);
     } else if (ENV !== "production") {
         const dom: any = newVDom.base;
         dom._vdom = newVDom;

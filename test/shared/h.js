@@ -1,5 +1,4 @@
 import { h } from '../../build/zreact';
-import { VNode } from '../../build/vnode';
 import { expect } from 'chai';
 
 /*eslint-env browser, mocha */
@@ -18,7 +17,7 @@ describe('h(jsx)', () => {
 		let r;
 		expect( () => r = h('foo') ).not.to.throw();
 		expect(r).to.be.an('object');
-		expect(r).to.be.an.instanceof(VNode);
+		expect(r).to.be.an.instanceof(Object);
 		expect(r).to.have.property('nodeName', 'foo');
 		expect(r).to.have.property('attributes', undefined);
 		expect(r).to.have.property('children').that.eql([]);

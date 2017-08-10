@@ -1,4 +1,4 @@
-import { h, Component, render } from '../preact.dev';
+import { h, Component, render } from '../../build/zreact';
 /** @jsx h */
 
 describe('keys', () => {
@@ -85,7 +85,7 @@ describe('keys', () => {
 		root = render(<App opened loading />, scratch, root);
 		root = render(<App opened />, scratch, root);
 
-		let html = String(root.innerHTML).replace(/ class=""/g, '');
+		let html = String(root.base.innerHTML).replace(/ class=""/g, '');
 		expect(html).to.equal('<div>This div needs to be here for this to break</div><div></div><div class="indicator"><div>indicator</div><div>indicator</div><div>indicator</div></div>');
 	});
 });
