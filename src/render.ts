@@ -2,7 +2,7 @@ import { diff } from "./vdom/diff";
 import { IVNode } from "./vnode";
 import { IVDom } from "./vdom/index";
 import { initDevTools } from "./devtools";
-import { Scheduling } from "./util";
+import { defer } from "./util";
 
 declare const DEVTOOLS_ENV: string;
 declare const ENV: string;
@@ -27,7 +27,7 @@ export function render(vnode: IVNode, parent: Element, vdom: IVDom): IVDom {
         if (!window.ZREACT_DEV && !isScheduling && typeof window.Map === "function") {
             // window.ZREACT_DEV();
             isScheduling = true;
-            Scheduling.rIC(() => {
+            defer(() => {
                 window.ZREACT_DEV = initDevTools(newVDom);
                 isScheduling = false;
             });
