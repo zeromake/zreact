@@ -1,7 +1,6 @@
 import { options, Component} from "zreact";
 import { IKeyValue } from "./types";
 import { IVDom } from "./vdom/index";
-import { extend } from "./util";
 
 interface IReactElement {
     props?: boolean|IKeyValue;
@@ -130,7 +129,7 @@ function updateReactComponent(componentOrVDom: any): IReactComponent {
     const base = isVDom ? componentOrVDom.base : componentOrVDom;
     if (instanceMap.has(base)) {
         const inst = instanceMap.get(base);
-        extend(inst, newInstance);
+        Object.assign(inst, newInstance);
         return inst;
     }
     instanceMap.set(base, newInstance);
