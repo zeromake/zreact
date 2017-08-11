@@ -29,92 +29,86 @@ export const extend = Object.assign || function assign_(t: any) {
     return t;
 };
 
+declare function requestIdleCallback(fun: () => void): void;
+
 declare const window: {
-    requestIdleCallback: (fun: () => void) => void;
     addEventListener: any;
     postMessage: any;
 };
 
 let rAF;
 let rIC;
-if (typeof requestAnimationFrame !== "function") {
-    throw new Error("not requestAnimationFrame in global");
-} else if (typeof window.requestIdleCallback !== "function") {
-    let scheduledRAFCallback: any = null;
-    let scheduledRICCallback: any = null;
+let scheduledRAFCallback: any = null;
+let scheduledRICCallback: any = null;
 
-    let isIdleScheduled = false;
-    let isAnimationFrameScheduled = false;
+let isIdleScheduled = false;
+let isAnimationFrameScheduled = false;
 
-    let frameDeadline = 0;
-    let previousFrameTime = 33;
-    let activeFrameTime = 33;
+let frameDeadline = 0;
+let previousFrameTime = 33;
+let activeFrameTime = 33;
 
-    const frameDeadlineObject = {
-        timeRemaining: typeof performance === "object" && typeof performance.now === "function" ? function _() {
-        return frameDeadline - performance.now();
-        } : function _() {
-            return frameDeadline - Date.now();
-        },
-    };
-    const messageKey = "__reactIdleCallback$" + Math.random().toString(36).slice(2);
-    const idleTick = function _(event: any) {
-        if (event.source !== window || event.data !== messageKey) {
-        return;
-        }
-        isIdleScheduled = false;
-        const callback = scheduledRICCallback;
-        scheduledRICCallback = null;
-        if (callback) {
-            callback(frameDeadlineObject);
-        }
-    };
-    window.addEventListener("message", idleTick, false);
+const frameDeadlineObject = {
+    timeRemaining: typeof performance === "object" && typeof performance.now === "function" ? function _() {
+    return frameDeadline - performance.now();
+    } : function _() {
+        return frameDeadline - Date.now();
+    },
+};
+const messageKey = "__reactIdleCallback$" + Math.random().toString(36).slice(2);
+const idleTick = function _(event: any) {
+    if (event.source !== window || event.data !== messageKey) {
+    return;
+    }
+    isIdleScheduled = false;
+    const callback = scheduledRICCallback;
+    scheduledRICCallback = null;
+    if (callback) {
+        callback(frameDeadlineObject);
+    }
+};
+window.addEventListener("message", idleTick, false);
 
-    const animationTick = function _(rafTime: number) {
-        isAnimationFrameScheduled = false;
-        let nextFrameTime = rafTime - frameDeadline + activeFrameTime;
-        if (nextFrameTime < activeFrameTime && previousFrameTime < activeFrameTime) {
-        if (nextFrameTime < 8) {
-            nextFrameTime = 8;
-        }
-        activeFrameTime = nextFrameTime < previousFrameTime ? previousFrameTime : nextFrameTime;
-        } else {
-            previousFrameTime = nextFrameTime;
-        }
-        frameDeadline = rafTime + activeFrameTime;
-        if (!isIdleScheduled) {
-            isIdleScheduled = true;
-            window.postMessage(messageKey, "*");
-        }
-        const callback = scheduledRAFCallback;
-        scheduledRAFCallback = null;
-        if (callback) {
-            callback(rafTime);
-        }
-    };
+const animationTick = function _(rafTime: number) {
+    isAnimationFrameScheduled = false;
+    let nextFrameTime = rafTime - frameDeadline + activeFrameTime;
+    if (nextFrameTime < activeFrameTime && previousFrameTime < activeFrameTime) {
+    if (nextFrameTime < 8) {
+        nextFrameTime = 8;
+    }
+    activeFrameTime = nextFrameTime < previousFrameTime ? previousFrameTime : nextFrameTime;
+    } else {
+        previousFrameTime = nextFrameTime;
+    }
+    frameDeadline = rafTime + activeFrameTime;
+    if (!isIdleScheduled) {
+        isIdleScheduled = true;
+        window.postMessage(messageKey, "*");
+    }
+    const callback = scheduledRAFCallback;
+    scheduledRAFCallback = null;
+    if (callback) {
+        callback(rafTime);
+    }
+};
 
-    rAF = function _(callback: any) {
-        scheduledRAFCallback = callback;
-        if (!isAnimationFrameScheduled) {
-            isAnimationFrameScheduled = true;
-            requestAnimationFrame(animationTick);
-        }
-        return 0;
-    };
+rAF = function _(callback: any) {
+    scheduledRAFCallback = callback;
+    if (!isAnimationFrameScheduled) {
+        isAnimationFrameScheduled = true;
+        requestAnimationFrame(animationTick);
+    }
+    return 0;
+};
 
-    rIC = function _(callback: any) {
-        scheduledRICCallback = callback;
-        if (!isAnimationFrameScheduled) {
-            isAnimationFrameScheduled = true;
-            requestAnimationFrame(animationTick);
-        }
-        return 0;
-    };
-} else {
-    rAF = requestAnimationFrame;
-    rIC = window.requestIdleCallback;
-}
+rIC = function _(callback: any) {
+    scheduledRICCallback = callback;
+    if (!isAnimationFrameScheduled) {
+        isAnimationFrameScheduled = true;
+        requestAnimationFrame(animationTick);
+    }
+    return 0;
+};
 export const Scheduling = {
     rAF,
     rIC,

@@ -2,13 +2,17 @@ import { diff } from "./vdom/diff";
 import { IVNode } from "./vnode";
 import { IVDom } from "./vdom/index";
 import { initDevTools } from "./devtools";
+import { Scheduling } from "./util";
 
 declare const DEVTOOLS_ENV: string;
 declare const ENV: string;
 declare const window: {
     $zreact: IVDom;
     ZREACT_DEV: any;
+    Map: any;
 };
+
+let isScheduling = false;
 
 /**
  * 创建组件到dom上
@@ -20,9 +24,13 @@ declare const window: {
 export function render(vnode: IVNode, parent: Element, vdom: IVDom): IVDom {
     const newVDom = diff(vdom, vnode, {}, false, parent, false);
     if (DEVTOOLS_ENV !== "production") {
-        if (!window.ZREACT_DEV) {
+        if (!window.ZREACT_DEV && !isScheduling && typeof window.Map === "function") {
             // window.ZREACT_DEV();
-            window.ZREACT_DEV = initDevTools(newVDom);
+            isScheduling = true;
+            Scheduling.rIC(() => {
+                window.ZREACT_DEV = initDevTools(newVDom);
+                isScheduling = false;
+            });
         }
     } else if (ENV !== "production") {
         const dom: any = newVDom.base;
