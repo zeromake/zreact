@@ -1,3 +1,17 @@
+<a name="0.0.4"></a>
+## [0.0.4](https://github.com/zeromake/zreact/compare/v0.0.3...v0.0.4) (2017-08-17)
+
+
+### Bug Fixes
+
+* class change on interface ([cb1eb89](https://github.com/zeromake/zreact/commit/cb1eb89))
+* render initDevTools add scheduling ([e8568d6](https://github.com/zeromake/zreact/commit/e8568d6))
+* scheduling change defer ([7bbebb7](https://github.com/zeromake/zreact/commit/7bbebb7))
+* update package; test error; dev_tools init change ([eea0856](https://github.com/zeromake/zreact/commit/eea0856))
+* zreact.d.ts and package update ([c5d7237](https://github.com/zeromake/zreact/commit/c5d7237))
+
+
+
 <a name="0.0.3"></a>
 ## [0.0.3](https://github.com/zeromake/zreact/compare/v0.0.2...v0.0.3) (2017-08-09)
 
