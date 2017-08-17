@@ -15,13 +15,12 @@
   },
   "homepage": "https://github.com/zeromake/zreact",
   "scripts": {
-    "clean": "rimraf dist/ types devtools.js devtools.js.map",
-    "build:all": "npm run clean && npm run build:dev && npm run build && npm run build:devtools && npm run build:devtools1 && npm run build:d.ts",
+    "clean": "rimraf dist devtools.js devtools.js.map",
+    "build:all": "npm run clean && npm run build:dev && npm run build && npm run build:devtools && npm run build:devtools1",
     "build": "cross-env NODE_ENV=production DEVTOOLS_ENV=production rollup -c config/rollup.config.js",
     "build:devtools": "cross-env DEVTOOLS_ENV=dev NODE_ENV=production rollup -c config/rollup.config.devtools.js",
     "build:devtools1": "rollup -c config/rollup.config.devtools.1.js",
     "build:dev": "cross-env DEVTOOLS_ENV=production NODE_ENV=dev rollup -c config/rollup.config.js",
-    "build:d.ts": "tsc --declaration --module amd --outFile types/zreact.js && rimraf types/zreact.js types/zreact.js.map",
     "dev": "cross-env DEVTOOLS_ENV=production NODE_ENV=dev rollup -c config/rollup.config.js -w",
     "test": "babel test/test.jsx -o test/test.js && node test/test.js",
     "test:karma": "karma start test/karma.conf.js --single-run",
@@ -51,9 +50,9 @@
     "package.json"
   ],
   "devDependencies": {
-    "babel-cli": "^6.24.1",
+    "babel-cli": "^6.26.0",
     "babel-loader": "^7.1.1",
-    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-preset-env": "^1.6.0",
     "babel-preset-es2015": "^6.24.1",
@@ -72,19 +71,19 @@
     "karma-webpack": "^2.0.4",
     "mocha": "^3.4.2",
     "rimraf": "^2.6.1",
-    "rollup": "^0.45.2",
+    "rollup": "^0.47.6",
     "rollup-plugin-alias": "^1.3.1",
     "rollup-plugin-replace": "^1.1.1",
     "rollup-plugin-typescript": "zeromake/rollup-plugin-typescript",
     "rollup-plugin-uglify": "^2.0.1",
     "rollup-watch": "^4.3.1",
-    "sinon": "^3.1.0",
-    "sinon-chai": "^2.12.0",
+    "sinon": "^3.2.0",
+    "sinon-chai": "^2.13.0",
     "ts-loader": "^2.3.1",
     "tslint": "^5.6.0",
     "typedoc": "^0.8.0",
     "typescript": "^2.4.1",
     "uglify-es": "^3.0.27",
-    "webpack": "^3.5.2"
+    "webpack": "^3.5.5"
   }
 }
