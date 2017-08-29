@@ -21,7 +21,9 @@ let isScheduling = false;
  * @param merge 原dom元素
  * @param domChild 虚拟dom用于挂载原来挂载在dom元素上的属性
  */
-export function render(vnode: IVNode, parent: Element, vdom: IVDom): IVDom {
+export function render(vnode: IVNode, parent: Element, dom?: Element): IVDom {
+    const tmp: any = dom;
+    const vdom = tmp && tmp._vdom;
     const newVDom = diff(vdom, vnode, {}, false, parent, false);
     if (DEVTOOLS_ENV !== "production") {
         if (!window.ZREACT_DEV && !isScheduling && typeof window.Map === "function") {
@@ -32,10 +34,8 @@ export function render(vnode: IVNode, parent: Element, vdom: IVDom): IVDom {
                 isScheduling = false;
             });
         }
-    } else if (ENV !== "production") {
-        const dom: any = newVDom.base;
-        dom._vdom = newVDom;
-        // window.$zreact = base;
     }
-    return newVDom;
+    const base: any = newVDom.base;
+    // base._vdom = newVDom;
+    return base;
 }

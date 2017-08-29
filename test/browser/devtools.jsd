@@ -98,13 +98,13 @@ describe_('React Developer Tools integration', () => {
 
 	it('notifies dev tools about component updates', () => {
 		const node = render(h(StatefulComponent), container);
-		node.component.forceUpdate();
+		node._vdom.component.forceUpdate();
 		expect(renderer.Reconciler.receiveComponent).to.be.called;
 	});
 
 	it('notifies dev tools when components are removed', () => {
 		const node = render(h(StatefulComponent), container);
-		unmountComponent(node.component, true);
+		unmountComponent(node._vdom.component, true);
 		expect(renderer.Reconciler.unmountComponent).to.be.called;
 	});
 
@@ -112,19 +112,19 @@ describe_('React Developer Tools integration', () => {
 	// ReactDOMComponent-like instances
 	it('exposes the tag name of DOM components', () => {
 		const node = render(h(StatefulComponent), container);
-		const domInstance = domInstanceMap.get(node.base);
+		const domInstance = domInstanceMap.get(node);
 		expect(domInstance._currentElement.type).to.equal('span');
 	});
 
 	it('exposes DOM component props', () => {
 		const node = render(h(FunctionalComponent), container);
-		const domInstance = domInstanceMap.get(node.base);
+		const domInstance = domInstanceMap.get(node);
 		expect(domInstance._currentElement.props.class).to.equal('functional');
 	});
 
 	it('exposes text component contents', () => {
 		const node = render(h(Label, {label: 'Text content'}), container);
-		const textInstance = domInstanceMap.get(node.base);
+		const textInstance = domInstanceMap.get(node);
 		expect(textInstance._stringText).to.equal('Text content');
 	});
 
@@ -132,32 +132,32 @@ describe_('React Developer Tools integration', () => {
 	// ReactCompositeComponent-like instances
 	it('exposes the name of composite component classes', () => {
 		const node = render(h(StatefulComponent), container);
-		expect(instanceMap.get(node.base).getName()).to.equal('StatefulComponent');
+		expect(instanceMap.get(node).getName()).to.equal('StatefulComponent');
 	});
 
 	it('exposes composite component props', () => {
 		const node = render(h(Label, {label: 'Text content'}), container);
-		const instance = instanceMap.get(node.base);
+		const instance = instanceMap.get(node);
 		expect(instance._currentElement.props.label).to.equal('Text content');
 	});
 
 	it('exposes composite component state', () => {
 		const node = render(h(StatefulComponent), container);
 
-		node.component.setState({count: 42});
-		node.component.forceUpdate();
+		node._vdom.component.setState({count: 42});
+		node._vdom.component.forceUpdate();
 
-		expect(instanceMap.get(node.base).state).to.deep.equal({count: 42});
+		expect(instanceMap.get(node).state).to.deep.equal({count: 42});
 	});
 
 	// Test setting state via devtools
 	it('updates component when setting state from devtools', () => {
 		const node = render(h(StatefulComponent), container);
 
-		instanceMap.get(node.base).setState({count: 10});
-		instanceMap.get(node.base).forceUpdate();
+		instanceMap.get(node).setState({count: 10});
+		instanceMap.get(node).forceUpdate();
 
-		expect(node.base.textContent).to.equal('10');
+		expect(node.textContent).to.equal('10');
 	});
 
 	// Test that the original instance is exposed via `_instance` so it can
@@ -171,28 +171,28 @@ describe_('React Developer Tools integration', () => {
 
 	it('exposes the name of functional components', () => {
 		const node = render(h(FunctionalComponent), container);
-		const instance = instanceMap.get(node.base);
+		const instance = instanceMap.get(node);
 		expect(instance.getName()).to.equal('FunctionalComponent');
 	});
 
 	xit('exposes a fallback name if the component has no useful name', () => {
 		const node = render(h(() => h('div')), container);
-		const instance = instanceMap.get(node.base);
+		const instance = instanceMap.get(node);
 		expect(instance.getName()).to.equal('(Function.name missing)');
 	});
 
 	// Test handling of DOM children
 	it('notifies dev tools about DOM children', () => {
 		const node = render(h(StatefulComponent), container);
-		const domInstance = domInstanceMap.get(node.base);
+		const domInstance = domInstanceMap.get(node);
 		expect(renderer.Reconciler.mountComponent).to.have.been.calledWith(domInstance);
 	});
 
 	it('notifies dev tools when a component update adds DOM children', () => {
 		const node = render(h(MultiChild, {initialCount: 2}), container);
 
-		node.component.setState({count: 4});
-		node.component.forceUpdate();
+		node._vdom.component.setState({count: 4});
+		node._vdom.component.forceUpdate();
 
 		expect(renderer.Reconciler.mountComponent).to.have.been.called.twice;
 	});
@@ -200,18 +200,18 @@ describe_('React Developer Tools integration', () => {
 	it('notifies dev tools when a component update modifies DOM children', () => {
 		const node = render(h(StatefulComponent), container);
 
-		instanceMap.get(node.base).setState({count: 10});
-		instanceMap.get(node.base).forceUpdate();
+		instanceMap.get(node).setState({count: 10});
+		instanceMap.get(node).forceUpdate();
 
-		const textInstance = domInstanceMap.get(node.base.childNodes[0]);
+		const textInstance = domInstanceMap.get(node.childNodes[0]);
 		expect(textInstance._stringText).to.equal('10');
 	});
 
 	it('notifies dev tools when a component update removes DOM children', () => {
 		const node = render(h(MultiChild, {initialCount: 1}), container);
 
-		node.component.setState({count: 0});
-		node.component.forceUpdate();
+		node._vdom.component.setState({count: 0});
+		node._vdom.component.forceUpdate();
 
 		expect(renderer.Reconciler.unmountComponent).to.be.called;
 	});
@@ -229,7 +229,7 @@ describe_('React Developer Tools integration', () => {
 
 	it('removes root components when they are unmounted', () => {
 		const node = render(h(StatefulComponent), container);
-		unmountComponent(node.component, true);
+		unmountComponent(node._vdom.component, true);
 		expect(Object.keys(renderer.Mount._instancesByReactRootID).length).to.equal(0);
 	});
 

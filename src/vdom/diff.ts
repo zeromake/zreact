@@ -134,6 +134,9 @@ function idiff(
             const newVDom: IVDom = {
                 base: dom,
             }; // new VDom(dom);
+
+            const tmp: any = dom;
+            tmp._vdom = newVDom;
             if (vdom) {
                 // 来自renderComponent判断并处理vdom的子vdom更换
                 if (componentRoot) {
@@ -167,6 +170,8 @@ function idiff(
         const newVDom: IVDom = {
             base: out,
         };
+        const tmp: any = out;
+        tmp._vdom = newVDom;
         if (vdom) {
             // 来自renderComponent判断并处理vdom的子vdom更换
             if (componentRoot) {

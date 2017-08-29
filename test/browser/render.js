@@ -1,6 +1,6 @@
 /* global DISABLE_FLAKEY */
 
-import { h, render, Component, buildVDom } from '../../build/zreact';
+import { h, render, Component } from '../../build/zreact';
 /** @jsx h */
 
 function getAttributes(node) {
@@ -153,7 +153,7 @@ describe('render()', () => {
 	});
 
 	it('should clear falsey input values', () => {
-		let vdom = render((
+		let root = render((
 			<div>
 				<input value={0} />
 				<input value={false} />
@@ -161,11 +161,10 @@ describe('render()', () => {
 				<input value={undefined} />
 			</div>
 		), scratch);
-        const root = vdom.base
-		expect(root.children[0]).to.have.property('value', '0');
-		expect(root.children[1]).to.have.property('value', 'false');
-		expect(root.children[2]).to.have.property('value', '');
-		expect(root.children[3]).to.have.property('value', '');
+		expect(root.childNodes[0]).to.have.property('value', '0');
+		expect(root.childNodes[1]).to.have.property('value', 'false');
+		expect(root.childNodes[2]).to.have.property('value', '');
+		expect(root.childNodes[3]).to.have.property('value', '');
 	});
 
 	it('should clear falsey DOM properties', () => {
@@ -323,12 +322,11 @@ describe('render()', () => {
 		let click = sinon.spy(),
 			focus = sinon.spy();
 
-		let vdom = render((
+		let root = render((
 			<div onClickCapture={click} onFocusCapture={focus}>
 				<button />
 			</div>
 		), scratch);
-        const root = vdom.base
 		root.firstElementChild.click();
 		root.firstElementChild.focus();
 
@@ -372,19 +370,19 @@ describe('render()', () => {
 			<div style={{ color: 'rgb(0, 255, 255)' }}>test</div>
 		), scratch, vdom);
 
-		expect(vdom.base.style).to.have.property('cssText').that.equals('color: rgb(0, 255, 255);');
+		expect(vdom.style).to.have.property('cssText').that.equals('color: rgb(0, 255, 255);');
 
 		vdom = render((
 			<div style="display: inline;">test</div>
 		), scratch, vdom);
 
-		expect(vdom.base.style).to.have.property('cssText').that.equals('display: inline;');
+		expect(vdom.style).to.have.property('cssText').that.equals('display: inline;');
 
 		vdom = render((
 			<div style={{ backgroundColor: 'rgb(0, 255, 255)' }}>test</div>
 		), scratch, vdom);
 
-		expect(vdom.base.style).to.have.property('cssText').that.equals('background-color: rgb(0, 255, 255);');
+		expect(vdom.style).to.have.property('cssText').that.equals('background-color: rgb(0, 255, 255);');
 	});
 
 	it('should support dangerouslySetInnerHTML', () => {
@@ -434,14 +432,14 @@ describe('render()', () => {
 	it('should hydrate with dangerouslySetInnerHTML', () => {
 		let html = '<b>foo &amp; bar</b>';
 		scratch.innerHTML = `<div>${html}</div>`;
-		render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, buildVDom(scratch.lastChild));
+		render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, scratch.lastChild);
 
 		expect(scratch.firstChild).to.have.property('innerHTML', html);
 		expect(scratch.innerHTML).to.equal(`<div>${html}</div>`);
 	});
 
 	it('should reconcile mutated DOM attributes', () => {
-		let check = p => render(<input type="checkbox" checked={p} />, scratch, buildVDom(scratch.lastChild)),
+		let check = p => render(<input type="checkbox" checked={p} />, scratch, scratch.lastChild),
 			value = () => scratch.lastChild.checked,
 			setValue = p => scratch.lastChild.checked = p;
 		check(true);

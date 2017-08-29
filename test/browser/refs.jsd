@@ -27,13 +27,13 @@ describe('refs', () => {
 
 	it('should invoke refs in render()', () => {
 		let ref = spy('ref');
-		const vdom = render(<div ref={ref} />, scratch);
-		expect(ref).to.have.been.calledOnce.and.calledWith(vdom);
+		const dom = render(<div ref={ref} />, scratch);
+		expect(ref).to.have.been.calledOnce.and.calledWith(dom._vdom);
 	});
 
 	it('should invoke refs in Component.render()', () => {
-		let outer = spy('outer'),
-			inner = spy('inner');
+		let outer = spy('outer');
+        let inner = spy('inner');
 		class Foo extends Component {
 			render() {
 				return (
@@ -45,8 +45,8 @@ describe('refs', () => {
 		}
 		const vdom = render(<Foo />, scratch);
 
-		expect(outer).to.have.been.calledWith(vdom);
-		expect(inner).to.have.been.calledWith(vdom.children[0]);
+		expect(outer).to.have.been.calledWith(vdom._vdom);
+		expect(inner).to.have.been.calledWith(vdom.firstChild._vdom);
 	});
 
 	it('should pass components to ref functions', () => {
@@ -284,21 +284,21 @@ describe('refs', () => {
 		sinon.spy(Child.prototype, 'handleMount');
 
 		const vdom = render(<App />, scratch);
-		expect(inst.handleMount).to.have.been.calledOnce.and.calledWith(vdom.children[0]);
+		expect(inst.handleMount).to.have.been.calledOnce.and.calledWith(vdom.firstChild._vdom);
 		inst.handleMount.reset();
 
 		inst.setState({ show:true });
 		inst.forceUpdate();
 		expect(inst.handleMount).to.have.been.calledTwice;
         expect(inst.handleMount.firstCall).to.have.been.calledWith(null);
-		expect(inst.handleMount.secondCall).to.have.been.calledWith(vdom.children[0]);
+		expect(inst.handleMount.secondCall).to.have.been.calledWith(vdom.firstChild._vdom);
 		inst.handleMount.reset();
 
 		inst.setState({ show:false });
 		inst.forceUpdate();
 		expect(inst.handleMount).to.have.been.calledTwice;
 		expect(inst.handleMount.firstCall).to.have.been.calledWith(null);
-		expect(inst.handleMount.secondCall).to.have.been.calledWith(vdom.children[0]);
+		expect(inst.handleMount.secondCall).to.have.been.calledWith(vdom.firstChild._vdom);
 	});
 
 
@@ -318,6 +318,6 @@ describe('refs', () => {
 		}
 
 		const vdom = render(<div><Wrapper ref={ c => ref(c.vdom) } /></div>, scratch, buildVDom(scratch.firstChild));
-		expect(ref).to.have.been.calledOnce.and.calledWith(vdom.children[0]);
+		expect(ref).to.have.been.calledOnce.and.calledWith(vdom.firstChild._vdom);
 	});
 });
