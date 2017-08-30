@@ -71,17 +71,17 @@ describe('svg', () => {
 			</svg>
 		);
         let vdom = render(<Demo c="1" />, scratch, vdom);
-		sinon.spy(vdom.base, 'removeAttribute');
+		sinon.spy(vdom, 'removeAttribute');
 		vdom = render(<Demo />, scratch, vdom);
-		expect(vdom.base.removeAttribute).to.have.been.calledOnce.and.calledWith('class');
-		vdom.base.removeAttribute.restore();
+		expect(vdom.removeAttribute).to.have.been.calledOnce.and.calledWith('class');
+		vdom.removeAttribute.restore();
 
 		vdom = render(<div />, scratch, vdom);
 		vdom = render(<Demo />, scratch, vdom);
-		sinon.spy(vdom.base, 'setAttribute');
+		sinon.spy(vdom, 'setAttribute');
 		vdom = render(<Demo c="2" />, scratch, vdom);
-		expect(vdom.base.setAttribute).to.have.been.calledOnce.and.calledWith('class', 'foo_2');
-		vdom.base.setAttribute.restore();
+		expect(vdom.setAttribute).to.have.been.calledOnce.and.calledWith('class', 'foo_2');
+		vdom.setAttribute.restore();
 		vdom = render(<Demo c="3" />, scratch, vdom);
 		vdom = render(<Demo />, scratch, vdom);
 	});

@@ -309,7 +309,8 @@ describe('refs', () => {
 		parent.appendChild(child);
 		scratch.appendChild(parent); // scratch contains: <div><div></div></div>
 
-		let ref = spy('ref');
+        let ref = spy('ref');
+
 
 		class Wrapper {
 			render() {
@@ -317,7 +318,7 @@ describe('refs', () => {
 			}
 		}
 
-		const vdom = render(<div><Wrapper ref={ c => ref(c.vdom) } /></div>, scratch, buildVDom(scratch.firstChild));
+        const vdom = render(<div><Wrapper ref={ c => ref(c.vdom) } /></div>, scratch, scratch.firstChild);
 		expect(ref).to.have.been.calledOnce.and.calledWith(vdom.firstChild._vdom);
 	});
 });

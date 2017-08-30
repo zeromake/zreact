@@ -1,4 +1,4 @@
-import { options, Component} from "zreact";
+import { options, Component} from "./zreact";
 import { IKeyValue } from "./types";
 import { IVDom } from "./vdom/index";
 
@@ -94,7 +94,8 @@ function createReactCompositeComponent(component: Component<IKeyValue, IKeyValue
  */
 function createReactDOMComponent(vdom: IVDom): IReactComponent {
     const node = vdom.base;
-    const childVDom = vdom.children ? vdom.children : [];
+    const childNodes = node.nodeType === Node.ELEMENT_NODE ?
+        Array.prototype.slice.call(node.childNodes, 0) : [];
     const isText = node.nodeType === Node.TEXT_NODE;
     let element: string|IReactElement|null;
     if (isText) {
@@ -108,11 +109,13 @@ function createReactDOMComponent(vdom: IVDom): IReactComponent {
     return {
         _currentElement: element,
         _inDevTools: false,
-        _renderedChildren: childVDom.map(function _(child) {
-            if (child.component) {
-                return updateReactComponent(child.component);
+        _renderedChildren: childNodes.map(function _(child: any) {
+            if (child._vdom) {
+                if (child._vdom.component) {
+                    return updateReactComponent(child._vdom.component);
+                }
+                return updateReactComponent(child._vdom);
             }
-            return updateReactComponent(child);
         }),
         _stringText: isText ? node.textContent : null,
         node,
@@ -129,7 +132,7 @@ function updateReactComponent(componentOrVDom: any): IReactComponent {
     const base = isVDom ? componentOrVDom.base : componentOrVDom;
     if (instanceMap.has(base)) {
         const inst = instanceMap.get(base);
-        Object.assign(inst, newInstance);
+        (Object as any).assign(inst, newInstance);
         return inst;
     }
     instanceMap.set(base, newInstance);
@@ -154,7 +157,9 @@ function isRootComponent(component: Component<IKeyValue, IKeyValue>) {
     if (component._parentComponent) {
         return false;
     }
-    if (component.vdom && component.vdom.parent && component.vdom.parent.props) {
+    const parentElement: any = component.vdom && component.vdom.base && component.vdom.base.parentElement && component.vdom.base.parentElement;
+    const vdom = parentElement._vdom;
+    if (vdom && vdom.props) {
         return false;
     }
     return true;
@@ -276,43 +281,39 @@ function createDevToolsBridge(vdom?: IVDom) {
     };
 }
 
-export function initDevTools(vdom?: IVDom) {
-
-    if (typeof window.__REACT_DEVTOOLS_GLOBAL_HOOK__ === "undefined") {
-        return;
-    }
-    const bridge = createDevToolsBridge(vdom);
-
-    const nextAfterMount = options.afterMount;
-    options.afterMount = (component: Component<IKeyValue, IKeyValue>) => {
-        bridge.componentAdded(component);
-        if (nextAfterMount) {
-            nextAfterMount(component);
+export function getInitDevTools(opt: typeof options) {
+    return function initDevTools(vdom?: IVDom) {
+        if (typeof window.__REACT_DEVTOOLS_GLOBAL_HOOK__ === "undefined") {
+            return;
         }
-    };
-
-    const nextAfterUpdate = options.afterUpdate;
-    options.afterUpdate = (component: Component<IKeyValue, IKeyValue>) => {
-        bridge.componentUpdated(component);
-        if (nextAfterUpdate) {
-            nextAfterUpdate(component);
-        }
-    };
-
-    const nextBeforeUnmount = options.beforeUnmount;
-    options.beforeUnmount = (component: Component<IKeyValue, IKeyValue>) => {
-        bridge.componentRemoved(component);
-        if (nextBeforeUnmount) {
-            nextBeforeUnmount(component);
-        }
-    };
-
-    // Notify devtools about this instance of "React"
-    window.__REACT_DEVTOOLS_GLOBAL_HOOK__.inject(bridge);
-
-    return () => {
-        options.afterMount = nextAfterMount;
-        options.afterUpdate = nextAfterUpdate;
-        options.beforeUnmount = nextBeforeUnmount;
+        const bridge = createDevToolsBridge(vdom);
+        const nextAfterMount = opt.afterMount;
+        opt.afterMount = (component: Component<IKeyValue, IKeyValue>) => {
+            bridge.componentAdded(component);
+            if (nextAfterMount) {
+                nextAfterMount(component);
+            }
+        };
+        const nextAfterUpdate = opt.afterUpdate;
+        opt.afterUpdate = (component: Component<IKeyValue, IKeyValue>) => {
+            bridge.componentUpdated(component);
+            if (nextAfterUpdate) {
+                nextAfterUpdate(component);
+            }
+        };
+        const nextBeforeUnmount = opt.beforeUnmount;
+        opt.beforeUnmount = (component: Component<IKeyValue, IKeyValue>) => {
+            bridge.componentRemoved(component);
+            if (nextBeforeUnmount) {
+                nextBeforeUnmount(component);
+            }
+        };
+        // Notify devtools about this instance of "React"
+        window.__REACT_DEVTOOLS_GLOBAL_HOOK__.inject(bridge);
+        return () => {
+            opt.afterMount = nextAfterMount;
+            opt.afterUpdate = nextAfterUpdate;
+            opt.beforeUnmount = nextBeforeUnmount;
+        };
     };
 }

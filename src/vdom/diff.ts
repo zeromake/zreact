@@ -4,7 +4,7 @@ import { isSameNodeType, isNamedNode } from "./index";
 import { IVNode } from "../vnode";
 import { Component } from "../component";
 import { IKeyValue } from "../types";
-import { IVDom } from "./index";
+import { IVDom, buildVDom } from "./index";
 import {
     buildComponentFromVNode,
     unmountComponent,
@@ -68,7 +68,7 @@ export function diff(
         // 判断是否为svg
         isSvgMode = parent != null && parent.ownerSVGDocument !== undefined;
         // 判断是否在上次渲染过了
-        hydrating = vdom != null && !(vdom.props);
+        hydrating = vdom != null && vdom.props == null;
     }
     // 调用idiff生成dom
     const ret = idiff(
@@ -133,15 +133,9 @@ function idiff(
             const dom = document.createTextNode(String(vnode));
             const newVDom: IVDom = {
                 base: dom,
-            }; // new VDom(dom);
-
-            const tmp: any = dom;
-            tmp._vdom = newVDom;
+            };
+            (dom as any)._vdom = newVDom;
             if (vdom) {
-                // 来自renderComponent判断并处理vdom的子vdom更换
-                if (componentRoot) {
-                    replaceVDomParent(vdom, newVDom);
-                }
                 // 如果有旧dom，就替换并卸载旧的。
                 if (vdom.base.parentNode) {
                     vdom.base.parentNode.replaceChild(dom, vdom.base);
@@ -170,13 +164,8 @@ function idiff(
         const newVDom: IVDom = {
             base: out,
         };
-        const tmp: any = out;
-        tmp._vdom = newVDom;
+        (out as any)._vdom = newVDom;
         if (vdom) {
-            // 来自renderComponent判断并处理vdom的子vdom更换
-            if (componentRoot) {
-                replaceVDomParent(vdom, newVDom);
-            }
             // 旧dom存在时的一些处理
             // 把旧dom的子元素全部移动到新dom中
             while (vdom.base.firstChild) {
@@ -207,10 +196,6 @@ function idiff(
             props[attr.name] = attr.value;
         }
     }
-
-    // if (vdom.base !== out) {
-    //     vdom.base = out;
-    // }
     if (
         !hydrating
         && vchildren
@@ -226,9 +211,6 @@ function idiff(
             fc.nodeValue = String(vchildren[0]);
         }
     } else if (vchildren && vchildren.length || fc != null) {
-        if (vdom.children == null) {
-            vdom.children = [];
-        }
         // vnode子元素需要渲染或者为空但dom子元素需要清空
         const childrenHydrating = hydrating || (typeof props === "object" && props.dangerouslySetInnerHTML != null);
         diffChildren(
@@ -264,7 +246,7 @@ function diffChildren(
     isHydrating: boolean,
 ) {
     // 取出上次的子元素
-    let originalChildren = vdom.children || [];
+    const originalChildren = vdom.base.childNodes;
     const children: Array<IVDom|undefined> = [];
     const keyed: {
         [name: string]: IVDom | undefined;
@@ -273,66 +255,38 @@ function diffChildren(
     let min = 0;
     let childrenLen = 0;
     const vlen = vchildren ? vchildren.length : 0;
+    const len = originalChildren.length;
     let j;
     let c;
     let f;
     let vchild: string | number | boolean | IVNode;
     let child: IVDom | null | undefined;
-    const pchildren: IVDom[] = [];
-    const childNodes = vdom.base && vdom.base.childNodes;
-    const unChildren = [];
-    // 处理真实子元素与上次的dom上下文中存放的子元素数量不对的情况
-    // 这种方式只能处理原生添加dom和删除dom。
-    if (childNodes.length !== originalChildren.length) {
-        let offset = 0;
-        const nodeList = childNodes;
-        const nodeLen = nodeList.length;
-        const newChildren: IVDom[] = [];
-        for (let i = 0; i < nodeLen; i++) {
-            const node = nodeList[i];
-            let childVdom = originalChildren[i + offset];
-            while (childVdom && node !== childVdom.base) {
-                offset ++;
-                childVdom = originalChildren[i + offset];
-            }
-            if (childVdom) {
-                newChildren.push(childVdom);
-            } else {
-                const newVdom: IVDom = {
-                    base: node,
-                };
-                newChildren.push(newVdom);
-            }
-        }
-        originalChildren = newChildren;
-    }
-    const len = originalChildren.length;
-    // Build up a map of keyed children and an Array of unkeyed children:
-    if (len !== 0) {
-    for (let i = 0; i < len; i++) {
-        const pchild = originalChildren[i];
-        const props = pchild.props;
-        const key = vlen && props
-            ? pchild.component
-                ? pchild.component._key
-                : typeof props === "object" && props.key
-            : null;
-        if (key != null) {
-            keyedLen++;
-            keyed[key] = pchild;
-        } else if (
-            props
-            || (
-                isTextNode(pchild.base)
-                ? (isHydrating ? pchild.base.nodeValue && pchild.base.nodeValue.trim() : true)
-                : isHydrating
-            )
-            ) {
-            children[childrenLen++] = pchild;
-        }
-    }
-    }
 
+    if (len > 0) {
+        for (let i = 0; i < len; i++) {
+            const pchild = originalChildren[i];
+            const pvdom: IVDom | undefined = pchild && (pchild as any)._vdom;
+            const props = pvdom && pvdom.props;
+            const key = pvdom && vlen && props
+                ? pvdom.component
+                    ? pvdom.component._key
+                    : typeof props === "object" && props.key
+                : null;
+            if (key != null) {
+                keyedLen++;
+                keyed[key] = pvdom;
+            } else if (
+                props
+                || (
+                    isTextNode(pchild)
+                    ? (isHydrating ? pchild.nodeValue && pchild.nodeValue.trim() : true)
+                    : isHydrating
+                )
+                ) {
+                children[childrenLen++] = pvdom;
+            }
+        }
+    }
     if (vlen !== 0) {
         for (let i = 0; i < vlen; i++) {
             vchild = vchildren[i];
@@ -362,13 +316,8 @@ function diffChildren(
             }
             // morph the matched/found/created DOM child to match vchild (deep)
             const pchild = idiff(child, vchild, context, mountAll, false);
-            if (pchild.parent !== vdom) {
-                pchild.parent = vdom;
-            }
-            // 把新的props存储对象存储起来
-            pchildren.push(pchild);
             // 获取真实
-            f = childNodes[i];
+            f = originalChildren[i];
             if (pchild.base !== vdom.base && pchild.base !== f) {
                 if (f == null) {
                     vdom.base.appendChild(pchild.base);
@@ -381,7 +330,6 @@ function diffChildren(
             }
         }
     }
-    vdom.children = pchildren;
     // remove unused keyed children:
     if (keyedLen) {
         for (const i in keyed) {
@@ -429,18 +377,17 @@ export function recollectNodeTree(node: IVDom, unmountOnly: boolean) {
 
 export function removeChildren(node: IVDom) {
     // 触发子元素的生命周期
-    const nodeList = node.children;
-    // node.children = undefined;
-    let len = nodeList ? nodeList.length : 0;
-    // node = getLastChild(node && node.base);
-    while (nodeList && len--) {
-        // 不需要移除因为父级已经移除
-        recollectNodeTree(nodeList[len], true);
+    let item = node.base.lastChild;
+    while (item) {
+        const next = item.previousSibling;
+        const vdom: IVDom = (item as any)._vdom || buildVDom(item);
+        recollectNodeTree(vdom, true);
+        item = next;
     }
 }
 
 function diffAttributes(vdom: IVDom, attrs: IKeyValue | undefined, old: IKeyValue) {
-    const dom: any = vdom.base;
+    const dom = vdom.base;
     let name: string;
     for (name in old) {
         if (!(attrs && attrs[name] != null) && old[name] != null) {
@@ -459,7 +406,7 @@ function diffAttributes(vdom: IVDom, attrs: IKeyValue | undefined, old: IKeyValu
                     || attrs[name] !== (
                         name === "value"
                         || name === "checked"
-                        ? dom[name]
+                        ? (dom as any)[name]
                         : old[name]
                     )
                 )
@@ -472,12 +419,12 @@ function diffAttributes(vdom: IVDom, attrs: IKeyValue | undefined, old: IKeyValu
     }
 }
 
-function replaceVDomParent(oldVDom: IVDom, vdom: IVDom): void {
-    if (oldVDom.parent && oldVDom.parent.children) {
-        vdom.parent = oldVDom.parent;
-        const index = oldVDom.parent.children.indexOf(oldVDom);
-        if (index !== -1) {
-            oldVDom.parent.children[index] = vdom;
-        }
-    }
-}
+// function replaceVDomParent(oldVDom: IVDom, vdom: IVDom): void {
+//     if (oldVDom.parent && oldVDom.parent.children) {
+//         vdom.parent = oldVDom.parent;
+//         const index = oldVDom.parent.children.indexOf(oldVDom);
+//         if (index !== -1) {
+//             oldVDom.parent.children[index] = vdom;
+//         }
+//     }
+// }

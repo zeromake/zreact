@@ -71,10 +71,6 @@ export interface IVDom {
      */
     component?: Component<IKeyValue, IKeyValue>;
     /**
-     * 子组件
-     */
-    children?: IVDom[];
-    /**
      * 真实dom索引
      */
     base: Element| Text | Node;
@@ -94,7 +90,6 @@ export interface IVDom {
      * dom标签名
      */
     normalizedNodeName?: string;
-    parent?: IVDom;
     /**
      * component类(原型)
      */

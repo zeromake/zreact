@@ -1,19 +1,7 @@
 import { diff } from "./vdom/diff";
 import { IVNode } from "./vnode";
-import { IVDom } from "./vdom/index";
-import { initDevTools } from "./devtools";
+import { IVDom, buildVDom } from "./vdom/index";
 import { defer } from "./util";
-
-declare const DEVTOOLS_ENV: string;
-declare const ENV: string;
-declare const window: {
-    $zreact: IVDom;
-    ZREACT_DEV: any;
-    Map: any;
-};
-
-let isScheduling = false;
-
 /**
  * 创建组件到dom上
  * @param vnode jsx
@@ -21,21 +9,13 @@ let isScheduling = false;
  * @param merge 原dom元素
  * @param domChild 虚拟dom用于挂载原来挂载在dom元素上的属性
  */
-export function render(vnode: IVNode, parent: Element, dom?: Element): IVDom {
-    const tmp: any = dom;
-    const vdom = tmp && tmp._vdom;
-    const newVDom = diff(vdom, vnode, {}, false, parent, false);
-    if (DEVTOOLS_ENV !== "production") {
-        if (!window.ZREACT_DEV && !isScheduling && typeof window.Map === "function") {
-            // window.ZREACT_DEV();
-            isScheduling = true;
-            defer(() => {
-                window.ZREACT_DEV = initDevTools(newVDom);
-                isScheduling = false;
-            });
-        }
+export function render(vnode: IVNode, parent: Element, dom?: Element): Element | Node | Text {
+    let vdom: IVDom | undefined;
+    if (dom && (dom as any)._vdom) {
+        vdom = (dom as any)._vdom;
+    } else {
+        vdom = buildVDom(dom);
     }
-    const base: any = newVDom.base;
-    // base._vdom = newVDom;
-    return base;
+    const newVDom = diff(vdom, vnode, {}, false, parent, false);
+    return newVDom.base;
 }

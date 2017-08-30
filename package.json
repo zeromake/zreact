@@ -16,10 +16,9 @@
   "homepage": "https://github.com/zeromake/zreact",
   "scripts": {
     "clean": "rimraf dist devtools.js devtools.js.map",
-    "build:all": "npm run clean && npm run build:dev && npm run build && npm run build:devtools && npm run build:devtools1",
+    "build:all": "npm run clean && npm run build:dev && npm run build && npm run build:devtools-run",
     "build": "cross-env NODE_ENV=production DEVTOOLS_ENV=production rollup -c config/rollup.config.js",
-    "build:devtools": "cross-env DEVTOOLS_ENV=dev NODE_ENV=production rollup -c config/rollup.config.devtools.js",
-    "build:devtools1": "rollup -c config/rollup.config.devtools.1.js",
+    "build:devtools-run": "rollup -c config/rollup.config.devtools-run.js",
     "build:dev": "cross-env DEVTOOLS_ENV=production NODE_ENV=dev rollup -c config/rollup.config.js",
     "dev": "cross-env DEVTOOLS_ENV=production NODE_ENV=dev rollup -c config/rollup.config.js -w",
     "test": "babel test/test.jsx -o test/test.js && node test/test.js",

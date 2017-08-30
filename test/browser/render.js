@@ -501,7 +501,7 @@ describe('render()', () => {
 		const DOMElement = html`<div><a foo="bar"></a></div>`;
         const preactElement = <div><a></a></div>;
 
-		render(preactElement, scratch, buildVDom(DOMElement));
+		render(preactElement, scratch, DOMElement);
 		expect(scratch).to.have.property('innerHTML', '<div><a></a></div>');
 	});
 
@@ -608,10 +608,10 @@ describe('render()', () => {
 		const root = render(<TodoList />, scratch);
 		input.focus();
 		input.value = 1;
-		root.component.setText({
+		root._vdom.component.setText({
 			target: input
 		});
-		root.component.addTodo();
+		root._vdom.component.addTodo();
 		expect(document.activeElement).to.equal(input);
 		setTimeout(() =>{
 			expect(/1/.test(scratch.innerHTML)).to.equal(true);

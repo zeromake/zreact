@@ -1,6 +1,7 @@
 import { IS_NON_DIMENSIONAL } from "../constants";
 import { IVDom } from "../vdom/index";
 import options from "../options";
+import { IKeyValue } from "../types";
 
 /**
  * 创建一个原生html组件
@@ -43,7 +44,7 @@ export function setAccessor(
     value: any,
     isSvg: boolean,
 ) {
-    const node: any = vdom.base;
+    const node = vdom.base;
     if (name === "className") {
         // 把className重名为class
         name = "class";
@@ -61,11 +62,11 @@ export function setAccessor(
         }
     } else if ("class" === name && !isSvg) {
         // 直接通过className设置class
-        node.className = value || "";
+        (node as Element).className = value || "";
     } else if ("style" === name) {
         if (!value || typeof value === "string" || typeof old === "string") {
             // 对于字符串型的直接设置到style.cssText
-            node.style.cssText = value || "";
+            (node as HTMLElement).style.cssText = value || "";
         }
         if (value && typeof value === "object") {
             // 如果是一个对象遍历设置
@@ -73,20 +74,20 @@ export function setAccessor(
                 for (const i in old) {
                     if (!(i in value)) {
                         // 清理旧属性且不在新的里
-                        node.style[i] = "";
+                        ((node as HTMLElement).style as any)[i] = "";
                     }
                 }
             }
             for (const i in value) {
                 // 设置新属性
-                node.style[i] = typeof value[i] === "number"
+                ((node as HTMLElement).style as any)[i] = typeof value[i] === "number"
                 && IS_NON_DIMENSIONAL.test(i) === false ? (value[i] + "px") : value[i];
             }
         }
     } else if ("dangerouslySetInnerHTML" === name) {
         if (value) {
             // innerHTML
-            node.innerHTML = value.__html || "";
+            (node as Element).innerHTML = value.__html || "";
             // child.children = [];
             // const childNodes = node.childNodes;
             // for (let i = 0, len = childNodes.length; i < len ; i++) {
@@ -122,7 +123,7 @@ export function setAccessor(
         // 安全设置属性
         setProperty(node, name, value == null ? "" : value);
         if (value == null || value === false) {
-            node.removeAttribute(name);
+            (node as Element).removeAttribute(name);
         }
     } else {
         // 设置Attribute
@@ -130,22 +131,22 @@ export function setAccessor(
         // null || undefined || void 0 || false
         if (value == null || value === false) {
             if (ns) {
-                node.removeAttributeNS(
+                (node as Element).removeAttributeNS(
                     "http://www.w3.org/1999/xlink",
                     name.toLowerCase(),
                 );
             } else {
-                node.removeAttribute(name);
+                (node as Element).removeAttribute(name);
             }
         } else if (typeof value !== "function") {
             if (ns) {
-                node.setAttributeNS(
+                (node as Element).setAttributeNS(
                     "http://www.w3.org/1999/xlink",
                     name.toLowerCase(),
                     value,
                 );
             } else {
-                node.setAttribute(name, value);
+                (node as Element).setAttribute(name, value);
             }
         }
     }
