@@ -5,10 +5,12 @@ import alias from 'rollup-plugin-alias'
 // set new typescript
 const rollupTypescriptPlugin = rollupTypescript()
 export default {
-    entry: 'src/zreact.ts',
-	format: 'umd',
-	moduleName: 'zreact',
-    dest: 'dist/zreact.devtools.js',
+    input: 'src/zreact.ts',
+    format: 'umd',
+    output: {
+        name: 'zreact',
+        file: 'dist/zreact.devtools.js'
+    },
     plugins: [
         rollupTypescriptPlugin,
         replace({

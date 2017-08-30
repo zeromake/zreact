@@ -3,15 +3,17 @@ import rollupTypescript from 'rollup-plugin-typescript'
 // set new typescript
 const rollupTypescriptPlugin = rollupTypescript()
 export default {
-    entry: 'src/devtools-run.ts',
+    input: 'src/devtools-run.ts',
     external: ['zreact'],
-	format: 'umd',
-    dest: 'devtools.js',
+    output: {
+        format: 'umd',
+        file: 'devtools.js'
+    },
     globals: {
 		zreact: 'zreact'
 	},
     plugins: [
         rollupTypescriptPlugin,
     ],
-    sourceMap: true
+    sourcemap: true
 }

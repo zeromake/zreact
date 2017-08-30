@@ -14,8 +14,8 @@ const replacePlugin = replace({
     ENV: JSON.stringify(process.env.NODE_ENV)
 })
 export default {
-    entry: 'src/zreact.ts',
-    moduleName: 'zreact',
+    input: 'src/zreact.ts',
+    name: 'zreact',
     // dest: isProduction ? 'dist/zreact.min.js' : 'dist/zreact.js',
     plugins: !isProduction ? [
         rollupTypescriptPlugin,
@@ -25,20 +25,20 @@ export default {
         uglify({}, minify),
         replacePlugin
     ],
-    sourceMap: !isProduction,
-    targets: isProduction ? [
+    sourcemap: !isProduction,
+    output: isProduction ? [
         {
             format: 'umd',
-            dest: pkg["minified:main"]
+            file: pkg["minified:main"]
         }
     ] : [
         {
             format: 'umd',
-            dest: pkg.main
+            file: pkg.main
         },
         {
             format: 'es',
-            dest: pkg.module
+            file: pkg.module
         }
 	]
 }
