@@ -11,6 +11,8 @@ import { IKeyValue } from "./types";
 import { IVDom } from "./vdom/index";
 import { IVNode } from "./vnode";
 
+declare const VERSION_ENV: string;
+const version = VERSION_ENV;
 export default {
     Component,
     PureComponent,
@@ -22,6 +24,7 @@ export default {
     options,
     render,
     rerender,
+    version,
 };
 
 export {
@@ -35,4 +38,5 @@ export {
     options,
     render,
     rerender,
+    version,
 };

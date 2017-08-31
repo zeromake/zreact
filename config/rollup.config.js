@@ -10,7 +10,7 @@ const isProduction = process.env.NODE_ENV === 'production'
 // set new typescript
 const rollupTypescriptPlugin = rollupTypescript()
 const replacePlugin = replace({
-    DEVTOOLS_ENV: JSON.stringify(process.env.DEVTOOLS_ENV),
+    VERSION_ENV: JSON.stringify(pkg.version),
     ENV: JSON.stringify(process.env.NODE_ENV)
 })
 export default {
