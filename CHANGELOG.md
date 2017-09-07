@@ -1,3 +1,22 @@
+<a name="0.1.0"></a>
+# [0.1.0](https://github.com/zeromake/zreact/compare/v0.0.4...v0.1.0) (2017-09-07)
+
+
+### Bug Fixes
+
+* del devtools ([6ae3797](https://github.com/zeromake/zreact/commit/6ae3797))
+* update api on d.ts ([cd3bfdb](https://github.com/zeromake/zreact/commit/cd3bfdb))
+* update package and rollup config ([ab19d75](https://github.com/zeromake/zreact/commit/ab19d75))
+* **vdom:** Text key, children set undefined ([f1bd5d3](https://github.com/zeromake/zreact/commit/f1bd5d3))
+
+
+### Features
+
+* add version ([22324be](https://github.com/zeromake/zreact/commit/22324be))
+* render api change ([342efaa](https://github.com/zeromake/zreact/commit/342efaa))
+
+
+
 <a name="0.0.4"></a>
 ## [0.0.4](https://github.com/zeromake/zreact/compare/v0.0.3...v0.0.4) (2017-08-17)
 
