@@ -42,6 +42,7 @@ declare namespace $private {
          */
         componentConstructor?: any;
     }
+    type funComponent = (props?: IKeyValue, content?: any) => zreact.VNode;
 }
 declare namespace zreact {
     interface DangerouslySetInnerHTML {
@@ -247,7 +248,7 @@ declare namespace zreact {
         eventBind?: boolean;
     }
     function render(vnode: VNode, parent: Element | Node, dom?: Element | Text | Node): Element | Text | Node;
-    function h(nodeName: string | typeof Component, attributes: $private.IKeyValue | null, ...args: Array<VNode | string | number | boolean | Array<VNode | string | number | boolean>>): VNode;
+    function h(nodeName: string | typeof Component | $private.funComponent, attributes: $private.IKeyValue | null, ...args: Array<VNode | string | number | boolean | Array<VNode | string | number | boolean>>): VNode;
     function createElement(nodeName: string | typeof Component, attributes: $private.IKeyValue | null, ...args: Array<VNode | string | number | boolean | Array<VNode | string | number | boolean>>): VNode;
     function createClass(obj: any): any;
 }

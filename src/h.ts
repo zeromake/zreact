@@ -1,7 +1,7 @@
 import { Component } from "./component";
 import options from "./options";
 import { IVNode } from "./vnode";
-import { IKeyValue } from "./types";
+import { IKeyValue, funComponent, childType } from "./types";
 
 // const EMPTY_CHILDREN: any[] = [];
 
@@ -13,9 +13,9 @@ import { IKeyValue } from "./types";
  * @see http://jasonformat.com/wtf-is-jsx
  * @public
  */
-export function h(nodeName: string | typeof Component, attributes: IKeyValue, ...args: Array<IVNode|string|number|boolean|Array<IVNode|string|number|boolean>>) {
+export function h(this: Component<IKeyValue, IKeyValue> | undefined | void | null, nodeName: string | typeof Component | funComponent, attributes: IKeyValue, ...args: childType[]) {
     // 初始化子元素列表
-    const stack: Array<IVNode|string|number|boolean|Array<IVNode|string|number|boolean>> = [];
+    const stack: childType[] = [];
     const children: Array<IVNode|string|number|boolean> = [];
     // let i: number;
     // let child: any;
@@ -40,7 +40,7 @@ export function h(nodeName: string | typeof Component, attributes: IKeyValue, ..
         // let num = 0;
         // 取出最后一个
         let child: any = stack.pop();
-        if (child && child.pop !== undefined) {
+        if (child && child.pop != null) {
             // 如果是个数组就倒序放入stack
             for (let i = child.length; i-- ; ) {
                 const item = child[i];
@@ -87,11 +87,15 @@ export function h(nodeName: string | typeof Component, attributes: IKeyValue, ..
             lastSimple = simple;
         }
     }
+    const self = this;
+    const component: Component<IKeyValue, IKeyValue> | undefined = self != null && self.setState ? self : undefined;
     const p: IVNode = {
         // 设置属性
         attributes: attributes == null ? undefined : attributes,
         // 设置子元素
         children,
+        // 设置组件实例
+        component,
         // 设置key
         key: attributes == null ? undefined : attributes.key,
         // 设置原生组件名字或自定义组件class(function)

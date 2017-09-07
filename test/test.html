@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-     <script src="../dist/zreact.devtools.js"></script>
+     <script src="../dist/zreact.js"></script>
     <!-- <script src="https://cdn.bootcss.com/preact/8.2.1/preact.js"></script> -->
     <title>Document</title>
 </head>
@@ -12,40 +12,52 @@
     <div id="app">
     </div>
     <script>
+        var h = zreact.h;
+        var render = zreact.render;
 
-        class Foo extends zreact.Component {
-            constructor(props, context) {
-                super(props, context)
+        var Foo = zreact.createClass({
+            $init: function(props, context) {
                 this.state = {
                     num: [1,2,3]
                 }
-            }
-            render(props, state) {
+                // this.h = h
+                // this.test = this.test.bind(this)
+            },
+            render: function(props, state) {
                 var self = this
                 var test = state.num.map(function(i, index) {
-                    return zreact.h("li", null, i, zreact.h("button", { onClick: self["delete"].bind(self, index) }, "x"))
+                    return self.h("li", null, i, self.h("button", { onClick: (e) => self["delete"](index, e) }, "x"))
                 });
-                return zreact.h("div", null, zreact.h("ul", null, test), zreact.h("button", { onClick: this.test.bind(this) }, "添加"));
-            }
-            test() {
+                return self.h("div", null, self.h("ul", null, test), self.h("button", { onClick: this.test }, "添加"));
+            },
+            test: function() {
                 console.log("Foo test", this.state);
                 this.setState(function(state) {
                     state.num.push(state.num.length + 1);
                 })
-            }
-            "delete"(index) {
+            },
+            "delete": function(index) {
                 this.setState(function(state) {
                     state.num.splice(index, 1);
                 })
             }
-        }
+        })
         var scratch = document.querySelector("#app");
         var vdom = zreact.render(zreact.h(Foo), scratch)
         zreact.render(zreact.h("div"), scratch, vdom)
         zreact.render(zreact.h(Foo), scratch, vdom)
-        var Component = zreact.Component
-        var h = zreact.h
-        var render = zreact.render
+
+        // var Test = function(p) {
+        //     var h = h.bind(this)
+        //     console.log(p)
+        //     return h('div', { class: 'test' }, 'test', p.children)
+        // }
+        // var Test2 = function() {
+        //     return h(Test, null, h('span', null, "Test2"))
+        // }
+        // var scratch = document.querySelector("#app");
+        // render(zreact.h(Test2), scratch, )
+        // fiber test
         // var dotStyle = {
         //     position: 'absolute',
         //     background: '#61dafb',
@@ -220,11 +232,11 @@
         //         root,
         //         vdom
         //     );
-        //     // requestAnimationFrame(update);
+        //     requestAnimationFrame(update);
         // }
         // requestAnimationFrame(update);
     </script>
-    <!-- <script src="../devtools.js"></script> -->
+    <script src="../devtools.js"></script>
     <!-- <script src="../node_modules/preact/devtools.js"></script> -->
 </body>
 </html>

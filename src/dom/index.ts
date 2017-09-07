@@ -2,6 +2,7 @@ import { IS_NON_DIMENSIONAL } from "../constants";
 import { IVDom } from "../vdom/index";
 import options from "../options";
 import { IKeyValue } from "../types";
+import { Component } from "../component";
 
 /**
  * 创建一个原生html组件
@@ -43,6 +44,7 @@ export function setAccessor(
     old: any,
     value: any,
     isSvg: boolean,
+    component?: Component<any, any> | void | null,
 ) {
     const node = vdom.base;
     if (name === "className") {
@@ -108,7 +110,7 @@ export function setAccessor(
         if (value) {
             if (!old) {
                 // 保证只有一次绑定事件
-                addEventListener(vdom, name, useCapture);
+                addEventListener(vdom, name, useCapture, component);
             }
         } else {
             // 移除事件
@@ -165,7 +167,7 @@ function setProperty(node: any, name: string, value: string) {
  * @param child 上下文
  * @param useCapture 是否冒泡(兼容ie8)
  */
-function eventProxy(vdom: IVDom, useCapture: boolean): (e: Event) => void {
+function eventProxy(vdom: IVDom, useCapture: boolean, component?: Component<any, any> | void | null): (e: Event) => void {
     return (e: Event) => {
         if (isIe8 && !useCapture) {
             // ie8事件默认冒泡所以需要阻止
@@ -176,9 +178,9 @@ function eventProxy(vdom: IVDom, useCapture: boolean): (e: Event) => void {
         // 事件钩子
         const event = options.event && options.event(e) || e;
         if (listener) {
-            if (options.eventBind && vdom.component) {
-                // 自动使用所属自定义组件来做this
-                return listener.call(vdom.component, event);
+            if (options.eventBind && component && listener.call) {
+                // 使用vnode的所属组件实例来做this
+                return listener.call(component, event);
             }
             // 直接调用事件
             return listener(event);
@@ -209,9 +211,9 @@ export function isTextNode(node: Text | any): boolean {
  * @param useCapture 是否冒泡
  * @param child 上下文
  */
-function addEventListener(vdom: IVDom, name: string, useCapture: boolean) {
+function addEventListener(vdom: IVDom, name: string, useCapture: boolean, component?: Component<any, any> | void | null) {
     // 生成当前事件的代理方法
-    const eventProxyFun = eventProxy(vdom, useCapture);
+    const eventProxyFun = eventProxy(vdom, useCapture, component);
     if (!vdom.eventProxy) {
         vdom.eventProxy = {};
     }

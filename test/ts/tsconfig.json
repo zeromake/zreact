@@ -19,6 +19,6 @@
 	},
 	"files": [
 		"prect-test.tsx",
-		"../../src/preact.d.ts"
+		"../../types/zreact.d.ts"
 	]
 }

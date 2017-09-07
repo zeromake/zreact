@@ -3,6 +3,7 @@ import 'core-js/es6/map';
 import 'core-js/fn/array/fill';
 import 'core-js/fn/array/from';
 import 'core-js/fn/object/assign';
+import pkg from '../package.json'
 
 global.ENV = "dev"
-global.DEVTOOLS_ENV = "production"
+global.VERSION_ENV = JSON.stringify(pkg.version)

@@ -5,18 +5,18 @@ interface DummyProps {
 }
 
 interface DummyState {
-    input: string;
+    input?: string;
 }
 
 class DummyComponent extends Component<DummyProps, DummyState> {
-    constructor(props: DummyProps) {
-        super(props);
+    constructor(props: DummyProps, c: any) {
+        super(props, c);
         this.state = {
             input: `x${this.props}x`,
         };
     }
     public render({ initialInput }: DummyProps, { input }: DummyState) {
-        return <DummerComponent initialInput={initialInput} input={input} />
+        return <DummerComponent initialInput={initialInput} input={input}/>;
     }
 }
 
@@ -28,4 +28,4 @@ function DummerComponent({ input, initialInput }: DummerComponentProps) {
     return <div>Input: {input}, initial: {initialInput}</div>;
 }
 
-render(h(DummerComponent, { initialInput: "The input" }), document.getElementById("xxx"));
+render(<DummerComponent initialInput="The input"/>, document.getElementById("xxx"));

@@ -11,6 +11,7 @@
       "node_modeles" // 不转换 node_modeles
     ],
     "files": [
-       "src/zreact.ts"
+       "src/zreact.ts",
+       "src/devtools.ts"
     ]
 }

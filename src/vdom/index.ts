@@ -110,8 +110,10 @@ export interface IVDom {
 
 export function buildVDom(base?: Element|Text|Node): IVDom | undefined {
     if (base) {
-        return {
+        const vdom = {
             base,
         };
+        (base as any)._vdom = vdom;
+        return vdom;
     }
 }

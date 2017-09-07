@@ -5,6 +5,7 @@ import { enqueueRender } from "./render-queue";
 import { extend } from "./util";
 import { IKeyValue } from "./types";
 import { IVDom } from "./vdom/index";
+import { h } from "./h";
 
 export class Component <PropsType extends IKeyValue, StateType extends IKeyValue> {
     /**
@@ -91,6 +92,8 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
      * 获取上下文，会被传递到所有的子组件
      */
     public getChildContext?: () => IKeyValue;
+
+    public h: typeof h;
     /**
      * 子组件
      */
@@ -125,6 +128,7 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
         this.context = context;
         this.props = props;
         this.state = this.state || {};
+        this.h = h;
     }
     /**
      * 设置state并通过enqueueRender异步更新dom

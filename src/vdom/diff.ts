@@ -3,7 +3,7 @@ import options from "../options";
 import { isSameNodeType, isNamedNode } from "./index";
 import { IVNode } from "../vnode";
 import { Component } from "../component";
-import { IKeyValue } from "../types";
+import { IKeyValue, childType } from "../types";
 import { IVDom, buildVDom } from "./index";
 import {
     buildComponentFromVNode,
@@ -222,7 +222,7 @@ function idiff(
         );
     }
     // 设置dom属性
-    diffAttributes(vdom, vnode.attributes, props);
+    diffAttributes(vdom, vnode, props);
     // 把props存到dom上下文中
     // child[ATTR_KEY] = props;
     // 还原
@@ -240,7 +240,7 @@ function idiff(
  */
 function diffChildren(
     vdom: IVDom,
-    vchildren: Array<string | number | boolean | IVNode>,
+    vchildren: childType[],
     context: any,
     mountAll: boolean,
     isHydrating: boolean,
@@ -259,7 +259,7 @@ function diffChildren(
     let j;
     let c;
     let f;
-    let vchild: string | number | boolean | IVNode;
+    let vchild: childType;
     let child: IVDom | null | undefined;
 
     if (len > 0) {
@@ -267,11 +267,15 @@ function diffChildren(
             const pchild = originalChildren[i];
             const pvdom: IVDom | undefined = pchild && (pchild as any)._vdom;
             const props = pvdom && pvdom.props;
-            const key = pvdom && vlen && props
-                ? pvdom.component
-                    ? pvdom.component._key
-                    : typeof props === "object" && props.key
-                : null;
+            let key: string | undefined;
+            if (pvdom && vlen > 0 && props) {
+                if (pvdom.component) {
+                    key = pvdom.component._key;
+                } else if (typeof props === "object") {
+                    key = props.key;
+                }
+            }
+            // const key = pvdom && vlen && props ? pvdom.component ? pvdom.component._key : typeof props === "object" && props.key : null;
             if (key != null) {
                 keyedLen++;
                 keyed[key] = pvdom;
@@ -283,7 +287,7 @@ function diffChildren(
                     : isHydrating
                 )
                 ) {
-                children[childrenLen++] = pvdom;
+                children[childrenLen++] = pvdom || buildVDom(pchild);
             }
         }
     }
@@ -335,6 +339,7 @@ function diffChildren(
         for (const i in keyed) {
             const keyItem = keyed[i];
             if (keyItem != null) {
+                // console.log("---removeKey----", i, keyItem);
                 // removeNode(keyed[i].base);
                 recollectNodeTree(keyItem, false);
             }
@@ -345,6 +350,7 @@ function diffChildren(
     while (min <= childrenLen) {
         child = children[childrenLen--];
         if (child !== undefined) {
+            // console.log("---removeChildren----", child);
             // removeNode(child.base);
             recollectNodeTree(child, false);
         }
@@ -386,14 +392,16 @@ export function removeChildren(node: IVDom) {
     }
 }
 
-function diffAttributes(vdom: IVDom, attrs: IKeyValue | undefined, old: IKeyValue) {
+function diffAttributes(vdom: IVDom, vnode: IVNode, old: IKeyValue) {
+    const attrs: IKeyValue | undefined = vnode.attributes;
+    const component = vnode.component;
     const dom = vdom.base;
     let name: string;
     for (name in old) {
         if (!(attrs && attrs[name] != null) && old[name] != null) {
             const oldValue = old[name];
             const value = old[name] = undefined;
-            setAccessor(vdom, name, oldValue, value, isSvgMode);
+            setAccessor(vdom, name, oldValue, value, isSvgMode, component);
         }
     }
     if (attrs) {
@@ -413,7 +421,7 @@ function diffAttributes(vdom: IVDom, attrs: IKeyValue | undefined, old: IKeyValu
             ) {
                 const oldValue = old[name];
                 const value = old[name] = attrs[name];
-                setAccessor(vdom, name, oldValue, value, isSvgMode);
+                setAccessor(vdom, name, oldValue, value, isSvgMode, component);
             }
         }
     }
