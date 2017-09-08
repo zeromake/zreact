@@ -16,6 +16,7 @@
 * add vnode event bind this ([5a79412](https://github.com/zeromake/zreact/commit/5a79412))
 * render api change ([342efaa](https://github.com/zeromake/zreact/commit/342efaa))
 * **component:** add like vue's vm.$emit function ([3a61707](https://github.com/zeromake/zreact/commit/3a61707))
+* **event:** filter event not is component ([07e65f9](https://github.com/zeromake/zreact/commit/07e65f9))
 
 
 
