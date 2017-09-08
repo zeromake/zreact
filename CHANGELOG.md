@@ -1,5 +1,5 @@
 <a name="0.1.0"></a>
-# [0.1.0](https://github.com/zeromake/zreact/compare/v0.0.4...v0.1.0) (2017-09-07)
+# [0.1.0](https://github.com/zeromake/zreact/compare/v0.0.4...v0.1.0) (2017-09-08)
 
 
 ### Bug Fixes
@@ -13,7 +13,9 @@
 ### Features
 
 * add version ([22324be](https://github.com/zeromake/zreact/commit/22324be))
+* add vnode event bind this ([5a79412](https://github.com/zeromake/zreact/commit/5a79412))
 * render api change ([342efaa](https://github.com/zeromake/zreact/commit/342efaa))
+* **component:** add like vue's vm.$emit function ([3a61707](https://github.com/zeromake/zreact/commit/3a61707))
 
 
 

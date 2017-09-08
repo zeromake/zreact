@@ -191,11 +191,13 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
      * @param eventName 事件名去除
      * @param args 传递的参数
      */
-    public $emit(eventName: string, args: any) {
+    public $emit(eventName: string, args: any): any {
         const event = this.props["on" + eventName];
         if (event) {
             let result;
-            if (this._emitComponent) {
+            const functionName = event.name;
+            // 保证只是该组件实例上的方法才绑定this
+            if (this._emitComponent && (this._emitComponent as any)[functionName] === event) {
                 result = event.call(this._emitComponent, args);
             } else {
                 result = event(args);

@@ -12,6 +12,7 @@
     <div id="app">
     </div>
     <script>
+        'use strict';
         var h = zreact.h;
         var render = zreact.render;
 
@@ -45,6 +46,9 @@
         //         })
         //     }
         // })
+        function test () {
+            console.log(this, '---test---')
+        }
         var Bar = zreact.createClass({
             render: function(p, s, c, h) {
                 return h("button", { onClick: this.add}, "add")

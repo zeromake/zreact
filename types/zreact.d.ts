@@ -207,6 +207,12 @@ declare namespace zreact {
          * @param context
          */
         render(props: PropsType, state: StateType, context: $private.IKeyValue, createElement: typeof h): VNode | void;
+        /**
+         * 触发props上的on开头的方法，并以_emitComponent为this, 仅支持一个参数传入
+         * @param eventName 事件名去除
+         * @param args 传递的参数
+         */
+        $emit(eventName: string, args: any): any;
     }
     class PureComponent<PropsType extends $private.IKeyValue, StateType extends $private.IKeyValue> extends Component<PropsType, StateType> {
         isPureReactComponent: boolean;

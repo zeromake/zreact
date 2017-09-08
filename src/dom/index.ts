@@ -162,32 +162,6 @@ function setProperty(node: any, name: string, value: string) {
     } catch (e) { }
 }
 
-/**
- * 生成用于绑定事件的方法，保证每次更新props上的事件方法不会重新绑定事件
- * @param child 上下文
- * @param useCapture 是否冒泡(兼容ie8)
- */
-function eventProxy(vdom: IVDom, useCapture: boolean, component?: Component<any, any> | void | null): (e: Event) => void {
-    return (e: Event) => {
-        if (isIe8 && !useCapture) {
-            // ie8事件默认冒泡所以需要阻止
-            e.cancelBubble = !useCapture;
-        }
-        // 取出对于的props事件
-        const listener = vdom.listeners && vdom.listeners[e.type];
-        // 事件钩子
-        const event = options.event && options.event(e) || e;
-        if (listener) {
-            if (options.eventBind && component && listener.call) {
-                // 使用vnode的所属组件实例来做this
-                return listener.call(component, event);
-            }
-            // 直接调用事件
-            return listener(event);
-        }
-    };
-}
-
 export function getPreviousSibling(node: Node): Node| null {
     return node.previousSibling;
 }
@@ -204,6 +178,32 @@ export function isTextNode(node: Text | any): boolean {
     return node.splitText !== undefined;
 }
 
+/**
+ * 生成用于绑定事件的方法，保证每次更新props上的事件方法不会重新绑定事件
+ * @param child 上下文
+ * @param useCapture 是否冒泡(兼容ie8)
+ */
+function eventProxy(vdom: IVDom, useCapture: boolean, component?: Component<any, any> | void | null): (e: Event) => void {
+    return (e: Event) => {
+        if (isIe8 && !useCapture) {
+            // ie8事件默认冒泡所以需要阻止
+            e.cancelBubble = !useCapture;
+        }
+        // 取出对于的props事件
+        const listener = vdom.listeners && vdom.listeners[e.type];
+        // 事件钩子
+        const event = options.event && options.event(e) || e;
+        const functionName = (listener as any).name;
+        if (listener) {
+            if (options.eventBind && component && listener.call && (component as any)[functionName] === listener) {
+                // 使用vnode的所属组件实例来做this
+                return listener.call(component, event);
+            }
+            // 直接调用事件
+            return listener(event);
+        }
+    };
+}
 /**
  * 绑定代理事件
  * @param node dom节点
