@@ -113,7 +113,10 @@ export function buildVDom(base?: Element|Text|Node): IVDom | undefined {
         const vdom = {
             base,
         };
-        (base as any)._vdom = vdom;
+        try {
+            (base as any)._vdom = vdom;
+        } catch (e) {
+        }
         return vdom;
     }
 }

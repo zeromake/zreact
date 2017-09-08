@@ -1,31 +1,11 @@
-import rollupTypescript from 'rollup-plugin-typescript'
-import uglify from 'rollup-plugin-uglify'
-import { minify } from 'uglify-es'
-import pkg from '../package.json'
-import replace from 'rollup-plugin-replace'
-// import typescript from 'typescript'
+const pkg = require('../package.json')
+const baseConfig = require('./rollup.base.config')
 
 const isProduction = process.env.NODE_ENV === 'production'
 
-// set new typescript
-const rollupTypescriptPlugin = rollupTypescript()
-const replacePlugin = replace({
-    VERSION_ENV: JSON.stringify(pkg.version),
-    ENV: JSON.stringify(process.env.NODE_ENV)
-})
-export default {
+const config = Object.assign({
     input: 'src/zreact.ts',
     name: 'zreact',
-    // dest: isProduction ? 'dist/zreact.min.js' : 'dist/zreact.js',
-    plugins: !isProduction ? [
-        rollupTypescriptPlugin,
-        replacePlugin
-    ] : [
-        rollupTypescriptPlugin,
-        uglify({}, minify),
-        replacePlugin
-    ],
-    sourcemap: !isProduction,
     output: isProduction ? [
         {
             format: 'umd',
@@ -41,4 +21,6 @@ export default {
             file: pkg.module
         }
 	]
-}
+}, baseConfig)
+
+export default config

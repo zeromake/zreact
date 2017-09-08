@@ -119,6 +119,10 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
      */
     public _disable?: boolean;
     /**
+     * 模拟vue.emit用的上下文保存
+     */
+    public _emitComponent?: Component<any, any>;
+    /**
      * react标准用于设置component实例
      */
     public _ref?: (component: Component<PropsType, StateType> | null) => void;
@@ -127,8 +131,11 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
         this._dirty = true;
         this.context = context;
         this.props = props;
-        this.state = this.state || {};
-        this.h = h;
+        this.state = (this.state || {}) as StateType;
+        const self = this;
+        this.h = function _(){
+            return h.apply(self, Array.prototype.slice.call(arguments, 0));
+        } as typeof h;
     }
     /**
      * 设置state并通过enqueueRender异步更新dom
@@ -176,7 +183,24 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
      * @param state
      * @param context
      */
-    public render(props?: PropsType, state?: StateType, context?: IKeyValue): IVNode | void {
+    public render(props: PropsType, state: StateType, context: IKeyValue, createElement: typeof h): IVNode | void {
         // console.error("not set render");
+    }
+    /**
+     * 触发props上的on开头的方法，并以_emitComponent为this
+     * @param eventName 事件名去除
+     * @param args 传递的参数
+     */
+    public $emit(eventName: string, args: any) {
+        const event = this.props["on" + eventName];
+        if (event) {
+            let result;
+            if (this._emitComponent) {
+                result = event.call(this._emitComponent, args);
+            } else {
+                result = event(args);
+            }
+            return result;
+        }
     }
 }

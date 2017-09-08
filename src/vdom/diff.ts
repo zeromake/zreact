@@ -134,7 +134,10 @@ function idiff(
             const newVDom: IVDom = {
                 base: dom,
             };
-            (dom as any)._vdom = newVDom;
+            try {
+                (dom as any)._vdom = newVDom;
+            } catch (e) {
+            }
             if (vdom) {
                 // 如果有旧dom，就替换并卸载旧的。
                 if (vdom.base.parentNode) {
@@ -148,10 +151,10 @@ function idiff(
         vdom.props = true;
         return vdom;
     }
-    let vnodeName = vnode.nodeName;
+    let vnodeName = (vnode as IVNode).nodeName;
     if (typeof vnodeName === "function") {
         // 是一个组件,创建或复用组件实例，返回dom
-        return buildComponentFromVNode(vdom, vnode, context, mountAll);
+        return buildComponentFromVNode(vdom, (vnode as IVNode), context, mountAll); // , (vnode as IVNode).component);
     }
     // 重新判断一下是否要创建svg
     isSvgMode = vnodeName === "svg"
@@ -185,7 +188,7 @@ function idiff(
     // 取出上次存放的props
     let props = vdom.props;
     // 获取虚拟的子节点
-    const vchildren = vnode.children;
+    const vchildren = (vnode as IVNode).children;
     if (props == null || typeof props === "boolean") {
         // 上回的props不存在说明，这次一般为新建（preact有可能通过原生dom操作删除）
         vdom.props = props = {};
@@ -222,9 +225,12 @@ function idiff(
         );
     }
     // 设置dom属性
-    diffAttributes(vdom, vnode, props);
+    diffAttributes(vdom, (vnode as IVNode), props);
     // 把props存到dom上下文中
     // child[ATTR_KEY] = props;
+    if ((vdom.base as any)._vdom !== vdom) {
+        (vdom.base as any)._vdom = vdom;
+    }
     // 还原
     isSvgMode = prevSvgMode;
     return vdom;
@@ -400,7 +406,7 @@ function diffAttributes(vdom: IVDom, vnode: IVNode, old: IKeyValue) {
     for (name in old) {
         if (!(attrs && attrs[name] != null) && old[name] != null) {
             const oldValue = old[name];
-            const value = old[name] = undefined;
+            const value: any = old[name] = undefined;
             setAccessor(vdom, name, oldValue, value, isSvgMode, component);
         }
     }

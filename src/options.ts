@@ -1,5 +1,5 @@
 import { IVNode } from "./vnode";
-import { Component } from "component";
+import { Component } from "./component";
 import { IKeyValue } from "./types";
 
 const options: {

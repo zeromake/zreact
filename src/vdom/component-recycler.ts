@@ -1,5 +1,6 @@
 import { Component } from "../component";
 import { IKeyValue } from "../types";
+import { h } from "../h";
 
 /**
  * 缓存卸载自定义组件对象列表
@@ -14,6 +15,7 @@ const components: {
  */
 export function collectComponent(component: Component<IKeyValue, IKeyValue>) {
     const constructor: any = component.constructor;
+    component._emitComponent = undefined;
     // 获取组件名
     const name = constructor.name;
     // 获取该组件名所属的列表
@@ -31,7 +33,7 @@ export function collectComponent(component: Component<IKeyValue, IKeyValue>) {
  * @param props
  * @param context
  */
-export function createComponent(Ctor: any, props: IKeyValue, context: IKeyValue): Component<IKeyValue, IKeyValue> {
+export function createComponent(Ctor: any, props: IKeyValue, context: IKeyValue, component: Component<IKeyValue, IKeyValue> | undefined | void | null): Component<IKeyValue, IKeyValue> {
     const list = components[Ctor.name];
     let inst: Component<IKeyValue, IKeyValue>;
     // 创建组件实例
@@ -57,6 +59,9 @@ export function createComponent(Ctor: any, props: IKeyValue, context: IKeyValue)
             }
         }
     }
+    if (!inst._emitComponent && component) {
+        inst._emitComponent = component;
+    }
     return inst;
 }
 
@@ -66,6 +71,6 @@ export function createComponent(Ctor: any, props: IKeyValue, context: IKeyValue)
  * @param state
  * @param context
  */
-function doRender(this: typeof Component, props: IKeyValue, state: IKeyValue, context: IKeyValue) {
-    return this.constructor(props, context);
+function doRender(this: typeof Component, props: IKeyValue, state: IKeyValue, context: IKeyValue, createElement: typeof h) {
+    return this.constructor(props, context, createElement);
 }

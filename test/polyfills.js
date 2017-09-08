@@ -3,6 +3,7 @@ import 'core-js/es6/map';
 import 'core-js/fn/array/fill';
 import 'core-js/fn/array/from';
 import 'core-js/fn/object/assign';
+import 'core-js/fn/function/bind';
 import pkg from '../package.json'
 
 global.ENV = "dev"

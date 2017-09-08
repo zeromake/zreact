@@ -163,7 +163,7 @@ export function renderComponent(component: Component<IKeyValue, IKeyValue>, opts
 
     if (!skip) {
         // 当前组件的render函数返回的VNode
-        const rendered: IVNode | void = component.render(props, state, context);
+        const rendered: IVNode | void = component.render(props, state, context, component.h);
         //
         let inst: Component<IKeyValue, IKeyValue> | undefined;
         if (component.getChildContext) {
@@ -192,7 +192,7 @@ export function renderComponent(component: Component<IKeyValue, IKeyValue>, opts
                     toUnmount = inst;
                 }
                 // 新建Component
-                inst = createComponent(childComponent, childProps, context);
+                inst = createComponent(childComponent, childProps, context, rendered.component);
                 // 子组件索引保证下次相同子组件不会重新创建
                 component._component = inst;
                 // 设置好缓存dom
@@ -348,7 +348,7 @@ export function buildComponentFromVNode(
             vdom = oldVDom = null;
         }
         // 通过缓存组件的方式创建组件实例
-        c = createComponent(vnode.nodeName, props, context);
+        c = createComponent(vnode.nodeName, props, context, vnode.component);
         if (vdom && !c.nextVDom) {
             // 上次这个标签为原生组件，把将要卸载的组件dom缓存
             c.nextVDom = vdom;

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-     <script src="../dist/zreact.js"></script>
+     <script src="../dist/zreact.ie8.js"></script>
     <!-- <script src="https://cdn.bootcss.com/preact/8.2.1/preact.js"></script> -->
     <title>Document</title>
 </head>
@@ -15,37 +15,62 @@
         var h = zreact.h;
         var render = zreact.render;
 
+        // var Foo = zreact.createClass({
+        //     $init: function(props, context) {
+        //         this.state = {
+        //             num: [1,2,3]
+        //         }
+        //         console.log(JSON.stringify(this.state))
+        //         // this.h = h
+        //         // this.test = this.test.bind(this)
+        //     },
+        //     render: function(props, state, c, h) {
+        //         var self = this
+        //         console.log('map', JSON.stringify(state))
+        //         var test = state.num.map(function(i, index) {
+        //             return h("li", null, i, h("button", { onClick: self["delete"].bind(self, index, e) }, "x"))
+        //         });
+        //         console.log(JSON.stringify(state))
+        //         return h("div", null, h("ul", null, test), h("button", { onClick: this.test }, "添加"));
+        //     },
+        //     test: function() {
+        //         console.log("Foo test", JSON.stringify(this.state));
+        //         this.setState(function(state) {
+        //             state.num.push(state.num.length + 1);
+        //         })
+        //     },
+        //     "delete": function(index) {
+        //         this.setState(function(state) {
+        //             state.num.splice(index, 1);
+        //         })
+        //     }
+        // })
+        var Bar = zreact.createClass({
+            render: function(p, s, c, h) {
+                return h("button", { onClick: this.add}, "add")
+            },
+            add: function() {
+                this.$emit("Add")
+            }
+        })
         var Foo = zreact.createClass({
-            $init: function(props, context) {
+            $init: function(p, c) {
                 this.state = {
-                    num: [1,2,3]
+                    num: 1
                 }
-                // this.h = h
-                // this.test = this.test.bind(this)
             },
-            render: function(props, state) {
-                var self = this
-                var test = state.num.map(function(i, index) {
-                    return self.h("li", null, i, self.h("button", { onClick: (e) => self["delete"](index, e) }, "x"))
-                });
-                return self.h("div", null, self.h("ul", null, test), self.h("button", { onClick: this.test }, "添加"));
+            render: function(p, s, c, h) {
+                return h("div", null, "num: " + s.num, h(Bar, { onAdd: this.add}))
             },
-            test: function() {
-                console.log("Foo test", this.state);
+            add: function() {
+                console.log('--Foo--', this)
                 this.setState(function(state) {
-                    state.num.push(state.num.length + 1);
-                })
-            },
-            "delete": function(index) {
-                this.setState(function(state) {
-                    state.num.splice(index, 1);
+                    state.num += 1
                 })
             }
         })
         var scratch = document.querySelector("#app");
         var vdom = zreact.render(zreact.h(Foo), scratch)
-        zreact.render(zreact.h("div"), scratch, vdom)
-        zreact.render(zreact.h(Foo), scratch, vdom)
 
         // var Test = function(p) {
         //     var h = h.bind(this)
@@ -236,7 +261,7 @@
         // }
         // requestAnimationFrame(update);
     </script>
-    <script src="../devtools.js"></script>
+    <!-- <script src="../devtools.js"></script> -->
     <!-- <script src="../node_modules/preact/devtools.js"></script> -->
 </body>
 </html>

@@ -43,6 +43,7 @@ declare namespace $private {
         componentConstructor?: any;
     }
     type funComponent = (props?: IKeyValue, content?: any) => zreact.VNode;
+    type childType = zreact.VNode | string | number | boolean;
 }
 declare namespace zreact {
     interface DangerouslySetInnerHTML {
@@ -205,7 +206,7 @@ declare namespace zreact {
          * @param state
          * @param context
          */
-        render(props?: PropsType, state?: StateType, context?: $private.IKeyValue): VNode | void;
+        render(props: PropsType, state: StateType, context: $private.IKeyValue, createElement: typeof h): VNode | void;
     }
     class PureComponent<PropsType extends $private.IKeyValue, StateType extends $private.IKeyValue> extends Component<PropsType, StateType> {
         isPureReactComponent: boolean;
@@ -248,8 +249,8 @@ declare namespace zreact {
         eventBind?: boolean;
     }
     function render(vnode: VNode, parent: Element | Node, dom?: Element | Text | Node): Element | Text | Node;
-    function h(nodeName: string | typeof Component | $private.funComponent, attributes: $private.IKeyValue | null, ...args: Array<VNode | string | number | boolean | Array<VNode | string | number | boolean>>): VNode;
-    function createElement(nodeName: string | typeof Component, attributes: $private.IKeyValue | null, ...args: Array<VNode | string | number | boolean | Array<VNode | string | number | boolean>>): VNode;
+    function h(this: Component<$private.IKeyValue, $private.IKeyValue> | undefined | void | null, nodeName: string | typeof Component | $private.funComponent, attributes: $private.IKeyValue, ...args: $private.childType[]): VNode;
+    function createElement(this: Component<$private.IKeyValue, $private.IKeyValue> | undefined | void | null, nodeName: string | typeof Component | $private.funComponent, attributes: $private.IKeyValue, ...args: $private.childType[]): VNode;
     function createClass(obj: any): any;
 }
 declare module "zreact" {

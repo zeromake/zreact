@@ -88,7 +88,7 @@ export function h(this: Component<IKeyValue, IKeyValue> | undefined | void | nul
         }
     }
     const self = this;
-    const component: Component<IKeyValue, IKeyValue> | undefined = self != null && self.setState ? self : undefined;
+    const component: Component<IKeyValue, IKeyValue> | undefined = self && self.setState ? self : undefined;
     const p: IVNode = {
         // 设置属性
         attributes: attributes == null ? undefined : attributes,
