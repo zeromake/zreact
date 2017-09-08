@@ -4,16 +4,11 @@
 		"lib": [
 			"es6",
 			"dom"
-		],
-		"noImplicitAny": true,
-		"noImplicitThis": true,
-		"strictNullChecks": false,
+    ],
+    "outDir": "build",
 		"typeRoots": [
-			"../../"
+			"../../types/"
 		],
-		"types": [],
-		"noEmit": true,
-		"forceConsistentCasingInFileNames": true,
 		"jsx": "react",
 		"jsxFactory": "h"
 	},
