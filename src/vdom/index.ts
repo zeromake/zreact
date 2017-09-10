@@ -1,4 +1,4 @@
-import { IVNode } from "../vnode";
+import { VNode } from "../vnode";
 import { Component } from "../component";
 import { isTextNode } from "../dom/index";
 // import { ATTR_KEY } from "../constants";
@@ -11,7 +11,7 @@ import { IKeyValue } from "../types";
  * @param vnode
  * @param hydrating
  */
-export function isSameNodeType(node: IVDom, vnode: string|number|boolean|IVNode, hydrating: boolean) {
+export function isSameNodeType(node: IVDom, vnode: string|number|boolean|VNode, hydrating: boolean) {
     if (typeof vnode === "string" || typeof vnode === "number" || typeof vnode === "boolean") {
         // vnode是文本节点,判断dom是否为文本节点
         return isTextNode(node.base);
@@ -39,7 +39,7 @@ export function isNamedNode(
  * 获取当前组件所有地方来的props
  * @param vnode
  */
-export function getNodeProps(vnode: IVNode) {
+export function getNodeProps(vnode: VNode) {
     // jsx上的属性
     const props = extend({}, vnode.attributes);
     props.children = vnode.children;

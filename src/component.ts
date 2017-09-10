@@ -1,6 +1,6 @@
 import { FORCE_RENDER } from "./constants";
 import { renderComponent } from "./vdom/component";
-import { IVNode } from "./vnode";
+import { VNode } from "./vnode";
 import { enqueueRender } from "./render-queue";
 import { extend } from "./util";
 import { IKeyValue } from "./types";
@@ -183,7 +183,7 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
      * @param state
      * @param context
      */
-    public render(props: PropsType, state: StateType, context: IKeyValue, createElement: typeof h): IVNode | void {
+    public render(props: PropsType, state: StateType, context: IKeyValue, createElement: typeof h): VNode | void {
         // console.error("not set render");
     }
     /**

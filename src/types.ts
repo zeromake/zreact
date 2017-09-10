@@ -1,4 +1,4 @@
-import { IVNode } from "./vnode";
+import { VNode } from "./vnode";
 
 /**
  * 通用map<string, any>
@@ -9,8 +9,8 @@ export interface IKeyValue {
 /**
  * 函数组件
  */
-export type funComponent = (props?: IKeyValue, content?: any) => IVNode;
+export type funComponent = (props?: IKeyValue, content?: any) => VNode;
 /**
  * nodeName的类型
  */
-export type childType = IVNode|string|number|boolean;
+export type childType = VNode|string|number|boolean;

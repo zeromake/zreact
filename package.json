@@ -1,6 +1,6 @@
 {
   "name": "zreact",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "React like,copy by preact",
   "main": "dist/zreact.js",
   "module": "dist/zreact.esm.js",
@@ -19,6 +19,7 @@
     "build:all": "npm run clean && npm run build:dev && npm run build && npm run build:ie8 && npm run build:devtools-run",
     "build": "cross-env NODE_ENV=production DEVTOOLS_ENV=production rollup -c config/rollup.config.js",
     "build:devtools-run": "rollup -c config/rollup.config.devtools-run.js",
+    "build:devtools": "rollup -c config/rollup.config.devtools.js",
     "build:dev": "cross-env DEVTOOLS_ENV=production NODE_ENV=dev rollup -c config/rollup.config.js",
     "build:ie8": "cross-env DEVTOOLS_ENV=production NODE_ENV=dev rollup -c config/rollup.ie8.config.js",
     "dev": "cross-env DEVTOOLS_ENV=production NODE_ENV=dev rollup -c config/rollup.config.js -w",

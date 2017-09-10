@@ -1,6 +1,7 @@
-import { IVNode } from "./vnode";
+import { VNode } from "./vnode";
 import { Component } from "./component";
 import { IKeyValue } from "./types";
+import { IVDom } from "./vdom/index";
 
 const options: {
     /**
@@ -26,7 +27,7 @@ const options: {
     /**
      * vnode实例创建时的钩子
      */
-    vnode?: (vnode: IVNode) => void;
+    vnode?: (vnode: VNode) => void;
     /**
      * 事件钩子，可以对event过滤返回的会代替event参数
      */
@@ -35,6 +36,10 @@ const options: {
      * 是否自动对事件方法绑定this为组件，默认为true(preact没有)
      */
     eventBind?: boolean;
+    /**
+     * ref 默认为vdom, 
+     */
+    ref?: ((vdom: IVDom) => any) | boolean;
 } = {
     eventBind: true,
 };

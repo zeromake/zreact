@@ -1,6 +1,6 @@
 import { Component } from "./component";
 import options from "./options";
-import { IVNode } from "./vnode";
+import { VNode } from "./vnode";
 import { IKeyValue, funComponent, childType } from "./types";
 
 // const EMPTY_CHILDREN: any[] = [];
@@ -16,7 +16,7 @@ import { IKeyValue, funComponent, childType } from "./types";
 export function h(this: Component<IKeyValue, IKeyValue> | undefined | void | null, nodeName: string | typeof Component | funComponent, attributes: IKeyValue, ...args: childType[]) {
     // 初始化子元素列表
     const stack: childType[] = [];
-    const children: Array<IVNode|string|number|boolean> = [];
+    const children: Array<VNode|string|number|boolean> = [];
     // let i: number;
     // let child: any;
     // 是否为原生组件
@@ -89,18 +89,30 @@ export function h(this: Component<IKeyValue, IKeyValue> | undefined | void | nul
     }
     const self = this;
     const component: Component<IKeyValue, IKeyValue> | undefined = self && self.setState ? self : undefined;
-    const p: IVNode = {
-        // 设置属性
-        attributes: attributes == null ? undefined : attributes,
-        // 设置子元素
-        children,
-        // 设置组件实例
-        component,
-        // 设置key
-        key: attributes == null ? undefined : attributes.key,
+    const p = new VNode(
         // 设置原生组件名字或自定义组件class(function)
         nodeName,
-    };
+        // 设置子元素
+        children
+    );
+    // 设置属性
+    p.attributes = attributes == null ? undefined : attributes;
+    // 设置组件实例
+    p.component = component;
+    // 设置key
+    p.key = attributes == null ? undefined : attributes.key;
+    // const p: VNode = {
+    //     // 设置属性
+    //     attributes: attributes == null ? undefined : attributes,
+    //     // 设置子元素
+    //     children,
+    //     // 设置组件实例
+    //     component,
+    //     // 设置key
+    //     key: attributes == null ? undefined : attributes.key,
+    //     // 设置原生组件名字或自定义组件class(function)
+    //     nodeName,
+    // };
     // vnode 钩子
     if (options.vnode !== undefined) {
         options.vnode(p);

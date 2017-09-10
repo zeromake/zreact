@@ -1,10 +1,7 @@
 import { Component } from "./component";
 import { IKeyValue, childType, funComponent } from "./types";
 
-/**
- * 虚拟的Node，与VDom不同，用于生成真实的dom
- */
-export interface IVNode {
+export class VNode {
     /**
      * 组件名
      * {string} 为原生组件
@@ -27,5 +24,9 @@ export interface IVNode {
     /**
      * 绑定的组件实例
      */
-    component: Component<IKeyValue, IKeyValue> | undefined | void | null;
+    component?: Component<IKeyValue, IKeyValue> | undefined | void | null;
+    constructor(nodeName: string | typeof Component | funComponent, children: childType[]) {
+        this.nodeName = nodeName;
+        this.children = children;
+    }
 }

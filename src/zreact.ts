@@ -9,7 +9,7 @@ import { rerender } from "./render-queue";
 import { buildVDom } from "./vdom/index";
 import { IKeyValue } from "./types";
 import { IVDom } from "./vdom/index";
-import { IVNode } from "./vnode";
+import { VNode } from "./vnode";
 
 declare const VERSION_ENV: string;
 const version = VERSION_ENV;

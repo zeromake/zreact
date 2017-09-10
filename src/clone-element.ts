@@ -1,5 +1,5 @@
 import { h } from "./h";
-import { IVNode } from "./vnode";
+import { VNode } from "./vnode";
 import { extend } from "./util";
 
 /**
@@ -8,7 +8,7 @@ import { extend } from "./util";
  * @param props 新的props
  * @param children 新的子组件
  */
-export function cloneElement(vnode: IVNode, props: any, ...children: any[]) {
+export function cloneElement(vnode: VNode, props: any, ...children: any[]) {
     const child: any = children.length > 0 ? children : vnode.children;
     return h(
         vnode.nodeName,

@@ -60,7 +60,15 @@ export function setAccessor(
         }
         if (value) {
             // 给新方法设置vdom
-            value(vdom);
+            if (options.ref) {
+                if (typeof options.ref === "function") {
+                    value(options.ref(vdom))
+                } else {
+                    value(vdom.base)
+                }
+            } else {
+                value(vdom);
+            }
         }
     } else if ("class" === name && !isSvg) {
         // 直接通过className设置class

@@ -106,17 +106,22 @@ function createReactDOMComponent(vdom: IVDom): IReactComponent {
             type: node.nodeName.toLowerCase(),
         };
     }
+    const children: IReactComponent[] = new Array();
+    childNodes.forEach(function _(child: any) {
+        if (child._vdom) {
+            let component: IReactComponent;
+            if (child._vdom.component) {
+                component = updateReactComponent(child._vdom.component);
+            } else {
+                component = updateReactComponent(child._vdom);
+            }
+            children.push(component);
+        }
+    })
     return {
         _currentElement: element,
         _inDevTools: false,
-        _renderedChildren: childNodes.map(function _(child: any) {
-            if (child._vdom) {
-                if (child._vdom.component) {
-                    return updateReactComponent(child._vdom.component);
-                }
-                return updateReactComponent(child._vdom);
-            }
-        }),
+        _renderedChildren: children,
         _stringText: isText ? node.textContent : null,
         node,
     };
@@ -187,7 +192,7 @@ function createDevToolsBridge(vdom?: IVDom) {
             while (node && !node._vdom) {
                 node = node.parentNode;
             }
-            return node ? updateReactComponent(node._vdom) : null;
+            return node ? updateReactComponent(node._vdom.component) : null;
         },
         getNodeFromInstance: function getNodeFromInstance(instance: IReactComponent) {
             return instance.node;

@@ -1,7 +1,7 @@
 import options from "../options";
 // import { ATTR_KEY } from "../constants";
 import { isSameNodeType, isNamedNode } from "./index";
-import { IVNode } from "../vnode";
+import { VNode } from "../vnode";
 import { Component } from "../component";
 import { IKeyValue, childType } from "../types";
 import { IVDom, buildVDom } from "./index";
@@ -53,7 +53,7 @@ export function flushMounts() {
  */
 export function diff(
     vdom: IVDom | undefined,
-    vnode: IVNode | void,
+    vnode: VNode | void,
     context: IKeyValue,
     mountAll: boolean,
     parent: any,
@@ -104,7 +104,7 @@ export function diff(
  */
 function idiff(
     vdom: IVDom | undefined | null,
-    vnode: IVNode | string | number | boolean | void,
+    vnode: VNode | string | number | boolean | void,
     context: IKeyValue,
     mountAll: boolean,
     componentRoot?: boolean,
@@ -151,10 +151,10 @@ function idiff(
         vdom.props = true;
         return vdom;
     }
-    let vnodeName = (vnode as IVNode).nodeName;
+    let vnodeName = (vnode as VNode).nodeName;
     if (typeof vnodeName === "function") {
         // 是一个组件,创建或复用组件实例，返回dom
-        return buildComponentFromVNode(vdom, (vnode as IVNode), context, mountAll); // , (vnode as IVNode).component);
+        return buildComponentFromVNode(vdom, (vnode as VNode), context, mountAll); // , (vnode as VNode).component);
     }
     // 重新判断一下是否要创建svg
     isSvgMode = vnodeName === "svg"
@@ -188,7 +188,7 @@ function idiff(
     // 取出上次存放的props
     let props = vdom.props;
     // 获取虚拟的子节点
-    const vchildren = (vnode as IVNode).children;
+    const vchildren = (vnode as VNode).children;
     if (props == null || typeof props === "boolean") {
         // 上回的props不存在说明，这次一般为新建（preact有可能通过原生dom操作删除）
         vdom.props = props = {};
@@ -225,7 +225,7 @@ function idiff(
         );
     }
     // 设置dom属性
-    diffAttributes(vdom, (vnode as IVNode), props);
+    diffAttributes(vdom, (vnode as VNode), props);
     // 把props存到dom上下文中
     // child[ATTR_KEY] = props;
     if ((vdom.base as any)._vdom !== vdom) {
@@ -398,7 +398,7 @@ export function removeChildren(node: IVDom) {
     }
 }
 
-function diffAttributes(vdom: IVDom, vnode: IVNode, old: IKeyValue) {
+function diffAttributes(vdom: IVDom, vnode: VNode, old: IKeyValue) {
     const attrs: IKeyValue | undefined = vnode.attributes;
     const component = vnode.component;
     const dom = vdom.base;

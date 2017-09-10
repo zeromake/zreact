@@ -1,7 +1,7 @@
 import options from "../options";
 import { enqueueRender } from "../render-queue";
 import { Component } from "../component";
-import { IVNode } from "../vnode";
+import { VNode } from "../vnode";
 import { createComponent, collectComponent } from "./component-recycler";
 import { getNodeProps } from "./index";
 import { removeNode } from "../dom/index";
@@ -163,7 +163,7 @@ export function renderComponent(component: Component<IKeyValue, IKeyValue>, opts
 
     if (!skip) {
         // 当前组件的render函数返回的VNode
-        const rendered: IVNode | void = component.render(props, state, context, component.h);
+        const rendered: VNode | void = component.render(props, state, context, component.h);
         //
         let inst: Component<IKeyValue, IKeyValue> | undefined;
         if (component.getChildContext) {
@@ -318,7 +318,7 @@ export function renderComponent(component: Component<IKeyValue, IKeyValue>, opts
  */
 export function buildComponentFromVNode(
     vdom: IVDom | undefined | null,
-    vnode: IVNode,
+    vnode: VNode,
     context: IKeyValue,
     mountALL: boolean,
 ): IVDom {
