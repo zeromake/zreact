@@ -87,8 +87,6 @@ export function h(this: Component<IKeyValue, IKeyValue> | undefined | void | nul
             lastSimple = simple;
         }
     }
-    const self = this;
-    const component: Component<IKeyValue, IKeyValue> | undefined = self && self.setState ? self : undefined;
     const p = new VNode(
         // 设置原生组件名字或自定义组件class(function)
         nodeName,
@@ -97,8 +95,12 @@ export function h(this: Component<IKeyValue, IKeyValue> | undefined | void | nul
     );
     // 设置属性
     p.attributes = attributes == null ? undefined : attributes;
-    // 设置组件实例
-    p.component = component;
+    if (options.eventBind) {
+        const self = this;
+        const component: Component<IKeyValue, IKeyValue> | undefined = self && self.setState ? self : undefined;
+        // 设置组件实例
+        p.component = component;
+    }
     // 设置key
     p.key = attributes == null ? undefined : attributes.key;
     // const p: VNode = {

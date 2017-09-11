@@ -30,7 +30,8 @@
       ],
       "no-empty": false,
       "ordered-imports": false,
-      "no-conditional-assignment": false
+      "no-conditional-assignment": false,
+      "object-literal-sort-keys": false,
     },
     "rulesDirectory": []
 }

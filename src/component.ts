@@ -6,6 +6,7 @@ import { extend } from "./util";
 import { IKeyValue } from "./types";
 import { IVDom } from "./vdom/index";
 import { h } from "./h";
+import options from "./options";
 
 export class Component <PropsType extends IKeyValue, StateType extends IKeyValue> {
     /**
@@ -93,7 +94,7 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
      */
     public getChildContext?: () => IKeyValue;
 
-    public h: typeof h;
+    public h?: typeof h;
     /**
      * 子组件
      */
@@ -132,10 +133,12 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
         this.context = context;
         this.props = props;
         this.state = (this.state || {}) as StateType;
-        const self = this;
-        this.h = function _(){
-            return h.apply(self, Array.prototype.slice.call(arguments, 0));
-        } as typeof h;
+        if (options.eventBind) {
+            const self = this;
+            this.h = function _(){
+                return h.apply(self, Array.prototype.slice.call(arguments, 0));
+            } as typeof h;
+        }
     }
     /**
      * 设置state并通过enqueueRender异步更新dom
@@ -183,7 +186,7 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
      * @param state
      * @param context
      */
-    public render(props: PropsType, state: StateType, context: IKeyValue, createElement: typeof h): VNode | void {
+    public render(props: PropsType, state: StateType, context: IKeyValue, createElement?: typeof h): VNode | void {
         // console.error("not set render");
     }
     /**

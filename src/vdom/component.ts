@@ -162,8 +162,9 @@ export function renderComponent(component: Component<IKeyValue, IKeyValue>, opts
     component._dirty = false;
 
     if (!skip) {
+        let rendered: VNode | void;
         // 当前组件的render函数返回的VNode
-        const rendered: VNode | void = component.render(props, state, context, component.h);
+        rendered = component.render(props, state, context, component.h);
         //
         let inst: Component<IKeyValue, IKeyValue> | undefined;
         if (component.getChildContext) {
