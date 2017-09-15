@@ -218,7 +218,7 @@ function idiff(
         const childrenHydrating = hydrating || (typeof props === "object" && props.dangerouslySetInnerHTML != null);
         diffChildren(
             vdom,
-            vchildren,
+            vchildren as childType[],
             context,
             mountAll,
             childrenHydrating,

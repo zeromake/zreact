@@ -11,7 +11,7 @@ export class VNode {
     /**
      * 子组件
      */
-    children: childType[];
+    children?: childType[];
     /**
      * 组件所属的属性
      */
@@ -25,6 +25,8 @@ export class VNode {
      * 绑定的组件实例
      */
     component?: Component<IKeyValue, IKeyValue> | undefined | void | null;
+    zreactCompatUpgraded?: boolean;
+    zreactCompatNormalized?: boolean;
     constructor(nodeName: string | typeof Component | funComponent, children: childType[]) {
         this.nodeName = nodeName;
         this.children = children;

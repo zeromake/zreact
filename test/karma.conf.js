@@ -100,7 +100,7 @@ module.exports = function(config) {
 
 		files: [
 			{ pattern: 'polyfills.js', watched: false },
-			{ pattern: '{browser,shared}/**.js', watched: false }
+			{ pattern: '{browser,shared,compat}/**.js', watched: false }
 		],
 
 		preprocessors: {
@@ -118,18 +118,23 @@ module.exports = function(config) {
 						exclude: /node_modules/,
                         loader: 'babel-loader',
                         options: {
-                            "presets": [
-                            ["env", {
-                                "loose": true,
-                                "exclude": ["transform-es2015-typeof-symbol"],
-                                "targets": {
-                                "browsers": ["last 2 versions", "IE >= 9"]
-                                }
-                            }]
-                            ],
+                            presets: [
+								['es2015', { loose:true }],
+								'stage-0',
+								'react'
+							],
+                            // "presets": [
+                            // ["env", {
+                            //     "loose": true,
+                            //     "exclude": ["transform-es2015-typeof-symbol"],
+                            //     "targets": {
+                            //         "browsers": ["last 2 versions", "IE >= 9"]
+                            //     }
+                            // }]
+                            // ],
                             "plugins": [
-                            "transform-object-rest-spread",
-                            "transform-react-jsx"
+                                "transform-object-rest-spread",
+                                "transform-react-jsx"
                             ]
                         }
                     },
@@ -148,7 +153,10 @@ module.exports = function(config) {
 				]
 			},
 			resolve: {
-				alias: { preact: '../src/zreact.ts' },
+                alias: {
+                    'zreact-compat': path.join(__dirname, '../build/compat.js'),
+                    zreact: path.join(__dirname, '../build/zreact.js')
+                },
 				modules: [__dirname, 'node_modules']
 			},
 			plugins: [

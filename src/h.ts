@@ -13,7 +13,7 @@ import { IKeyValue, funComponent, childType } from "./types";
  * @see http://jasonformat.com/wtf-is-jsx
  * @public
  */
-export function h(this: Component<IKeyValue, IKeyValue> | undefined | void | null, nodeName: string | typeof Component | funComponent, attributes: IKeyValue, ...args: childType[]) {
+export function h(this: Component<IKeyValue, IKeyValue> | undefined | void | null, nodeName: string | typeof Component | funComponent, attributes: IKeyValue | null, ...args: childType[]) {
     // 初始化子元素列表
     const stack: childType[] = [];
     const children: Array<VNode|string|number|boolean> = [];

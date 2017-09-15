@@ -12,6 +12,7 @@
     ],
     "files": [
        "src/zreact.ts",
-       "src/devtools.ts"
+       "src/devtools.ts",
+       "src/compat.ts"
     ]
 }
