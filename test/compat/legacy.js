@@ -1,4 +1,6 @@
-import React from '../../legacy';
+import React from '../legacy';
+
+const h = React.createElement;
 
 describe('legacy', () => {
 	it('should export server', () => {

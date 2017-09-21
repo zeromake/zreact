@@ -184,7 +184,7 @@ class ContextProvider {
 function renderSubtreeIntoContainer(parentComponent: any, vnode: any, container: any, callback: any) {
     const wrap = h(ContextProvider as any, { context: parentComponent.context }, vnode);
     const renderContainer = render(wrap, container);
-    const component = renderContainer.vdom && renderContainer.vdom.component || renderContainer.vdom.base;
+    const component = renderContainer._component || (renderContainer.vdom && renderContainer.vdom.base);
     if (callback) {
         callback.call(component, renderContainer);
     }

@@ -9,6 +9,7 @@ const {
 	unstable_renderSubtreeIntoContainer,
 	__spread
 } = React;
+const h = React.createElement;
 
 describe('preact-compat', () => {
 	describe('render()', () => {
@@ -304,12 +305,10 @@ describe('preact-compat', () => {
 				renderInner() {
 					const wrapper = document.createElement('div');
                     this.inner = unstable_renderSubtreeIntoContainer(this, <Inner/>, wrapper);
-                    console.log('------', this.inner)
 				}
 			}
 			const root = document.createElement('div');
             const app = render(<App/>, root);
-            console.log(app.inner.getNode)
 			expect(typeof app.inner.getNode === 'function').to.equal(true);
 		});
 

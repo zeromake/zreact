@@ -2,6 +2,8 @@ import React from 'zreact-compat';
 import assertJsx from 'preact-jsx-chai';
 chai.use(assertJsx);
 
+const h = React.createElement;
+
 describe('svg', () => {
 	let scratch;
 

@@ -1,6 +1,8 @@
 import renderToString from 'preact-render-to-string';
 import React from 'zreact-compat';
 
+const h = React.createElement;
+
 describe('jsx', () => {
 	it('should render react-style', () => {
 		let jsx = (

@@ -2,6 +2,8 @@ import renderToString from 'preact-render-to-string';
 import { rerender } from 'zreact';
 import React from 'zreact-compat';
 
+const h = React.createElement;
+
 describe('components', () => {
 	let scratch;
 

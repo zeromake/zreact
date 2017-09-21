@@ -1,7 +1,7 @@
 import { h, cloneElement, render, rerender, Component, buildVDom } from '../../build/zreact';
 /** @jsx h */
 
-let spyAll = obj => Object.keys(obj).forEach( key => sinon.spy(obj,key) );
+let spyAll = obj => Object.keys(obj).forEach( key => obj[key] = sinon.spy(obj,key) );
 
 function getAttributes(node) {
 	let attrs = {};
@@ -508,17 +508,19 @@ describe('Components', () => {
 			}
 			const Func = sinon.spy( () => <Inner /> );
 			class Inner extends Component {
-				componentWillMount() {}
+				componentWillMount() {
+                    console.log("componentWillMount")
+                }
 				componentDidMount() {}
 				componentWillUnmount() {}
 				render() {
 					return <div>inner</div>;
 				}
-			}
+            }
 
 			spyAll(Inner.prototype);
 
-			let root = render(<Root />, scratch);
+            let root = render(<Root />, scratch);
 
 			expect(Inner.prototype.componentWillMount).to.have.been.calledOnce;
 			expect(Inner.prototype.componentDidMount).to.have.been.calledOnce;

@@ -116,27 +116,27 @@ module.exports = function(config) {
 						enforce: 'pre',
 						test: /\.jsx?$/,
 						exclude: /node_modules/,
-                        loader: 'babel-loader',
-                        options: {
-                            presets: [
-								['es2015', { loose:true }],
-								'stage-0',
-								'react'
-							],
-                            // "presets": [
-                            // ["env", {
-                            //     "loose": true,
-                            //     "exclude": ["transform-es2015-typeof-symbol"],
-                            //     "targets": {
-                            //         "browsers": ["last 2 versions", "IE >= 9"]
-                            //     }
-                            // }]
-                            // ],
-                            "plugins": [
-                                "transform-object-rest-spread",
-                                "transform-react-jsx"
-                            ]
-                        }
+                        loader: 'babel-loader'
+                        // options: {
+                        //     presets: [
+						// 		['es2015', { loose:true }],
+						// 		'stage-0',
+						// 		'react'
+						// 	],
+                        //     // "presets": [
+                        //     // ["env", {
+                        //     //     "loose": true,
+                        //     //     "exclude": ["transform-es2015-typeof-symbol"],
+                        //     //     "targets": {
+                        //     //         "browsers": ["last 2 versions", "IE >= 9"]
+                        //     //     }
+                        //     // }]
+                        //     // ],
+                        //     "plugins": [
+                        //         "transform-object-rest-spread",
+                        //         "transform-react-jsx"
+                        //     ]
+                        // }
                     },
                     {
                         test: /\.ts$/,
