@@ -1,5 +1,21 @@
+<a name="0.1.1"></a>
+## [0.1.1](https://github.com/zeromake/zreact/compare/v0.1.0...v0.1.1) (2017-09-21)
+
+
+### Bug Fixes
+
+* **vnode:** vnode change class ([855ebb5](https://github.com/zeromake/zreact/commit/855ebb5))
+* compat renderSubtreeIntoContainer error ([b547a3b](https://github.com/zeromake/zreact/commit/b547a3b))
+
+
+### Features
+
+* add compat ([56a188c](https://github.com/zeromake/zreact/commit/56a188c))
+
+
+
 <a name="0.1.0"></a>
-# [0.1.0](https://github.com/zeromake/zreact/compare/v0.0.4...v0.1.0) (2017-09-08)
+# [0.1.0](https://github.com/zeromake/zreact/compare/0.1.0...v0.1.0) (2017-09-08)
 
 
 ### Bug Fixes
