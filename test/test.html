@@ -46,35 +46,36 @@
         //         })
         //     }
         // })
-        function test () {
-            console.log(this, '---test---')
-        }
-        var Bar = zreact.createClass({
-            render: function(p, s, c, h) {
-                return h("button", { onClick: this.add}, "add")
-            },
-            add: function() {
-                this.$emit("Add")
-            }
-        })
-        var Foo = zreact.createClass({
-            $init: function(p, c) {
-                this.state = {
-                    num: 1
-                }
-            },
-            render: function(p, s, c, h) {
-                return h("div", null, "num: " + s.num, h(Bar, { onAdd: this.add}))
-            },
-            add: function() {
-                console.log('--Foo--', this)
-                this.setState(function(state) {
-                    state.num += 1
-                })
-            }
-        })
-        var scratch = document.querySelector("#app");
-        var vdom = zreact.render(zreact.h(Foo), scratch)
+        // function test () {
+        //     console.log(this, '---test---')
+        // }
+        // var Bar = zreact.createClass({
+        //     render: function(p, s, c, h) {
+        //         return h("button", { onClick: this.add}, "add")
+        //     },
+        //     add: function() {
+        //         this.$emit("Add")
+        //     }
+        // })
+        // var Foo = zreact.createClass({
+        //     $init: function(p, c) {
+        //         this.state = {
+        //             num: 1
+        //         }
+        //     },
+        //     render: function(p, s, c, h) {
+        //         return h("div", null, "num: " + s.num, h(Bar, { onAdd: this.add}))
+        //     },
+        //     add: function() {
+        //         console.log('--Foo--', this)
+        //         this.setState(function(state) {
+        //             state.num += 1
+        //         })
+        //     }
+        // })
+        // var scratch = document.querySelector("#app");
+        // var vdom = zreact.render(zreact.h(Foo), scratch)
+
 
         // var Test = function(p) {
         //     var h = h.bind(this)
@@ -264,6 +265,32 @@
         //     requestAnimationFrame(update);
         // }
         // requestAnimationFrame(update);
+
+        var Bar = zreact.createClass({
+            componentDidMount: function() {
+                console.log('A.componentDidMount, '+document.querySelectorAll('.bar').length)
+            },
+            componentWillUnmount: function() {
+                console.log('A.componentWillUnmount, '+document.querySelectorAll('.bar').length)
+		        console.log(document.body.innerHTML)
+            },
+            render: function() {
+                return h('p', { class: 'bar' }, "Bar")
+            }
+        });
+        var Foo = function() {
+            return h("div", null, "Foo")
+        }
+        var scratch = document.querySelector("#app");
+        render(h(
+            "div", { id: "zreact-app" },
+            h(Bar),
+            h(Foo)
+        ), document.body, scratch)
+        render(h(
+            "div", { id: "zreact-app" },
+            h(Foo)
+        ), document.body, scratch)
     </script>
     <!-- <script src="../devtools.js"></script> -->
     <!-- <script src="../node_modules/preact/devtools.js"></script> -->

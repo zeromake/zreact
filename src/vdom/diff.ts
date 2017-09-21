@@ -332,8 +332,31 @@ function diffChildren(
                 if (f == null) {
                     vdom.base.appendChild(pchild.base);
                 } else if (pchild.base === f.nextSibling) {
-                    const t: any = f;
-                    removeNode(t);
+                    // 处理组件卸载生命周期
+                    // @developit I found it
+                    // [vdom/diff.js#L228](https://github.com/developit/preact/blob/master/src/vdom/diff.js#L228)
+                    // This has been uninstalled
+                    // but componentWillUnmount triggered on:
+                    // - [vdom/diff.js#L240](https://github.com/developit/preact/blob/master/src/vdom/diff.js#L240)
+                    // - [vdom/diff.js#L245](https://github.com/developit/preact/blob/master/src/vdom/diff.js#L245)
+                    // so top-level render and setState() are all the same
+                    // ## Repair the code
+                    // ``` javascript
+                    // ```
+                    const fvdom = (f as any)._vdom as IVDom;
+                    if ( fvdom && fvdom.component) {
+                        recollectNodeTree(fvdom, false);
+                        const fkey = fvdom.component._key;
+                        if (fkey && fkey in keyed) {
+                            keyed[fkey] = undefined;
+                        } else {
+                            const findex = children.indexOf(fvdom);
+                            if (findex > -1) {
+                                children[findex] = undefined;
+                            }
+                        }
+                    }
+                    removeNode(f as any);
                 } else {
                     vdom.base.insertBefore(pchild.base, f);
                 }
@@ -362,6 +385,7 @@ function diffChildren(
         }
     }
 }
+
 /** 递归回收(或者只是卸载一个)
  * @param node 要被卸载的dom
  * @param unmountOnly 为true则只触发生命周期，跳过删除(仅在dom上的组件索引不存在有效)
