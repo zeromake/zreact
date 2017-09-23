@@ -1,3 +1,5 @@
+/* istanbul ignore next */
+
 declare const Promise: any;
 declare class Object {
     public static assign: (...args: any[]) => any;
