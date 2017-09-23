@@ -7,7 +7,8 @@ const {
 	Component,
 	PropTypes,
 	unstable_renderSubtreeIntoContainer,
-	__spread
+	__spread,
+	REACT_ELEMENT_TYPE,
 } = React;
 const h = React.createElement;
 
@@ -191,7 +192,7 @@ describe('preact-compat', () => {
 		it('should normalize vnodes', () => {
 			let vnode = <div a="b"><a>t</a></div>;
 			// using typeof Symbol here injects a polyfill, which ruins the test. we'll hardcode the non-symbol value for now.
-			let $$typeof = (typeof Symbol !== "undefined" && Symbol.for && Symbol.for("react.element")) || 0xeac7;;
+			let $$typeof = REACT_ELEMENT_TYPE;
 			expect(vnode).to.have.property('$$typeof', $$typeof);
 			expect(vnode).to.have.property('type', 'div');
 			expect(vnode).to.have.property('props').that.is.an('object');

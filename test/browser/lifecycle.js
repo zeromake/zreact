@@ -591,4 +591,69 @@ describe('Lifecycle methods', () => {
 			}
 		});
 	});
+	describe("componentWillUnmount triggered", () => {
+		it("Component replace", (done) => {
+			class A extends Component {
+				componentWillUnmount() {
+					const len = document.querySelectorAll('.a').length
+					expect(len).to.equal(1)
+					done()
+				}
+				render() {
+					return <p class="a">A</p>
+				}
+			}
+			const B = () => <div class="b">B</div>
+			class App extends Component {
+				constructor() {
+					super()
+					this.state = {
+						disable: true
+					}
+				}
+				render(props, state) {
+					return (
+						<div>{ state.disable ? <A/>: null }<B/></div>
+					);
+				}
+			}
+			let app;
+			render(<App ref={ c => app=c } />, scratch);
+			app.setState({
+				disable: false
+			})
+		})
+		it("Component'keys replace", (done) => {
+			class A extends Component {
+				componentWillUnmount() {
+					const len = document.querySelectorAll('.a').length
+					expect(len).to.equal(1)
+					done()
+				}
+				render() {
+					return <p class="a">A</p>
+				}
+			}
+			const B = () => <div class="b">B</div>
+			class App extends Component {
+				constructor() {
+					super()
+					this.state = {
+						disable: true
+					}
+				}
+				render(props, state) {
+					return (
+						<div>{ state.disable ? <A key="a"/>: null }<B key="b"/></div>
+					);
+				}
+			}
+			let app;
+			render(<App ref={ c => app=c } />, scratch);
+			app.setState({
+				disable: false
+			});
+		});
+	});
+
 });

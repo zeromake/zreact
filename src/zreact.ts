@@ -1,10 +1,10 @@
 import { h, h as createElement } from "./h";
 import { cloneElement } from "./clone-element";
 import { Component } from "./component";
-import { PureComponent } from "./pure-component";
+// import { PureComponent } from "./pure-component";
 import { render } from "./render";
 import options from "./options";
-import { createClass } from "./create-class";
+// import { createClass } from "./create-class";
 import { rerender } from "./render-queue";
 import { buildVDom } from "./vdom/index";
 import { IKeyValue } from "./types";
@@ -15,10 +15,10 @@ declare const VERSION_ENV: string;
 const version = VERSION_ENV;
 export default {
     Component,
-    PureComponent,
+    // PureComponent,
     buildVDom,
     cloneElement,
-    createClass,
+    // createClass,
     createElement,
     h,
     options,
@@ -29,10 +29,10 @@ export default {
 
 export {
     Component,
-    PureComponent,
+    // PureComponent,
     buildVDom,
     cloneElement,
-    createClass,
+    // createClass,
     createElement,
     h,
     options,

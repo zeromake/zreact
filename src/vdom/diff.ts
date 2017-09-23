@@ -355,8 +355,9 @@ function diffChildren(
                                 children[findex] = undefined;
                             }
                         }
+                    } else {
+                        removeNode(f as any);
                     }
-                    removeNode(f as any);
                 } else {
                     vdom.base.insertBefore(pchild.base, f);
                 }

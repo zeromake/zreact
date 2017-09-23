@@ -616,6 +616,7 @@ PureComponent.prototype.shouldComponentUpdate = function(props: any, state: any)
 };
 
 export {
+    REACT_ELEMENT_TYPE,
     version,
     DOM,
     PropTypes,
@@ -637,6 +638,7 @@ export {
 };
 
 export default {
+    REACT_ELEMENT_TYPE,
     version,
     DOM,
     PropTypes,

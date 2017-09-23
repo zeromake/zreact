@@ -62,9 +62,9 @@ export function setAccessor(
             // 给新方法设置vdom
             if (options.ref) {
                 if (typeof options.ref === "function") {
-                    value(options.ref(vdom))
+                    value(options.ref(vdom));
                 } else {
-                    value(vdom.base)
+                    value(vdom.base);
                 }
             } else {
                 value(vdom);

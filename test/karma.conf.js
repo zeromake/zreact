@@ -62,23 +62,14 @@ var localBrowsers = realBrowser ? Object.keys(travisLaunchers) : ['PhantomJS'];
 
 module.exports = function(config) {
 	config.set({
-		browsers: ["Chrome"],//sauceLabs ? Object.keys(sauceLabsLaunchers) : localBrowsers,
+		browsers: sauceLabs ? Object.keys(sauceLabsLaunchers) : localBrowsers,
 
 		frameworks: ['mocha', 'chai-sinon'],
 
 		reporters: ['mocha'].concat(
             sauceLabs ? 'saucelabs' : [],
-            coverage ? 'coverage-istanbul' : []
+			coverage ? 'coverage-istanbul' : []
 		),
-		coverageReporter: {
-			dir: __dirname+'/../coverage',
-			reporters: [
-				{ type: 'text-summary' },
-				{ type: 'html' },
-				{ type: 'lcovonly', subdir: '.', file: 'lcov.info' }
-			]
-		},
-
 		mochaReporter: {
 			showDiff: true
 		},
@@ -173,15 +164,9 @@ module.exports = function(config) {
 			noInfo: true
         },
         coverageIstanbulReporter: {
-            reports: ['html', 'lcovonly', 'text-summary'],
+            reports: ['json', 'text-summary'],//'html', 'lcovonly', 'text-summary', 'json'],
             dir: 'test/coverage',
-            fixWebpackSourcePaths: true,
-            'report-config': {
-                html: {
-                    subdir: 'html'
-                }
-
-            }
-        }
+			fixWebpackSourcePaths: true
+		}
 	});
 };

@@ -214,10 +214,10 @@ declare namespace zreact {
          */
         $emit(eventName: string, args: any): any;
     }
-    class PureComponent<PropsType extends $private.IKeyValue, StateType extends $private.IKeyValue> extends Component<PropsType, StateType> {
-        isPureReactComponent: boolean;
-        shouldComponentUpdate: (props: PropsType, state: StateType) => boolean;
-    }
+    // class PureComponent<PropsType extends $private.IKeyValue, StateType extends $private.IKeyValue> extends Component<PropsType, StateType> {
+    //     isPureReactComponent: boolean;
+    //     shouldComponentUpdate: (props: PropsType, state: StateType) => boolean;
+    // }
     function cloneElement(vnode: VNode, props: any, ...children: any[]): VNode;
     function rerender(): void;
     interface option {
@@ -257,7 +257,7 @@ declare namespace zreact {
     function render(vnode: VNode, parent: Element | Node, dom?: Element | Text | Node): Element | Text | Node;
     function h(this: Component<$private.IKeyValue, $private.IKeyValue> | undefined | void | null, nodeName: string | typeof Component | $private.funComponent, attributes: $private.IKeyValue, ...args: $private.childType[]): VNode;
     function createElement(this: Component<$private.IKeyValue, $private.IKeyValue> | undefined | void | null, nodeName: string | typeof Component | $private.funComponent, attributes: $private.IKeyValue, ...args: $private.childType[]): VNode;
-    function createClass(obj: any): any;
+    // function createClass(obj: any): any;
 }
 declare module "zreact" {
 	export = zreact;
