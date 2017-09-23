@@ -205,17 +205,7 @@ function createDevToolsBridge(vdom?: IVDom) {
     if (vdom && vdom.component) {
         roots[".0"] = updateReactComponent(vdom.component);
     } else {
-        if (window.$zreact) {
-            const keys = Object.keys(roots);
-            if (keys.length > 0) {
-                keys.forEach((key) => {
-                    delete roots[key];
-                });
-            }
-            roots[".0"] = updateReactComponent(window.$zreact);
-        } else {
-            findRoots(document.body, roots);
-        }
+        findRoots(document.body, roots);
     }
     // findRoots(document.body, roots);
 

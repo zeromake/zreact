@@ -59,9 +59,9 @@ export function createComponent(Ctor: any, props: IKeyValue, context: IKeyValue,
             }
         }
     }
-    if (!inst._emitComponent && component) {
-        inst._emitComponent = component;
-    }
+    // if (!inst._emitComponent && component) {
+    //     inst._emitComponent = component;
+    // }
     return inst;
 }
 

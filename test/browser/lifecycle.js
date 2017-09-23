@@ -650,8 +650,8 @@ describe('Lifecycle methods', () => {
 			}
 			let app;
 			render(<App ref={ c => app=c } />, scratch);
-			app.setState({
-				disable: false
+			app.setState(() => {
+				return { disable: false }
 			});
 		});
 	});

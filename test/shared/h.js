@@ -5,11 +5,11 @@ import { expect } from 'chai';
 
 /** @jsx h */
 
-const buildVNode = (nodeName, attributes, children=[], component) => ({
+const buildVNode = (nodeName, attributes, children=[]) => ({
 	nodeName,
 	children,
     attributes,
-    component,
+    // component,
 	key: attributes && attributes.key
 });
 

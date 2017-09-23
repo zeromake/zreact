@@ -133,12 +133,12 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
         this.context = context;
         this.props = props;
         this.state = (this.state || {}) as StateType;
-        if (options.eventBind) {
-            const self = this;
-            this.h = function _(){
-                return h.apply(self, Array.prototype.slice.call(arguments, 0));
-            } as typeof h;
-        }
+        // if (options.eventBind) {
+        //     const self = this;
+        //     this.h = function _(){
+        //         return h.apply(self, Array.prototype.slice.call(arguments, 0));
+        //     } as typeof h;
+        // }
     }
     /**
      * 设置state并通过enqueueRender异步更新dom
@@ -194,18 +194,18 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
      * @param eventName 事件名去除
      * @param args 传递的参数
      */
-    public $emit(eventName: string, args: any): any {
-        const event = this.props["on" + eventName];
-        if (event) {
-            let result;
-            const functionName = event.name;
-            // 保证只是该组件实例上的方法才绑定this
-            if (this._emitComponent && (this._emitComponent as any)[functionName] === event) {
-                result = event.call(this._emitComponent, args);
-            } else {
-                result = event(args);
-            }
-            return result;
-        }
-    }
+    // public $emit(eventName: string, args: any): any {
+    //     const event = this.props["on" + eventName];
+    //     if (event) {
+    //         let result;
+    //         const functionName = event.name;
+    //         // 保证只是该组件实例上的方法才绑定this
+    //         if (this._emitComponent && (this._emitComponent as any)[functionName] === event) {
+    //             result = event.call(this._emitComponent, args);
+    //         } else {
+    //             result = event(args);
+    //         }
+    //         return result;
+    //     }
+    // }
 }

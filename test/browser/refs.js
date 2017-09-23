@@ -1,4 +1,4 @@
-import { h, render, Component, buildVDom } from 'zreact';
+import { h, render, Component, buildVDom, options } from 'zreact';
 /** @jsx h */
 
 // gives call count and argument errors names (otherwise sinon just uses "spy"):
@@ -29,6 +29,14 @@ describe('refs', () => {
 		let ref = spy('ref');
 		const dom = render(<div ref={ref} />, scratch);
 		expect(ref).to.have.been.calledOnce.and.calledWith(dom._vdom);
+	});
+	it("options.ref function", () => {
+		const oldref = options.ref;
+		options.ref = () => 1;
+		let ref = spy('ref');
+		const dom = render(<div ref={ref} />, scratch);
+		expect(ref).to.have.been.calledOnce.and.calledWith(1);
+		options.ref = oldref;
 	});
 
 	it('should invoke refs in Component.render()', () => {

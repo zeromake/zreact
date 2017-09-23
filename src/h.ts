@@ -95,12 +95,12 @@ export function h(this: Component<IKeyValue, IKeyValue> | undefined | void | nul
     );
     // 设置属性
     p.attributes = attributes == null ? undefined : attributes;
-    if (options.eventBind) {
-        const self = this;
-        const component: Component<IKeyValue, IKeyValue> | undefined = self && self.setState ? self : undefined;
-        // 设置组件实例
-        p.component = component;
-    }
+    // if (options.eventBind) {
+    //     const self = this;
+    //     const component: Component<IKeyValue, IKeyValue> | undefined = self && self.setState ? self : undefined;
+    //     // 设置组件实例
+    //     p.component = component;
+    // }
     // 设置key
     p.key = attributes == null ? undefined : attributes.key;
     // const p: VNode = {
