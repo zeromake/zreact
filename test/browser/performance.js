@@ -2,7 +2,7 @@
 /*eslint no-console:0*/
 /** @jsx h */
 
-let { h, Component, render, buildVDom } = require(NODE_ENV==='production' ? '../../dist/zreact.min.js' : '../../build/zreact');
+let { h, Component, render, buildVDom } = require('../../build/zreact');
 
 const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
 
