@@ -1,6 +1,6 @@
 /* global DISABLE_FLAKEY */
 
-import { h, render, Component } from '../../build/zreact';
+import { h, render, Component } from 'zreact';
 /** @jsx h */
 
 function getAttributes(node) {

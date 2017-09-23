@@ -1,4 +1,4 @@
-import { h, render, Component, buildVDom } from '../../build/zreact';
+import { h, render, Component, buildVDom } from 'zreact';
 /** @jsx h */
 
 const CHILDREN_MATCHER = sinon.match( v => v==null || Array.isArray(v) && !v.length , '[empty children]');

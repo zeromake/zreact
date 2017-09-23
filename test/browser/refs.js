@@ -1,4 +1,4 @@
-import { h, render, Component, buildVDom } from '../../build/zreact';
+import { h, render, Component, buildVDom } from 'zreact';
 /** @jsx h */
 
 // gives call count and argument errors names (otherwise sinon just uses "spy"):

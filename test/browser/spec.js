@@ -1,4 +1,4 @@
-import { h, render, rerender, Component } from '../../build/zreact';
+import { h, render, rerender, Component } from 'zreact';
 /** @jsx h */
 
 const EMPTY_CHILDREN = [];

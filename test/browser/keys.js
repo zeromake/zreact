@@ -1,4 +1,4 @@
-import { h, Component, render } from '../../build/zreact';
+import { h, Component, render } from 'zreact';
 /** @jsx h */
 
 describe('keys', () => {

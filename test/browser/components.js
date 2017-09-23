@@ -1,4 +1,4 @@
-import { h, cloneElement, render, rerender, Component, buildVDom } from '../../build/zreact';
+import { h, cloneElement, render, rerender, Component, buildVDom } from 'zreact';
 /** @jsx h */
 
 let spyAll = obj => Object.keys(obj).forEach( key => obj[key] = sinon.spy(obj,key) );

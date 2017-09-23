@@ -1,4 +1,4 @@
-import { h, render } from '../../build/zreact';
+import { h, render } from 'zreact';
 /** @jsx h */
 
 
