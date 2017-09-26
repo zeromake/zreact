@@ -298,6 +298,7 @@ function diffChildren(
         }
     }
     if (vlen !== 0) {
+        let offset = 0;
         for (let i = 0; i < vlen; i++) {
             vchild = vchildren[i];
             child = null;
@@ -327,7 +328,7 @@ function diffChildren(
             // morph the matched/found/created DOM child to match vchild (deep)
             const pchild = idiff(child, vchild, context, mountAll, false);
             // 获取真实
-            f = originalChildren[i];
+            f = originalChildren[i + offset];
             if (pchild.base !== vdom.base && pchild.base !== f) {
                 if (f == null) {
                     vdom.base.appendChild(pchild.base);
@@ -345,16 +346,17 @@ function diffChildren(
                     // ```
                     const fvdom = (f as any)._vdom as IVDom;
                     if ( fvdom && fvdom.component) {
-                        recollectNodeTree(fvdom, false);
-                        const fkey = fvdom.component._key;
-                        if (fkey && fkey in keyed) {
-                            keyed[fkey] = undefined;
-                        } else {
-                            const findex = children.indexOf(fvdom);
-                            if (findex > -1) {
-                                children[findex] = undefined;
-                            }
-                        }
+                        offset ++;
+                        // recollectNodeTree(fvdom, false);
+                        // const fkey = fvdom.component._key;
+                        // if (fkey && fkey in keyed) {
+                        //     keyed[fkey] = undefined;
+                        // } else {
+                        //     const findex = children.indexOf(fvdom);
+                        //     if (findex > -1) {
+                        //         children[findex] = undefined;
+                        //     }
+                        // }
                     } else {
                         removeNode(f as any);
                     }
@@ -381,7 +383,7 @@ function diffChildren(
         child = children[childrenLen--];
         if (child !== undefined) {
             // console.log("---removeChildren----", child);
-            // removeNode(child.base);
+            // removeNode(child.base);2
             recollectNodeTree(child, false);
         }
     }

@@ -26,7 +26,7 @@
     "build:compat": "cross-env DEVTOOLS_ENV=production NODE_ENV=dev rollup -c config/rollup.compat.config.js",
     "dev": "cross-env DEVTOOLS_ENV=production NODE_ENV=dev rollup -c config/rollup.config.js -w",
     "test": "tslint src/**/*.ts && tsc && npm run test:karma",
-    "test:karma": "karma start test/karma.conf.js --single-run && npm run ts-coverage-html && npm run ts-coverage-lcov",
+    "test:karma": "karma start test/karma.conf.js --single-run && npm run ts-coverage-lcov",
     "test:karma:watch": "npm run test:karma -- no-single-run",
     "ts-coverage-html": "remap-istanbul -i test/coverage/coverage-final.json -o test/coverage/html -t html -e node_modules,test",
     "ts-coverage-lcov": "remap-istanbul -i test/coverage/coverage-final.json -o test/coverage/lcov.info -t lcovonly -e node_modules,test",
@@ -80,6 +80,7 @@
     "karma-webpack": "^2.0.4",
     "mocha": "^3.4.2",
     "preact-jsx-chai": "^2.2.1",
+    "preact-render-to-string": "^3.6.3",
     "prop-types": "^15.5.10",
     "remap-istanbul": "^0.9.5",
     "rimraf": "^2.6.1",
@@ -97,8 +98,5 @@
     "typescript": "^2.5.2",
     "uglify-es": "^3.1.1",
     "webpack": "^3.6.0"
-  },
-  "dependencies": {
-    "preact-render-to-string": "^3.6.3"
   }
 }

@@ -37,7 +37,7 @@ const options: {
      */
     eventBind?: boolean;
     /**
-     * ref 默认为vdom, 
+     * ref 默认为vdom,
      */
     ref?: ((vdom: IVDom) => any) | boolean;
 } = {
