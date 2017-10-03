@@ -1,3 +1,19 @@
+<a name="0.1.2"></a>
+## [0.1.2](https://github.com/zeromake/zreact/compare/v0.1.1...v0.1.2) (2017-10-03)
+
+
+### Bug Fixes
+
+* componentWillUnmount triggered ([11fd90f](https://github.com/zeromake/zreact/commit/11fd90f))
+* componentWillUnmount triggered on dom unmout after ([5e9d1a2](https://github.com/zeromake/zreact/commit/5e9d1a2))
+
+
+### Features
+
+* add ci and coverage ([5b57703](https://github.com/zeromake/zreact/commit/5b57703))
+
+
+
 <a name="0.1.1"></a>
 ## [0.1.1](https://github.com/zeromake/zreact/compare/v0.1.0...v0.1.1) (2017-09-21)
 
@@ -15,7 +31,7 @@
 
 
 <a name="0.1.0"></a>
-# [0.1.0](https://github.com/zeromake/zreact/compare/0.1.0...v0.1.0) (2017-09-08)
+# [0.1.0](https://github.com/zeromake/zreact/compare/v0.0.4...v0.1.0) (2017-09-08)
 
 
 ### Bug Fixes
