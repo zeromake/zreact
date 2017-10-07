@@ -1,3 +1,13 @@
+<a name="0.1.3"></a>
+## [0.1.3](https://github.com/zeromake/zreact/compare/v0.1.2...v0.1.3) (2017-10-07)
+
+
+### Bug Fixes
+
+* **types:** ts types error ([6a0d702](https://github.com/zeromake/zreact/commit/6a0d702))
+
+
+
 <a name="0.1.2"></a>
 ## [0.1.2](https://github.com/zeromake/zreact/compare/v0.1.1...v0.1.2) (2017-10-03)
 
