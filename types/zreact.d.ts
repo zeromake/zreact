@@ -117,49 +117,49 @@ declare namespace zreact {
          */
         prevContext?: $private.IKeyValue;
         /**
-         * 在一个组件被渲染到 DOM 之前
-         */
-        componentWillMount?: () => void;
-        /**
-         * 在一个组件被渲染到 DOM 之后
-         */
-        componentDidMount?: () => void;
-        /**
-         * 在一个组件在 DOM 中被清除之前
-         */
-        componentWillUnmount?: () => void;
-        /**
-         * 在新的 props 被接受之前
-         * @param { PropsType } nextProps
-         * @param { IKeyValue } nextContext
-         */
-        componentWillReceiveProps?: (nextProps: PropsType, nextContext: $private.IKeyValue) => void;
-        /**
-         * 在 render() 之前. 若返回 false，则跳过 render，与 componentWillUpdate 互斥
-         * @param { PropsType } nextProps
-         * @param { StateType } nextState
-         * @param { IKeyValue } nextContext
-         * @returns { boolean }
-         */
-        shouldComponentUpdate?: (nextProps: PropsType, nextState: StateType, nextContext: $private.IKeyValue) => boolean;
-        /**
-         * 在 render() 之前，与 shouldComponentUpdate 互斥
-         * @param { PropsType } nextProps
-         * @param { StateType } nextState
-         * @param { IKeyValue } nextContext
-         */
-        componentWillUpdate?: (nextProps: PropsType, nextState: StateType, nextContext: $private.IKeyValue) => void;
-        /**
-         * 在 render() 之后
-         * @param { PropsType } previousProps
-         * @param { StateType } previousState
-         * @param { IKeyValue } previousContext
-         */
-        componentDidUpdate?: (previousProps: PropsType, previousState: StateType, previousContext: $private.IKeyValue) => void;
-        /**
-         * 获取上下文，会被传递到所有的子组件
-         */
-        getChildContext?: () => $private.IKeyValue;
+		 * 在一个组件被渲染到 DOM 之前
+		 */
+		public componentWillMount? (): void;
+		/**
+		 * 在一个组件被渲染到 DOM 之后
+		 */
+		public componentDidMount? (): void;
+		/**
+		 * 在一个组件在 DOM 中被清除之前
+		 */
+		public componentWillUnmount? (): void;
+		/**
+		 * 在新的 props 被接受之前
+		 * @param { PropsType } nextProps
+		 * @param { IKeyValue } nextContext
+		 */
+		public componentWillReceiveProps? (nextProps: PropsType, nextContext: $private.IKeyValue): boolean;
+		/**
+		 * 在 render() 之前. 若返回 false，则跳过 render，与 componentWillUpdate 互斥
+		 * @param { PropsType } nextProps
+		 * @param { StateType } nextState
+		 * @param { IKeyValue } nextContext
+		 * @returns { boolean }
+		 */
+		public shouldComponentUpdate? (nextProps: PropsType, nextState: StateType, nextContext: $private.IKeyValue): boolean;
+		/**
+		 * 在 render() 之前，与 shouldComponentUpdate 互斥
+		 * @param { PropsType } nextProps
+		 * @param { StateType } nextState
+		 * @param { IKeyValue } nextContext
+		 */
+		public componentWillUpdate? (nextProps: PropsType, nextState: StateType, nextContext: $private.IKeyValue): void;
+		/**
+		 * 在 render() 之后
+		 * @param { PropsType } previousProps
+		 * @param { StateType } previousState
+		 * @param { IKeyValue } previousContext
+		 */
+		public componentDidUpdate? (previousProps: PropsType, previousState: StateType, previousContext: $private.IKeyValue): void;
+		/**
+		 * 获取上下文，会被传递到所有的子组件
+		 */
+		public getChildContext? (): $private.IKeyValue;
         /**
          * 子组件
          */
@@ -199,7 +199,7 @@ declare namespace zreact {
          * 手动的同步更新dom
          * @param callback 回调
          */
-        forceUpdate(callback: () => void): void;
+        forceUpdate(callback?: () => void): void;
         /**
          * 用来生成VNode的函数，一定要继承后覆盖
          * @param props

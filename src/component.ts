@@ -52,21 +52,21 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
     /**
      * 在一个组件被渲染到 DOM 之前
      */
-    public componentWillMount?: () => void;
+    public componentWillMount? (): void;
     /**
      * 在一个组件被渲染到 DOM 之后
      */
-    public componentDidMount?: () => void;
+    public componentDidMount? (): void;
     /**
      * 在一个组件在 DOM 中被清除之前
      */
-    public componentWillUnmount?: () => void;
+    public componentWillUnmount? (): void;
     /**
      * 在新的 props 被接受之前
      * @param { PropsType } nextProps
      * @param { IKeyValue } nextContext
      */
-    public componentWillReceiveProps?: (nextProps: PropsType, nextContext: IKeyValue) => void;
+    public componentWillReceiveProps? (nextProps: PropsType, nextContext: IKeyValue): boolean;
     /**
      * 在 render() 之前. 若返回 false，则跳过 render，与 componentWillUpdate 互斥
      * @param { PropsType } nextProps
@@ -74,25 +74,25 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
      * @param { IKeyValue } nextContext
      * @returns { boolean }
      */
-    public shouldComponentUpdate?: (nextProps: PropsType, nextState: StateType, nextContext: IKeyValue) => boolean;
+    public shouldComponentUpdate? (nextProps: PropsType, nextState: StateType, nextContext: IKeyValue): boolean;
     /**
      * 在 render() 之前，与 shouldComponentUpdate 互斥
      * @param { PropsType } nextProps
      * @param { StateType } nextState
      * @param { IKeyValue } nextContext
      */
-    public componentWillUpdate?: (nextProps: PropsType, nextState: StateType, nextContext: IKeyValue) => void;
+    public componentWillUpdate? (nextProps: PropsType, nextState: StateType, nextContext: IKeyValue): void;
     /**
      * 在 render() 之后
      * @param { PropsType } previousProps
      * @param { StateType } previousState
      * @param { IKeyValue } previousContext
      */
-    public componentDidUpdate?: (previousProps: PropsType, previousState: StateType, previousContext: IKeyValue) => void;
+    public componentDidUpdate? (previousProps: PropsType, previousState: StateType, previousContext: IKeyValue): void;
     /**
      * 获取上下文，会被传递到所有的子组件
      */
-    public getChildContext?: () => IKeyValue;
+    public getChildContext? (): IKeyValue;
 
     public h?: typeof h;
     /**
@@ -172,7 +172,7 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
      * 手动的同步更新dom
      * @param callback 回调
      */
-    public forceUpdate(callback: () => void) {
+    public forceUpdate(callback?: () => void) {
         if (callback) {
             this._renderCallbacks = this._renderCallbacks || [];
             this._renderCallbacks.push(callback);
