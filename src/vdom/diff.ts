@@ -347,16 +347,6 @@ function diffChildren(
                     const fvdom = (f as any)._vdom as IVDom;
                     if ( fvdom && fvdom.component) {
                         offset ++;
-                        // recollectNodeTree(fvdom, false);
-                        // const fkey = fvdom.component._key;
-                        // if (fkey && fkey in keyed) {
-                        //     keyed[fkey] = undefined;
-                        // } else {
-                        //     const findex = children.indexOf(fvdom);
-                        //     if (findex > -1) {
-                        //         children[findex] = undefined;
-                        //     }
-                        // }
                     } else {
                         removeNode(f as any);
                     }

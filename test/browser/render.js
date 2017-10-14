@@ -523,11 +523,11 @@ describe('render()', () => {
 
 		let c = document.createElement('c');
 		c.textContent = 'baz';
-		comp.vdom.base.appendChild(c);
+		comp.base.appendChild(c);
 
 		let b = document.createElement('b');
 		b.textContent = 'bat';
-		comp.vdom.base.appendChild(b);
+		comp.base.appendChild(b);
 
 		expect(scratch.firstChild.children, 'append').to.have.length(4);
 

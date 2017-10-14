@@ -1,11 +1,10 @@
-import { h, Component, render } from 'zreact';
+import { h, Component, render, options, findDOMNode, findVDom } from 'zreact';
 import { initDevTools } from '../../build/devtools';
 import { unmountComponent } from '../../build/vdom/component';
 
 class StatefulComponent extends Component {
 	constructor(props) {
 		super(props);
-
 		this.state = {count: 0};
 	}
 
@@ -98,13 +97,13 @@ describe_('React Developer Tools integration', () => {
 
 	it('notifies dev tools about component updates', () => {
 		const node = render(h(StatefulComponent), container);
-		node._vdom.component.forceUpdate();
+		findVDom(node).component.forceUpdate();
 		expect(renderer.Reconciler.receiveComponent).to.be.called;
 	});
 
 	it('notifies dev tools when components are removed', () => {
 		const node = render(h(StatefulComponent), container);
-		unmountComponent(node._vdom.component, true);
+		unmountComponent(findVDom(node).component, true);
 		expect(renderer.Reconciler.unmountComponent).to.be.called;
 	});
 
@@ -143,9 +142,9 @@ describe_('React Developer Tools integration', () => {
 
 	it('exposes composite component state', () => {
 		const node = render(h(StatefulComponent), container);
-
-		node._vdom.component.setState({count: 42});
-		node._vdom.component.forceUpdate();
+		const vdom = findVDom(node);
+		vdom.component.setState({count: 42});
+		vdom.component.forceUpdate();
 
 		expect(instanceMap.get(node).state).to.deep.equal({count: 42});
 	});
@@ -191,8 +190,9 @@ describe_('React Developer Tools integration', () => {
 	it('notifies dev tools when a component update adds DOM children', () => {
 		const node = render(h(MultiChild, {initialCount: 2}), container);
 
-		node._vdom.component.setState({count: 4});
-		node._vdom.component.forceUpdate();
+		const vdom = findVDom(node);
+		vdom.component.setState({count: 4});
+		vdom.component.forceUpdate();
 		expect(renderer.Reconciler.mountComponent).to.have.been.called;
 	});
 
@@ -208,9 +208,9 @@ describe_('React Developer Tools integration', () => {
 
 	it('notifies dev tools when a component update removes DOM children', () => {
 		const node = render(h(MultiChild, {initialCount: 1}), container);
-
-		node._vdom.component.setState({count: 0});
-		node._vdom.component.forceUpdate();
+		const vdom = findVDom(node);
+		vdom.component.setState({count: 0});
+		vdom.component.forceUpdate();
 
 		expect(renderer.Reconciler.unmountComponent).to.be.called;
 	});
@@ -228,7 +228,7 @@ describe_('React Developer Tools integration', () => {
 
 	it('removes root components when they are unmounted', () => {
 		const node = render(h(StatefulComponent), container);
-		unmountComponent(node._vdom.component, true);
+		unmountComponent(findVDom(node).component, true);
 		expect(Object.keys(renderer.Mount._instancesByReactRootID).length).to.equal(0);
 	});
 

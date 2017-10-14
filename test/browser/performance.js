@@ -2,7 +2,7 @@
 /*eslint no-console:0*/
 /** @jsx h */
 
-let { h, Component, render, buildVDom } = require('zreact');
+let { h, Component, render } = require('zreact');
 
 const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
 
@@ -347,7 +347,7 @@ describe('performance', function() {
 				);
 			}
 		}
-        let vdom = render(<App />, scratch, buildVDom(scratch.firstChild));
+        let vdom = render(<App />, scratch, scratch.firstChild);
 		let html = scratch.innerHTML;
 
 		benchmark( () => {

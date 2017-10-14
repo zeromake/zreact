@@ -7,7 +7,7 @@ import { IKeyValue } from "./types";
  */
 export class PureComponent<PropsType extends IKeyValue, StateType extends IKeyValue> extends Component<PropsType, StateType> {
     public isPureReactComponent: boolean = true;
-    public shouldComponentUpdate = (props: PropsType, state: StateType): boolean => {
+    public shouldComponentUpdate(props: PropsType, state: StateType): boolean {
         // props,state只要一个不同就返回true
         return shallowDiffers(this.props, props) || shallowDiffers(this.state, state);
     }

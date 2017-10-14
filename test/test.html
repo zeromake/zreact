@@ -268,6 +268,7 @@
 
         var Bar = zreact.createClass({
             componentDidMount: function() {
+                console.log(this)
                 console.log('A.componentDidMount, '+document.querySelectorAll('.bar').length)
             },
             componentWillUnmount: function() {
@@ -287,12 +288,8 @@
             h(Bar),
             h(Foo)
         ), document.body, scratch)
-        render(h(
-            "div", { id: "zreact-app" },
-            h(Foo)
-        ), document.body, scratch)
     </script>
-    <!-- <script src="../devtools.js"></script> -->
+    <script src="../devtools.js"></script>
     <!-- <script src="../node_modules/preact/devtools.js"></script> -->
 </body>
 </html>

@@ -53,7 +53,7 @@ export function createComponent(Ctor: any, props: IKeyValue, context: IKeyValue,
         for (let i = list.length; i-- ; ) {
             const item = list[i];
             if (item.constructor === Ctor) {
-                inst.nextVDom = item.nextVDom;
+                inst._nextVDom = item._nextVDom;
                 list.splice(i, 1);
                 break;
             }

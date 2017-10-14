@@ -93,47 +93,27 @@ declare namespace zreact {
          */
         context: $private.IKeyValue;
         /**
-         * 组件挂载后的vdom
-         */
-        vdom?: $private.IVDom;
-        /**
-         * 被移除时的vdom缓存
-         */
-        nextVDom?: $private.IVDom;
-        /**
          * 自定义组件名
          */
         name?: string;
         /**
-         * 上一次的属性
-         */
-        prevProps?: PropsType;
-        /**
-         * 上一次的状态
-         */
-        prevState?: StateType;
-        /**
-         * 上一次的上下文
-         */
-        prevContext?: $private.IKeyValue;
-        /**
 		 * 在一个组件被渲染到 DOM 之前
 		 */
-		public componentWillMount? (): void;
+		public componentWillMount?(): void;
 		/**
 		 * 在一个组件被渲染到 DOM 之后
 		 */
-		public componentDidMount? (): void;
+		public componentDidMount?(): void;
 		/**
 		 * 在一个组件在 DOM 中被清除之前
 		 */
-		public componentWillUnmount? (): void;
+		public componentWillUnmount?(): void;
 		/**
 		 * 在新的 props 被接受之前
 		 * @param { PropsType } nextProps
 		 * @param { IKeyValue } nextContext
 		 */
-		public componentWillReceiveProps? (nextProps: PropsType, nextContext: $private.IKeyValue): boolean;
+		public componentWillReceiveProps?(nextProps: PropsType, nextContext: $private.IKeyValue): void;
 		/**
 		 * 在 render() 之前. 若返回 false，则跳过 render，与 componentWillUpdate 互斥
 		 * @param { PropsType } nextProps
@@ -141,53 +121,25 @@ declare namespace zreact {
 		 * @param { IKeyValue } nextContext
 		 * @returns { boolean }
 		 */
-		public shouldComponentUpdate? (nextProps: PropsType, nextState: StateType, nextContext: $private.IKeyValue): boolean;
+		public shouldComponentUpdate?(nextProps: PropsType, nextState: StateType, nextContext: $private.IKeyValue): boolean;
 		/**
 		 * 在 render() 之前，与 shouldComponentUpdate 互斥
 		 * @param { PropsType } nextProps
 		 * @param { StateType } nextState
 		 * @param { IKeyValue } nextContext
 		 */
-		public componentWillUpdate? (nextProps: PropsType, nextState: StateType, nextContext: $private.IKeyValue): void;
+		public componentWillUpdate?(nextProps: PropsType, nextState: StateType, nextContext: $private.IKeyValue): void;
 		/**
 		 * 在 render() 之后
 		 * @param { PropsType } previousProps
 		 * @param { StateType } previousState
 		 * @param { IKeyValue } previousContext
 		 */
-		public componentDidUpdate? (previousProps: PropsType, previousState: StateType, previousContext: $private.IKeyValue): void;
+		public componentDidUpdate?(previousProps: PropsType, previousState: StateType, previousContext: $private.IKeyValue): void;
 		/**
 		 * 获取上下文，会被传递到所有的子组件
 		 */
-		public getChildContext? (): $private.IKeyValue;
-        /**
-         * 子组件
-         */
-        _component?: Component<$private.IKeyValue, $private.IKeyValue>;
-        /**
-         * 父组件
-         */
-        _parentComponent?: Component<$private.IKeyValue, $private.IKeyValue>;
-        /**
-         * 是否加入更新队列
-         */
-        _dirty: boolean;
-        /**
-         * render 执行完后的回调队列
-         */
-        _renderCallbacks?: Array<() => void>;
-        /**
-         * 当前组件的key用于复用
-         */
-        _key?: string;
-        /**
-         * 是否停用
-         */
-        _disable?: boolean;
-        /**
-         * react标准用于设置component实例
-         */
-        _ref?: (component: Component<PropsType, StateType> | null) => void;
+		public getChildContext?(): $private.IKeyValue;
         constructor(props: PropsType, context: $private.IKeyValue);
         /**
          * 设置state并通过enqueueRender异步更新dom
@@ -206,18 +158,26 @@ declare namespace zreact {
          * @param state
          * @param context
          */
-        render(props: PropsType, state: StateType, context: $private.IKeyValue, createElement: typeof h): VNode | void;
-        /**
-         * 触发props上的on开头的方法，并以_emitComponent为this, 仅支持一个参数传入
-         * @param eventName 事件名去除
-         * @param args 传递的参数
-         */
-        $emit(eventName: string, args: any): any;
+        render(props?: PropsType, state?: StateType, context?: $private.IKeyValue, createElement?: typeof h): VNode | void;
     }
     // class PureComponent<PropsType extends $private.IKeyValue, StateType extends $private.IKeyValue> extends Component<PropsType, StateType> {
     //     isPureReactComponent: boolean;
     //     shouldComponentUpdate: (props: PropsType, state: StateType) => boolean;
-    // }
+	// }
+	/**
+	 * 判断是否为一个组件对象
+	 * @param element 
+	 */
+	function isValidElement(element: VNode| any): boolean;
+	/**
+	 * 获取组件|vdom的dom对象
+	 * @param componentOrVdom 
+	 */
+	function findDOMNode(componentOrVdom: any): Element;
+	/**
+	 * 获取组件或|dom的vdom对象
+	 */
+	function findVDom(componentOrDom: any | Node | Element): IVDom;
     function cloneElement(vnode: VNode, props: any, ...children: any[]): VNode;
     function rerender(): void;
     interface option {

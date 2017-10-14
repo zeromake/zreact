@@ -1,5 +1,13 @@
 import PropTypes from "prop-types";
-import { render as zreactRender, cloneElement as zreactCloneElement, h, Component as PreactComponent, options } from "zreact";
+import {
+    render as zreactRender,
+    cloneElement as zreactCloneElement,
+    h,
+    Component as PreactComponent,
+    options,
+    isValidElement,
+    findDOMNode
+} from "zreact";
 
 const version = "15.1.0"; // trick libraries to think we are react
 
@@ -343,10 +351,6 @@ function cloneElement(element: any, props: any, ...children: any[]) {
     return normalizeVNode(zreactCloneElement.apply(void 0, cloneArgs));
 }
 
-function isValidElement(element: any) {
-    return element && ((element instanceof VNode) || element.$$typeof === REACT_ELEMENT_TYPE);
-}
-
 function createStringRefProxy(name: any, component: any) {
     return component._refProxies[name] || (component._refProxies[name] = (resolved: any) => {
         if (component && component.refs) {
@@ -421,10 +425,6 @@ function shallowDiffers(a: any, b: any) {
         }
     }
     return false;
-}
-
-function findDOMNode(component: any) {
-    return component && component.vdom && component.vdom.base || component;
 }
 
 function F() {}

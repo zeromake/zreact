@@ -1,4 +1,4 @@
-import { h, render, Component, buildVDom } from 'zreact';
+import { h, render, Component } from 'zreact';
 /** @jsx h */
 
 const CHILDREN_MATCHER = sinon.match( v => v==null || Array.isArray(v) && !v.length , '[empty children]');
@@ -54,7 +54,7 @@ describe('context', () => {
 		sinon.spy(Inner.prototype, 'componentDidUpdate');
 		sinon.spy(Inner.prototype, 'render');
 
-		const root = render(<Outer />, scratch, buildVDom(scratch.lastChild));
+		const root = render(<Outer />, scratch, scratch.lastChild);
 
 		expect(Outer.prototype.getChildContext).to.have.been.calledOnce;
 
@@ -113,7 +113,7 @@ describe('context', () => {
 		sinon.spy(Inner.prototype, 'componentDidUpdate');
 		sinon.spy(Inner.prototype, 'render');
 
-		const vdom = render(<Outer />, scratch, buildVDom(scratch.lastChild));
+		const vdom = render(<Outer />, scratch, scratch.lastChild);
 
 		expect(Outer.prototype.getChildContext).to.have.been.calledOnce;
 

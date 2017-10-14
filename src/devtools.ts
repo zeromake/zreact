@@ -1,4 +1,4 @@
 import { getInitDevTools } from "./devtools-base";
-import { options } from "zreact";
+import { options, findDOMNode, findVDom } from "zreact";
 
-export const initDevTools = getInitDevTools(options);
+export const initDevTools = getInitDevTools(options, findDOMNode, findVDom);
