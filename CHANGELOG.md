@@ -1,3 +1,14 @@
+<a name="0.2.1"></a>
+## [0.2.1](https://github.com/zeromake/zreact/compare/v0.1.3...v0.2.1) (2017-11-02)
+
+
+### Features
+
+* add findDOMNode, findVDom ([0f3b088](https://github.com/zeromake/zreact/commit/0f3b088))
+* copy preact d.ts ([3f64cc4](https://github.com/zeromake/zreact/commit/3f64cc4))
+
+
+
 <a name="0.1.3"></a>
 ## [0.1.3](https://github.com/zeromake/zreact/compare/v0.1.2...v0.1.3) (2017-10-07)
 

@@ -1,9 +1,15 @@
-declare namespace zreact {
+declare namespace $private {
+    interface IKeyValue {
+        [name: string]: any;
+    }
+    interface IEventFun {
+        [name: string]: (e: Event) => void;
+    }
     interface IVDom {
         /**
          * dom所属的顶级Component
          */
-        component?: zreact.Component<any, any>;
+        component?: zreact.Component<IKeyValue, IKeyValue>;
         /**
          * 子组件
          */
@@ -21,11 +27,11 @@ declare namespace zreact {
         /**
          * dom所属的props
          */
-        props?: any | boolean;
+        props?: IKeyValue | boolean;
         /**
          * 通过props设置的事件方法, 通过eventProxy来调用, 保证在不停的props变化时不会一直绑定与解绑。
          */
-        listeners?: any;
+        listeners?: IEventFun;
         /**
          * dom标签名
          */
@@ -36,106 +42,157 @@ declare namespace zreact {
          */
         componentConstructor?: any;
     }
-	interface ComponentProps<C extends Component<any, any> | FunctionalComponent<any>> {
-		children?:JSX.Element[];
-		key?:string | number | any;
-		ref?:(el: C) => void;
-	}
-
-	interface DangerouslySetInnerHTML {
+    type funComponent = (props?: IKeyValue, content?: any) => zreact.VNode;
+    type childType = zreact.VNode | string | number | boolean;
+}
+declare namespace zreact {
+    interface DangerouslySetInnerHTML {
 	 __html: string;
 	}
 
-	interface ZreactHTMLAttributes {
+	interface PreactHTMLAttributes {
 		dangerouslySetInnerHTML?:DangerouslySetInnerHTML;
 		key?:string;
 		ref?:(el?: Element) => void;
 	}
-
-	interface VNode {
-		nodeName:ComponentConstructor<any, any>|string;
-		attributes:{[name:string]:any};
-		children:VNode[];
-		key:string;
-	}
-
-	interface ComponentLifecycle<PropsType, StateType> {
-		componentWillMount?():void;
-		componentDidMount?():void;
-		componentWillUnmount?():void;
-		componentWillReceiveProps?(nextProps:PropsType,nextContext:any):void;
-		shouldComponentUpdate?(nextProps:PropsType,nextState:StateType,nextContext:any):boolean;
-		componentWillUpdate?(nextProps:PropsType,nextState:StateType,nextContext:any):void;
-		componentDidUpdate?(previousProps:PropsType,previousState:StateType,previousContext:any):void;
-	}
-
-	interface FunctionalComponent<PropsType> {
-		(props?:PropsType & ComponentProps<this>, context?:any):JSX.Element;
-		displayName?:string;
-		defaultProps?:any;
-	}
-
-	interface ComponentConstructor<PropsType, StateType> {
-		new (props?:PropsType, context?: any):Component<PropsType, StateType>;
-	}
-
-    // Type alias for a component considered generally, whether stateless or stateful.
-	type AnyComponent<PropsType, StateType> = FunctionalComponent<PropsType> | ComponentConstructor<PropsType, StateType>;
-
-	abstract class Component<PropsType, StateType> {
-		constructor(props?:PropsType, context?:any);
-
-		static displayName?:string;
-		static defaultProps?:any;
-
-		state:StateType;
-		props:PropsType & ComponentProps<this>;
-		context:any;
-
-		linkState:(name:string) => (event: Event) => void;
-
-		public setState<K extends keyof StateType>(state:Pick<StateType, K>, callback?:() => void):void;
-		public setState<K extends keyof StateType>(fn:(prevState:StateType, props:PropsType) => Pick<StateType, K>, callback?:() => void):void;
-
-        public forceUpdate(callback?:() => void): void;
-        public getChildContext?(): any;
-
-		abstract render(props?:PropsType & ComponentProps<this>, state?:StateType, context?:any):JSX.Element|null;
-	}
-	interface Component<PropsType, StateType> extends ComponentLifecycle<PropsType, StateType> { }
-
-	function h<PropsType>(node:ComponentConstructor<PropsType, any> | FunctionalComponent<PropsType>, params:PropsType, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
-	function h(node:string, params:JSX.HTMLAttributes&JSX.SVGAttributes&{[propName: string]: any}, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
-	function render(node:JSX.Element, parent:Element|Document, mergeWith?:Element):Element;
-	function rerender():void;
-    function cloneElement(element:JSX.Element, props:any):JSX.Element;
-    /**
+    interface VNode {
+        /**
+         * 组件名
+         * {string} 为原生组件
+         * {Component|function} 为自定义组件
+         */
+        nodeName: string | typeof zreact.Component;
+        /**
+         * 子组件
+         */
+        children: Array<string | number | boolean | VNode>;
+        /**
+         * 组件所属的属性
+         */
+        attributes?: $private.IKeyValue;
+        /**
+         * 属性中的key
+         */
+        key?: string | number;
+    }
+    class Component<PropsType extends $private.IKeyValue, StateType extends $private.IKeyValue> {
+        /**
+         * 默认props
+         */
+        static defaultProps?: $private.IKeyValue;
+        /**
+         * 当前组件的状态,可以修改
+         */
+        state: StateType;
+        /**
+         * 由父级组件传递的状态，不可修改
+         */
+        props: PropsType;
+        /**
+         * 组件上下文，由父组件传递
+         */
+        context: $private.IKeyValue;
+        /**
+         * 自定义组件名
+         */
+        name?: string;
+        /**
+		 * 在一个组件被渲染到 DOM 之前
+		 */
+		public componentWillMount?(): void;
+		/**
+		 * 在一个组件被渲染到 DOM 之后
+		 */
+		public componentDidMount?(): void;
+		/**
+		 * 在一个组件在 DOM 中被清除之前
+		 */
+		public componentWillUnmount?(): void;
+		/**
+		 * 在新的 props 被接受之前
+		 * @param { PropsType } nextProps
+		 * @param { IKeyValue } nextContext
+		 */
+		public componentWillReceiveProps?(nextProps: PropsType, nextContext: $private.IKeyValue): void;
+		/**
+		 * 在 render() 之前. 若返回 false，则跳过 render，与 componentWillUpdate 互斥
+		 * @param { PropsType } nextProps
+		 * @param { StateType } nextState
+		 * @param { IKeyValue } nextContext
+		 * @returns { boolean }
+		 */
+		public shouldComponentUpdate?(nextProps: PropsType, nextState: StateType, nextContext: $private.IKeyValue): boolean;
+		/**
+		 * 在 render() 之前，与 shouldComponentUpdate 互斥
+		 * @param { PropsType } nextProps
+		 * @param { StateType } nextState
+		 * @param { IKeyValue } nextContext
+		 */
+		public componentWillUpdate?(nextProps: PropsType, nextState: StateType, nextContext: $private.IKeyValue): void;
+		/**
+		 * 在 render() 之后
+		 * @param { PropsType } previousProps
+		 * @param { StateType } previousState
+		 * @param { IKeyValue } previousContext
+		 */
+		public componentDidUpdate?(previousProps: PropsType, previousState: StateType, previousContext: $private.IKeyValue): void;
+		/**
+		 * 获取上下文，会被传递到所有的子组件
+		 */
+		public getChildContext?(): $private.IKeyValue;
+        constructor(props: PropsType, context: $private.IKeyValue);
+        /**
+         * 设置state并通过enqueueRender异步更新dom
+         * @param state 对象或方法
+         * @param callback render执行完后的回调。
+         */
+        setState(state: StateType, callback?: () => void): void;
+        /**
+         * 手动的同步更新dom
+         * @param callback 回调
+         */
+        forceUpdate(callback?: () => void): void;
+        /**
+         * 用来生成VNode的函数，一定要继承后覆盖
+         * @param props
+         * @param state
+         * @param context
+         */
+        render(props?: PropsType, state?: StateType, context?: $private.IKeyValue, createElement?: typeof h): VNode | void;
+    }
+    // class PureComponent<PropsType extends $private.IKeyValue, StateType extends $private.IKeyValue> extends Component<PropsType, StateType> {
+    //     isPureReactComponent: boolean;
+    //     shouldComponentUpdate: (props: PropsType, state: StateType) => boolean;
+	// }
+	/**
 	 * 判断是否为一个组件对象
-	 * @param element
+	 * @param element 
 	 */
 	function isValidElement(element: VNode| any): boolean;
 	/**
 	 * 获取组件|vdom的dom对象
-	 * @param componentOrVdom
+	 * @param componentOrVdom 
 	 */
 	function findDOMNode(componentOrVdom: any): Element;
 	/**
 	 * 获取组件或|dom的vdom对象
 	 */
 	function findVDom(componentOrDom: any | Node | Element): IVDom;
-    const options: {
+    function cloneElement(vnode: VNode, props: any, ...children: any[]): VNode;
+    function rerender(): void;
+    interface option {
         /**
          * render更新后钩子比componentDidUpdate更后面执行
          */
-        afterUpdate?: (component: Component<any, any>) => void;
+        afterUpdate?: (component: Component<$private.IKeyValue, $private.IKeyValue>) => void;
         /**
          * dom卸载载前钩子比componentWillUnmount更先执行
          */
-        beforeUnmount?: (component: Component<any, any>) => void;
+        beforeUnmount?: (component: Component<$private.IKeyValue, $private.IKeyValue>) => void;
         /**
          * dom挂载后钩子比componentDidMount更先执行
          */
-        afterMount?: (component: Component<any, any>) => void;
+        afterMount?: (component: Component<$private.IKeyValue, $private.IKeyValue>) => void;
         /**
          * setComponentProps时强制为同步render
          */
@@ -156,27 +213,20 @@ declare namespace zreact {
          * 是否自动对事件方法绑定this为组件，默认为true(preact没有)
          */
         eventBind?: boolean;
-        /**
-         * ref 默认为vdom,
-         */
-        ref?: ((vdom: IVDom) => any) | boolean;
-    };
+    }
+    function render(vnode: VNode, parent: Element | Node, dom?: Element | Text | Node): Element | Text | Node;
+    function h(this: Component<$private.IKeyValue, $private.IKeyValue> | undefined | void | null, nodeName: string | typeof Component | $private.funComponent, attributes: $private.IKeyValue, ...args: $private.childType[]): VNode;
+    function createElement(this: Component<$private.IKeyValue, $private.IKeyValue> | undefined | void | null, nodeName: string | typeof Component | $private.funComponent, attributes: $private.IKeyValue, ...args: $private.childType[]): VNode;
+    // function createClass(obj: any): any;
 }
-
 declare module "zreact" {
 	export = zreact;
 }
-
-declare module "zreact/devtools" {
-	// Empty. This module initializes the React Developer Tools integration
-	// when imported.
-}
-
 declare namespace JSX {
 	interface Element extends zreact.VNode {
 	}
 
-	interface ElementClass extends zreact.Component<any, any> {
+	interface ElementClass extends zreact.Component<$private.IKeyValue, $private.IKeyValue> {
 	}
 
 	interface ElementAttributesProperty {
@@ -543,7 +593,7 @@ declare namespace JSX {
 		onTransitionEnd?:TransitionEventHandler;
 	}
 
-	interface HTMLAttributes extends zreact.ZreactHTMLAttributes, DOMAttributes {
+	interface HTMLAttributes extends zreact.PreactHTMLAttributes, DOMAttributes {
 		// Standard HTML Attributes
 		accept?:string;
 		acceptCharset?:string;
@@ -552,7 +602,6 @@ declare namespace JSX {
 		allowFullScreen?:boolean;
 		allowTransparency?:boolean;
 		alt?:string;
-		as?:string;
 		async?:boolean;
 		autocomplete?:string;
 		autofocus?:boolean;

@@ -6,8 +6,8 @@ export default {
     input: 'src/devtools-run.ts',
     external: ['zreact'],
     output: {
-        format: 'umd',
-        file: 'devtools.js'
+        format: 'iife',
+        file: 'devtools-run.js'
     },
     globals: {
 		zreact: 'zreact'

@@ -7,7 +7,7 @@ export default {
     external: ['zreact'],
     output: {
         format: 'es',
-        file: 'dist/devtools.js'
+        file: 'devtools.js'
     },
     globals: {
 		zreact: 'zreact'
