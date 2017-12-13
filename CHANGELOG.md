@@ -1,3 +1,14 @@
+<a name="0.2.2"></a>
+## [0.2.2](https://github.com/zeromake/zreact/compare/v0.2.1...v0.2.2) (2017-12-13)
+
+
+### Bug Fixes
+
+* **types:** devtools typescript ([3209256](https://github.com/zeromake/zreact/commit/3209256))
+* add package.json files ([a5400b4](https://github.com/zeromake/zreact/commit/a5400b4))
+
+
+
 <a name="0.2.1"></a>
 ## [0.2.1](https://github.com/zeromake/zreact/compare/v0.1.3...v0.2.1) (2017-11-02)
 
@@ -5,7 +16,7 @@
 ### Features
 
 * add findDOMNode, findVDom ([0f3b088](https://github.com/zeromake/zreact/commit/0f3b088))
-* copy preact d.ts ([3f64cc4](https://github.com/zeromake/zreact/commit/3f64cc4))
+* copy preact d.ts ([7333d93](https://github.com/zeromake/zreact/commit/7333d93))
 
 
 
