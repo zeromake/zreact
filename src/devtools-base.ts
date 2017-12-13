@@ -138,9 +138,6 @@ export function getInitDevTools(opt: typeof options, findDOMNode: typeof IfindDO
     function updateReactComponent(componentOrVDom: any): IReactComponent {
         const isVDom = findVDom(componentOrVDom) == null;
         const newInstance = isVDom ? createReactDOMComponent(componentOrVDom) : createReactCompositeComponent(componentOrVDom);
-        if (!isVDom) {
-            console.log(componentOrVDom);
-        }
         const base: Element | Component<any, any> = isVDom ? findDOMNode(componentOrVDom) : componentOrVDom;
         if (instanceMap.has(base)) {
             const inst = instanceMap.get(base);

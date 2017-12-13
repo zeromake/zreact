@@ -43,7 +43,7 @@ declare namespace zreact {
 	}
 
 	interface DangerouslySetInnerHTML {
-	 __html: string;
+	    __html: string;
 	}
 
 	interface ZreactHTMLAttributes {
@@ -104,8 +104,8 @@ declare namespace zreact {
 	}
 	interface Component<PropsType, StateType> extends ComponentLifecycle<PropsType, StateType> { }
 
-	function h<PropsType>(node:ComponentConstructor<PropsType, any> | FunctionalComponent<PropsType>, params:PropsType, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
-	function h(node:string, params:JSX.HTMLAttributes&JSX.SVGAttributes&{[propName: string]: any}, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
+	function h<PropsType>(node:ComponentConstructor<PropsType, any> | FunctionalComponent<PropsType>, params?:PropsType, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
+	function h(node:string, params?:JSX.HTMLAttributes&JSX.SVGAttributes&{[propName: string]: any}, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
 	function render(node:JSX.Element, parent:Element|Document, mergeWith?:Element):Element;
 	function rerender():void;
     function cloneElement(element:JSX.Element, props:any):JSX.Element;
@@ -168,8 +168,7 @@ declare module "zreact" {
 }
 
 declare module "zreact/devtools" {
-	// Empty. This module initializes the React Developer Tools integration
-	// when imported.
+    export const initDevTools: (vdom?: zreact.IVDom) => void;
 }
 
 declare namespace JSX {

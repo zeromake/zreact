@@ -62,6 +62,8 @@ typings/
 /dist/
 /devtools.js
 /devtools.js.map
+/devtools-run.js
+/devtools-run.js.map
 /docs/
 *error.log
 
