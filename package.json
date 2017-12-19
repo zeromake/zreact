@@ -27,7 +27,7 @@
     "dev": "cross-env DEVTOOLS_ENV=production NODE_ENV=dev rollup -c config/rollup.config.js -w",
     "test": "tslint src/**/*.ts && tsc && npm run test:karma",
     "test:karma": "karma start test/karma.conf.js --single-run && npm run ts-coverage-lcov",
-    "test:karma:watch": "npm run test:karma -- no-single-run",
+    "test:karma:watch": "karma start test/karma.conf.js --no-single-run",
     "ts-coverage-html": "remap-istanbul -i test/coverage/coverage-final.json -o test/coverage/html -t html -e node_modules,test",
     "ts-coverage-lcov": "remap-istanbul -i test/coverage/coverage-final.json -o test/coverage/lcov.info -t lcovonly -e node_modules,test",
     "coverage": "cat ./test/coverage/lcov.info | coveralls",

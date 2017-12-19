@@ -37,7 +37,6 @@ declare class Map {
     public delete(key: any): void;
 }
 
-
 export function getInitDevTools(opt: typeof options, findDOMNode: typeof IfindDOMNode, findVDom: typeof IfindVDom) {
 
     /**
@@ -121,7 +120,7 @@ export function getInitDevTools(opt: typeof options, findDOMNode: typeof IfindDO
                 }
                 children.push(component);
             }
-        })
+        });
         return {
             _currentElement: element,
             _inDevTools: false,
@@ -198,7 +197,7 @@ export function getInitDevTools(opt: typeof options, findDOMNode: typeof IfindDO
                 while (node && !findVDom(node)) {
                     node = node.parentNode;
                 }
-                return node ? updateReactComponent(findVDom(node).component) : null;
+                return node ? updateReactComponent((findVDom(node) as IVDom).component) : null;
             },
             getNodeFromInstance: function getNodeFromInstance(instance: IReactComponent) {
                 return instance.node;
@@ -217,13 +216,13 @@ export function getInitDevTools(opt: typeof options, findDOMNode: typeof IfindDO
 
         const Mount = {
             _instancesByReactRootID: roots,
-            _renderNewRootComponent: function _renderNewRootComponent(arg: IReactComponent){},
+            _renderNewRootComponent: function _renderNewRootComponent(arg: IReactComponent) {},
         };
         const Reconciler = {
-            mountComponent: function mountComponent(arg: IReactComponent){},
-            performUpdateIfNecessary: function performUpdateIfNecessary(){},
-            receiveComponent: function receiveComponent(arg: IReactComponent){},
-            unmountComponent: function unmountComponent(arg: IReactComponent){},
+            mountComponent: function mountComponent(arg: IReactComponent) {},
+            performUpdateIfNecessary: function performUpdateIfNecessary() {},
+            receiveComponent: function receiveComponent(arg: IReactComponent) {},
+            unmountComponent: function unmountComponent(arg: IReactComponent) {},
         };
         const componentAdded = function componentAdded_(component: Component<IKeyValue, IKeyValue>) {
             const instance = updateReactComponent(component);

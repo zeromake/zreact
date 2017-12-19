@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="../../dist/zreact.js"></script>
+    <title>zreact fiber</title>
+</head>
+<body>
+    <div id="app">
+    </div>
+    <script>
+        var Component = zreact.Component
+        var h = zreact.h
+        var render = zreact.render
+        var createClass = zreact.createClass
+        var dotStyle = {
+            position: 'absolute',
+            background: '#61dafb',
+            font: 'normal 15px sans-serif',
+            textAlign: 'center',
+            cursor: 'pointer',
+        };
+        var containerStyle = {
+            position: 'absolute',
+            transformOrigin: '0 0',
+            left: '50%',
+            top: '50%',
+            width: '10px',
+            height: '10px',
+            background: '#eee',
+        };
+        var targetSize = 25;
+        var Dot = createClass({
+            state: { hover: false },
+            getInitialState: function() {
+                return { hover: false }
+            },
+            enter: function() {
+                this.setState({
+                    hover: true
+                });
+            },
+            leave: function() {
+                this.setState({
+                    hover: false
+                });
+            },
+            render: function() {
+                var props = this.props;
+                var s = props.size * 1.3;
+                var style = Object.assign({}, dotStyle, {
+                    width: s + 'px',
+                    height: s + 'px',
+                    left: props.x + 'px',
+                    top: props.y + 'px',
+                    borderRadius: s / 2 + 'px',
+                    lineHeight: s + 'px',
+                    background: this.state.hover ? '#ff0' : dotStyle.background
+                })
+                var _this2 = this
+                return h(
+                    'div',
+                    {
+                        style: style,
+                        onMouseEnter: function onMouseEnter() {
+                            return _this2.enter();
+                        },
+                        onMouseLeave: function onMouseLeave() {
+                            return _this2.leave();
+                        }
+                    },
+                    this.state.hover ? '*' + props.text + '*' : props.text
+                );
+            }
+        })
+        function SierpinskiTriangle(props) {
+            var x = props.x;
+            var y = props.y;
+            var s = props.s;
+            var children = props.children;
+            if (s <= targetSize) {
+                return h(Dot, {
+                    x: x - targetSize / 2,
+                    y: y - targetSize / 2,
+                    size: targetSize,
+                    text: children
+                });
+                //return r;
+            }
+            var newSize = s / 2;
+            var slowDown = true;
+            if (slowDown) {
+                // var e = performance.now() + 0.8;
+                // while (performance.now() < e) {
+                //     // Artificially long execution time.
+                // }
+            }
+            s /= 2;
+            return h("div", null,
+                h(
+                    SierpinskiTriangle,
+                    { x: x, y: y - s / 2, s: s },
+                    children
+                ),
+                h(
+                    SierpinskiTriangle,
+                    { x: x - s, y: y + s / 2, s: s },
+                    children
+                ),
+                h(
+                    SierpinskiTriangle,
+                    { x: x + s, y: y + s / 2, s: s },
+                    children
+                )
+            );
+        }
+        SierpinskiTriangle.shouldComponentUpdate = function(oldProps, newProps) {
+            var o = oldProps;
+            var n = newProps;
+            return !(
+                o.x === n.x &&
+                o.y === n.y &&
+                o.s === n.s &&
+                o.children === n.children
+            );
+        };
+        var ExampleApplication = createClass({
+            getInitialState: function() {
+                this.tick = this.tick.bind(this);
+                return { seconds: 0 };
+            },
+            componentDidMount: function() {
+                // this.intervalID = setInterval(this.tick, 1000);
+                this.intervalID = setInterval(() => {
+                    requestAnimationFrame(this.tick)
+                }, 1000);
+            },
+            tick: function() {
+                //ReactDOMFiber.unstable_deferredUpdates(() =>
+                    this.setState(function(state) {return ({ seconds: (state.seconds % 10) + 1 })})
+                //);
+            },
+            componentWillUnmount: function() {
+                clearInterval(this.intervalID);
+            },
+            render: function() {
+                var seconds = this.state.seconds;
+                var elapsed = this.props.elapsed;
+                var t = (elapsed / 1000) % 10;
+                var scale = 1 + (t > 5 ? 10 - t : t) / 10;
+                var transform = 'scaleX(' + (scale / 2.1) + ') scaleY(0.7) translateZ(0.1px)';
+                return (
+                    h("div", { style: Object.assign({}, containerStyle, { transform: transform }) },
+                        h("div", null,
+                            h(SierpinskiTriangle, { x: 0, y: 0, s: 1000 },
+                                this.state.seconds
+                            )
+                        )
+                    )
+                );
+            }
+        })
+        var start = new Date().getTime();
+        var vdom
+        var root = document.getElementById('app')
+
+        var App = createClass({
+            getInitialState: function() {
+                this.update = this.update.bind(this)
+                return {
+                    elapsed: new Date().getTime() - start
+                }
+            },
+            update: function() {
+                this.setState({
+                    elapsed: new Date().getTime() - start
+                })
+                requestAnimationFrame(this.update)
+            },
+            componentDidMount: function() {
+                requestAnimationFrame(this.update)
+            },
+            render: function() {
+                return h(ExampleApplication, {elapsed: this.state.elapsed})
+            }
+        })
+        function update() {
+            vdom = render(
+                h(App),
+                root,
+                vdom
+            );
+            requestAnimationFrame(update);
+        }
+        requestAnimationFrame(update);
+    </script>
+</body>
+</html>

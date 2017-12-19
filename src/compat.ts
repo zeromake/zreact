@@ -6,7 +6,8 @@ import {
     Component as PreactComponent,
     options,
     isValidElement,
-    findDOMNode
+    findDOMNode,
+    findVDom,
 } from "zreact";
 
 const version = "15.1.0"; // trick libraries to think we are react
@@ -170,13 +171,14 @@ function render(vnode: any, parent: any, callback?: () => void) {
         }
     }
     const out = zreactRender(vnode, parent, prev);
+    const vdom = findVDom(out);
     if (parent) {
-        parent._zreactCompatRendered = out && (((out as any)._vdom && (out as any)._vdom.component) || { base: out });
+        parent._zreactCompatRendered = (vdom && vdom.component) || { base: out };
     }
     if (typeof callback === "function") {
         callback();
     }
-    return out && (out as any)._vdom && (out as any)._vdom.component || out;
+    return vdom && vdom.component || out;
 }
 
 class ContextProvider {
@@ -192,7 +194,8 @@ class ContextProvider {
 function renderSubtreeIntoContainer(parentComponent: any, vnode: any, container: any, callback: any) {
     const wrap = h(ContextProvider as any, { context: parentComponent.context }, vnode);
     const renderContainer = render(wrap, container);
-    const component = renderContainer._component || (renderContainer.vdom && renderContainer.vdom.base);
+    const vdom = findVDom(renderContainer);
+    const component = (renderContainer as any)._component || (vdom && vdom.base);
     if (callback) {
         callback.call(component, renderContainer);
     }

@@ -151,9 +151,9 @@ describe('context', () => {
 		class Inner extends Component {
 			getChildContext() {
 				return { innerContext };
-			}
+            }
 			render(props, state, context) {
-                expect(props.children).to.be.empty
+                expect(props.children).to.be.undefined
                 expect(state).to.deep.equal({});
                 expect(context).to.deep.equal({ outerContext });
 				return <InnerMost />;
@@ -162,7 +162,7 @@ describe('context', () => {
 
 		class InnerMost extends Component {
 			render(props, state, context) {
-                expect(props.children).to.be.empty
+                expect(props.children).to.be.undefined
                 expect(state).to.deep.equal({});
                 expect(context).to.deep.equal({ outerContext, innerContext });
 				return <strong>test</strong>;

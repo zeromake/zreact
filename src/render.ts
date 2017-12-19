@@ -2,6 +2,8 @@ import { diff } from "./vdom/diff";
 import { VNode } from "./vnode";
 import { IVDom, buildVDom } from "./vdom/index";
 import { defer } from "./util";
+import { findVDom } from "./find";
+
 /**
  * 创建组件到dom上
  * @param vnode jsx
@@ -10,10 +12,8 @@ import { defer } from "./util";
  * @param domChild 虚拟dom用于挂载原来挂载在dom元素上的属性
  */
 export function render(vnode: VNode, parent: Element, dom?: Element): Element | Node | Text {
-    let vdom: IVDom | undefined;
-    if (dom && (dom as any)._vdom) {
-        vdom = (dom as any)._vdom;
-    } else {
+    let vdom: IVDom | undefined = findVDom(dom);
+    if (!vdom) {
         vdom = buildVDom(dom);
     }
     const newVDom = diff(vdom, vnode, {}, false, parent, false);

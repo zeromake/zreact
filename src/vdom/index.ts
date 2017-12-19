@@ -4,6 +4,7 @@ import { isTextNode } from "../dom/index";
 // import { ATTR_KEY } from "../constants";
 import { extend } from "../util";
 import { IKeyValue } from "../types";
+import { setVDom } from "../find";
 
 /**
  * dom节点与vnode是否相同的标签
@@ -114,7 +115,7 @@ export function buildVDom(base?: Element|Text|Node): IVDom | undefined {
             base,
         };
         try {
-            (base as any)._vdom = vdom;
+            setVDom(base, vdom);
         } catch (e) {
         }
         return vdom;

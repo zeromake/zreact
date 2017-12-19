@@ -17,6 +17,7 @@ import {
     getLastChild,
     isTextNode,
 } from "../dom/index";
+import { findVDom, setVDom } from "../find";
 
 export const mounts: Array<Component<any, any>> = [];
 
@@ -135,7 +136,7 @@ function idiff(
                 base: dom,
             };
             try {
-                (dom as any)._vdom = newVDom;
+                setVDom(dom, newVDom);
             } catch (e) {
             }
             if (vdom) {
@@ -167,7 +168,7 @@ function idiff(
         const newVDom: IVDom = {
             base: out,
         };
-        (out as any)._vdom = newVDom;
+        setVDom(out, newVDom);
         if (vdom) {
             // 旧dom存在时的一些处理
             // 把旧dom的子元素全部移动到新dom中
@@ -228,8 +229,9 @@ function idiff(
     diffAttributes(vdom, (vnode as VNode), props);
     // 把props存到dom上下文中
     // child[ATTR_KEY] = props;
-    if ((vdom.base as any)._vdom !== vdom) {
-        (vdom.base as any)._vdom = vdom;
+    const oldVDom = findVDom(vdom.base);
+    if (oldVDom !== vdom) {
+        setVDom(vdom.base, vdom);
     }
     // 还原
     isSvgMode = prevSvgMode;
@@ -271,7 +273,7 @@ function diffChildren(
     if (len > 0) {
         for (let i = 0; i < len; i++) {
             const pchild = originalChildren[i];
-            const pvdom: IVDom | undefined = pchild && (pchild as any)._vdom;
+            const pvdom: IVDom | undefined = pchild && findVDom(pchild);
             const props = pvdom && pvdom.props;
             let key: string | undefined;
             if (pvdom && vlen > 0 && props) {
@@ -344,7 +346,7 @@ function diffChildren(
                     // ## Repair the code
                     // ``` javascript
                     // ```
-                    const fvdom = (f as any)._vdom as IVDom;
+                    const fvdom = findVDom(f as any);
                     if ( fvdom && fvdom.component) {
                         offset ++;
                     } else {
@@ -409,7 +411,7 @@ export function removeChildren(node: IVDom) {
     let item = node.base.lastChild;
     while (item) {
         const next = item.previousSibling;
-        const vdom: IVDom = (item as any)._vdom || buildVDom(item);
+        const vdom: IVDom = findVDom(item) as IVDom || buildVDom(item);
         recollectNodeTree(vdom, true);
         item = next;
     }

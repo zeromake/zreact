@@ -1,4 +1,4 @@
-import { h } from "./h";
+import { createElement } from "./create-element";
 import { VNode } from "./vnode";
 import { extend } from "./util";
 
@@ -10,7 +10,7 @@ import { extend } from "./util";
  */
 export function cloneElement(vnode: VNode, props: any, ...children: any[]) {
     const child: any = children.length > 0 ? children : vnode.children;
-    return h(
+    return createElement(
         vnode.nodeName,
         extend({}, vnode.attributes, props),
         child,

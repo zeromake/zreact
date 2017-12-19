@@ -1,6 +1,6 @@
 import { Component } from "../component";
 import { IKeyValue } from "../types";
-import { h } from "../h";
+// import { h } from "../h";
 
 /**
  * 缓存卸载自定义组件对象列表
@@ -46,7 +46,7 @@ export function createComponent(Ctor: any, props: IKeyValue, context: IKeyValue,
         // 设置到constructor上
         inst.constructor = Ctor;
         // render用doRender代替
-        inst.render = doRender;
+        inst.render = (doRender as any);
     }
     // 查找之前的卸载缓存
     if (list) {
@@ -71,6 +71,6 @@ export function createComponent(Ctor: any, props: IKeyValue, context: IKeyValue,
  * @param state
  * @param context
  */
-function doRender(this: typeof Component, props: IKeyValue, state: IKeyValue, context: IKeyValue, createElement: typeof h) {
-    return this.constructor(props, context, createElement);
+function doRender(this: typeof Component, props: IKeyValue, state: IKeyValue, context: IKeyValue) {
+    return this.constructor(props, context);
 }

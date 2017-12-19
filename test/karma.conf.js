@@ -62,7 +62,7 @@ var localBrowsers = realBrowser ? Object.keys(travisLaunchers) : ['PhantomJS'];
 
 module.exports = function(config) {
 	config.set({
-		browsers: sauceLabs ? Object.keys(sauceLabsLaunchers) : localBrowsers,
+		browsers: sauceLabs ? Object.keys(sauceLabsLaunchers) : localBrowsers, //['Chrome'],
 
 		frameworks: ['mocha', 'chai-sinon'],
 

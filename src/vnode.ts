@@ -7,27 +7,27 @@ export class VNode {
      * {string} 为原生组件
      * {Component|function} 为自定义组件
      */
-    nodeName: string | typeof Component | funComponent;
+    public nodeName: string | typeof Component | funComponent;
     /**
      * 子组件
      */
-    children?: childType[];
+    public children?: childType[] | null;
     /**
      * 组件所属的属性
      */
-    attributes?: IKeyValue;
+    public attributes?: IKeyValue;
     /**
      * 属性中的key
      */
-    key?: string|number;
+    public key?: string|number;
 
     /**
      * 绑定的组件实例
      */
-    component?: Component<IKeyValue, IKeyValue> | undefined | void | null;
-    zreactCompatUpgraded?: boolean;
-    zreactCompatNormalized?: boolean;
-    constructor(nodeName: string | typeof Component | funComponent, children: childType[]) {
+    public component?: Component<IKeyValue, IKeyValue> | undefined | void | null;
+    public zreactCompatUpgraded?: boolean;
+    public zreactCompatNormalized?: boolean;
+    constructor(nodeName: string | typeof Component | funComponent, children: childType[] | undefined) {
         this.nodeName = nodeName;
         this.children = children;
     }

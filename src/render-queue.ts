@@ -10,7 +10,7 @@ let items: Array<Component<IKeyValue, IKeyValue>> = [];
  * 把Component放入队列中等待更新
  * @param component 组件
  */
-export function enqueueRender(component: Component<IKeyValue, IKeyValue>) {
+export function enqueueRender(component: Component<any, any>) {
     if (!component._dirty) {
         // 防止多次render
         component._dirty = true;

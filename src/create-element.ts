@@ -13,10 +13,10 @@ import { IKeyValue, funComponent, childType } from "./types";
  * @see http://jasonformat.com/wtf-is-jsx
  * @public
  */
-export function h(this: Component<IKeyValue, IKeyValue> | undefined | void | null, nodeName: string | typeof Component | funComponent, attributes: IKeyValue | null, ...args: childType[]) {
+export function createElement(this: Component<IKeyValue, IKeyValue> | undefined | void | null, nodeName: string | typeof Component | funComponent, attributes: IKeyValue | null, ...args: childType[]) {
     // 初始化子元素列表
     const stack: childType[] = [];
-    const children: Array<VNode|string|number|boolean> = [];
+    let children: Array<VNode|string|number|boolean> | undefined = [];
     // let i: number;
     // let child: any;
     // 是否为原生组件
@@ -54,15 +54,16 @@ export function h(this: Component<IKeyValue, IKeyValue> | undefined | void | nul
         } else {
             // 清空布尔
             if (typeof child === "boolean") {
-                child = undefined;
+                child = null;
             }
             // 判断当前组件是否为自定义组件
             simple = typeof nodeName !== "function";
             if (simple) {
                 // 原生组件的子元素处理
-                if (child == null) {
+                if (child == null || child === "") {
                     // null to ""
-                    child = "";
+                    continue;
+                    // child = "";
                 } else if (typeof child === "number") {
                     // num to string
                     child = String(child);
@@ -87,11 +88,14 @@ export function h(this: Component<IKeyValue, IKeyValue> | undefined | void | nul
             lastSimple = simple;
         }
     }
+    if (children.length === 0) {
+        children = undefined;
+    }
     const p = new VNode(
         // 设置原生组件名字或自定义组件class(function)
         nodeName,
         // 设置子元素
-        children
+        children,
     );
     // 设置属性
     p.attributes = attributes == null ? undefined : attributes;

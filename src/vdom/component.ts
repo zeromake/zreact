@@ -8,6 +8,7 @@ import { removeNode } from "../dom/index";
 import { extend } from "../util";
 import { IKeyValue } from "../types";
 import { IVDom } from "./index";
+import { findVDom, setVDom } from "../find";
 import {
     ASYNC_RENDER,
     // ATTR_KEY,
@@ -51,7 +52,8 @@ export function setComponentProps(component: Component<IKeyValue, IKeyValue>, pr
         // 清理掉props中的key
         delete props.key;
     }
-    if (!component._vdom || mountAll) {
+    const vdom = findVDom(component);
+    if (!vdom || mountAll) {
         // 如果没有插入到DOM树或正在被render渲染执行钩子
         if (component.componentWillMount) {
             component.componentWillMount();
@@ -79,7 +81,7 @@ export function setComponentProps(component: Component<IKeyValue, IKeyValue>, pr
         if (
             opts === SYNC_RENDER
             || options.syncComponentUpdates !== false
-            || !component._vdom
+            || vdom
         ) {
             // 同步执行
             renderComponent(component, SYNC_RENDER, mountAll);
@@ -101,7 +103,7 @@ export function setComponentProps(component: Component<IKeyValue, IKeyValue>, pr
  * @param {boolean?} mountALL
  * @param {boolean?} isChild
  */
-export function renderComponent(component: Component<IKeyValue, IKeyValue>, opts?: number, mountALL?: boolean, isChild?: boolean): void {
+export function renderComponent(component: Component<any, any>, opts?: number, mountALL?: boolean, isChild?: boolean): void {
     if (component._disable) {
         // 组件已停用直接不做操作。
         return;
@@ -119,7 +121,7 @@ export function renderComponent(component: Component<IKeyValue, IKeyValue>, opts
     // 获取组件上一次的context没有取当前
     const previousContext = component._prevContext || context;
     // 判断是否已有vdom
-    const isUpdate = component._vdom;
+    const isUpdate = findVDom(component);
     // 上次移除的vdom
     const nextVDom = component._nextVDom;
     // 组件vdom
@@ -164,7 +166,7 @@ export function renderComponent(component: Component<IKeyValue, IKeyValue>, opts
     if (!skip) {
         let rendered: VNode | void;
         // 当前组件的render函数返回的VNode
-        rendered = component.render(props, state, context, component._h);
+        rendered = component.render(props, state, context);
         //
         let inst: Component<IKeyValue, IKeyValue> | undefined;
         if (component.getChildContext) {
@@ -206,7 +208,7 @@ export function renderComponent(component: Component<IKeyValue, IKeyValue>, opts
                 renderComponent(inst, SYNC_RENDER, mountALL, true);
             }
             // 把子组件dom设置到base
-            vdom = inst._vdom;
+            vdom = findVDom(inst);
         } else {
             // 原生组件
             // 获取原dom或缓存dom
@@ -223,9 +225,10 @@ export function renderComponent(component: Component<IKeyValue, IKeyValue>, opts
 
             if (initialVDom || opts === SYNC_RENDER) {
                 // 组件dom，缓存dom，同步渲染
-                if (component._vdom && component._vdom.component) {
+                const tmpVDom = findVDom(component);
+                if (tmpVDom && tmpVDom.component) {
                     // 清理component索引防止使用同一个component情况下却卸载了。
-                    component._vdom.component = undefined;
+                    tmpVDom.component = undefined;
                     //
                     // const b: any = cbase;
                     // b._component = undefined;
@@ -266,7 +269,7 @@ export function renderComponent(component: Component<IKeyValue, IKeyValue>, opts
             unmountComponent(toUnmount);
         }
         // 当前自定义组件的根dom
-        component._vdom = vdom;
+        setVDom(component, (vdom as IVDom));
         component.base = (vdom as IVDom).base;
         if (vdom && !isChild) {
             // 创建了dom且不是子组件渲染
@@ -275,11 +278,10 @@ export function renderComponent(component: Component<IKeyValue, IKeyValue>, opts
             // 获取根自定义组件，有可能是一个子组件变化数据
             while ((t = t._parentComponent)) {
                 componentRef = t;
-                componentRef._vdom = vdom;
+                setVDom(componentRef, (vdom as IVDom));
                 componentRef.base = (vdom as IVDom).base;
             }
             // const dom: any = vdom.base;
-            // dom._vdom = vdom;
             // 保证dom的上下文为根自定义组件
             vdom.component = componentRef;
             vdom.componentConstructor = componentRef.constructor;
@@ -337,11 +339,11 @@ export function buildComponentFromVNode(
         // 向上查找
         isOwner = c.constructor === vnode.nodeName;
     }
-
-    if (c && c._vdom && isOwner && (!mountALL || c._component)) {
+    const tempVDom = findVDom(c);
+    if (tempVDom && isOwner && (!mountALL || (c as Component<any, any>)._component)) {
         // 获取到可复用的组件，重新设置props，复用状态下有dom所有为了流畅使用异步
-        setComponentProps(c, props, ASYNC_RENDER, context, mountALL);
-        vdom = c._vdom;
+        setComponentProps((c as Component<any, any>), props, ASYNC_RENDER, context, mountALL);
+        vdom = findVDom(c);
     } else {
         let oldVDom = vdom;
         // 不存在可以复用的组件
@@ -372,14 +374,14 @@ export function buildComponentFromVNode(
             mountALL,
         );
         // 获取vdom,实际上通过setComponentProps已经有了c.vdom,但是typescript无法识别,直接强制转换
-        vdom = c._vdom as IVDom;
+        vdom = findVDom(c) as IVDom;
         if (oldVDom && vdom !== oldVDom) {
             // 需要卸载dom
             oldVDom.component = undefined;
             recollectNodeTree(oldVDom, false);
         }
     }
-    return vdom;
+    return vdom as IVDom;
 }
 
 /**
@@ -391,7 +393,7 @@ export function unmountComponent(component: Component<IKeyValue, IKeyValue>) {
         // 触发全局钩子
         options.beforeUnmount(component);
     }
-    const vdom = component._vdom;
+    const vdom = findVDom(component);
     // 停用组件
     component._disable = true;
     if (component.componentWillUnmount) {
@@ -399,7 +401,7 @@ export function unmountComponent(component: Component<IKeyValue, IKeyValue>) {
         component.componentWillUnmount();
     }
     // 清理dom索引
-    component._vdom = undefined;
+    setVDom(component, undefined);
     component.base = undefined;
     // 获取子组件
     const inner = component._component;

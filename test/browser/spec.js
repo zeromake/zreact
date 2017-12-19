@@ -1,7 +1,7 @@
 import { h, render, rerender, Component } from 'zreact';
 /** @jsx h */
 
-const EMPTY_CHILDREN = [];
+const EMPTY_CHILDREN = undefined;
 
 describe('Component spec', () => {
 	let scratch;

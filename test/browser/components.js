@@ -62,7 +62,7 @@ describe('Components', () => {
 
 
 	it('should render functional components', () => {
-		const PROPS = { foo:'bar', onBaz:()=>{} };
+		const PROPS = { foo:'bar', onBaz:()=>{}};
 
         const C3 = sinon.spy( props => <div {...props} /> );
 
@@ -81,7 +81,7 @@ describe('Components', () => {
 
 
 	it('should render components with props', () => {
-		const PROPS = { foo:'bar', onBaz:()=>{} };
+		const PROPS = { foo:'bar', onBaz:()=>{}, children: undefined };
 		let constructorProps;
 
 		class C2 extends Component {
@@ -96,7 +96,7 @@ describe('Components', () => {
 		sinon.spy(C2.prototype, 'render');
 
 		render(<C2 {...PROPS} />, scratch);
-
+        console.log("---------: ", constructorProps, PROPS)
 		expect(constructorProps).to.deep.equal(PROPS);
 
 		expect(C2.prototype.render)
@@ -652,13 +652,15 @@ describe('Components', () => {
 	describe('Component Nesting', () => {
 		let useIntermediary = false;
 
-		let createComponent = (Intermediary) => {
+		let createComponent = (Intermediary, name) => {
 			class C extends Component {
-				componentWillMount() {}
+				componentWillMount() {
+                }
 				render({ children }) {
 					if (!useIntermediary) return children[0];
 					let I = useIntermediary===true ? Intermediary : useIntermediary;
-					return <I>{children}</I>;
+                    const vnode = <I>{children}</I>;
+                    return vnode
 				}
 			}
 			spyAll(C.prototype);
@@ -674,9 +676,9 @@ describe('Components', () => {
 		let F2 = createFunction();
 		let F3 = createFunction();
 
-		let C1 = createComponent(F1);
-		let C2 = createComponent(F2);
-		let C3 = createComponent(F3);
+		let C1 = createComponent(F1, 'C1');
+		let C2 = createComponent(F2, 'C2');
+		let C3 = createComponent(F3, 'C3');
 
 		let reset = () => [C1, C2, C3].reduce(
 			(acc, c) => acc.concat( Object.keys(c.prototype).map(key => c.prototype[key]) ),
@@ -698,7 +700,7 @@ describe('Components', () => {
 			expect(C1.prototype.componentWillMount, 'unmount innermost, C1').not.to.have.been.called;
 			expect(C2.prototype.componentWillMount, 'unmount innermost, C2').not.to.have.been.called;
 
-			reset();
+            reset();
 			rndr(<C1><C3>Some Text</C3></C1>);
 
 			expect(C1.prototype.componentWillMount, 'swap innermost').not.to.have.been.called;
