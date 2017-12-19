@@ -1,3 +1,18 @@
+<a name="0.3.0"></a>
+# [0.3.0](https://github.com/zeromake/zreact/compare/v0.2.2...v0.3.0) (2017-12-19)
+
+
+### Bug Fixes
+
+*  scripts are deprecated ([65e86d0](https://github.com/zeromake/zreact/commit/65e86d0))
+
+
+### Features
+
+* createElement miss null child, vnode.children default is undefined ([fe56a93](https://github.com/zeromake/zreact/commit/fe56a93))
+
+
+
 <a name="0.2.2"></a>
 ## [0.2.2](https://github.com/zeromake/zreact/compare/v0.2.1...v0.2.2) (2017-12-13)
 
