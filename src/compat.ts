@@ -5,6 +5,7 @@ import {
     h,
     Component as PreactComponent,
     options,
+    Children,
     isValidElement,
     findDOMNode,
     findVDom,
@@ -210,48 +211,6 @@ function unmountComponentAtNode(container: any) {
     }
     return false;
 }
-
-const ARR: any[] = [];
-
-// This API is completely unnecessary for Preact, so it"s basically passthrough.
-const Children = {
-    map(children: any, fn: any, ctx: any) {
-        if (children == null) {
-            return null;
-        }
-        children = Children.toArray(children);
-        if (ctx && ctx !== children) {
-            fn = fn.bind(ctx);
-        }
-        return children.map(fn);
-    },
-    forEach(children: any, fn: any, ctx: any) {
-        if (children == null) {
-            return null;
-        }
-        children = Children.toArray(children);
-        if (ctx && ctx !== children) {
-            fn = fn.bind(ctx);
-        }
-        children.forEach(fn);
-    },
-    count(children: any) {
-        return children && children.length || 0;
-    },
-    only(children: any) {
-        children = Children.toArray(children);
-        if (children.length !== 1) {
-            throw new Error("Children.only() expects only one child.");
-        }
-        return children[0];
-    },
-    toArray(children: any) {
-        if (children == null) {
-            return [];
-        }
-        return ARR.concat(children);
-    },
-};
 
 /** Track current render() component for ref assignment */
 let currentComponent: any;
@@ -484,7 +443,7 @@ function applyMixins(proto: any, mixins: any) {
     for (const key in mixins) {
         if (mixins.hasOwnProperty(key)) {
             proto[key] = multihook(
-                mixins[key].concat(proto[key] || ARR),
+                mixins[key].concat(proto[key]),
                 key === "getDefaultProps" || key === "getInitialState" || key === "getChildContext",
             );
         }

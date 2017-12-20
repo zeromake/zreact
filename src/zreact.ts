@@ -10,6 +10,7 @@ import { IKeyValue } from "./types";
 import { IVDom } from "./vdom/index";
 import { VNode } from "./vnode";
 import { findDOMNode, findVDom } from "./find";
+import Children from "./children";
 
 declare const VERSION_ENV: string;
 const version = VERSION_ENV;
@@ -24,6 +25,7 @@ function isValidElement(element: VNode| any): boolean {
 
 export default {
     Component,
+    Children,
     // PureComponent,
     cloneElement,
     createClass,
@@ -40,6 +42,7 @@ export default {
 
 export {
     Component,
+    Children,
     // PureComponent,
     cloneElement,
     createClass,

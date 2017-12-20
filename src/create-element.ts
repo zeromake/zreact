@@ -53,18 +53,15 @@ export function createElement(this: Component<IKeyValue, IKeyValue> | undefined 
             }
         } else {
             // 清空布尔
-            if (typeof child === "boolean") {
-                child = null;
+            if (typeof child === "boolean" || child == null || child === "") {
+                continue;
+                // child = null;
             }
             // 判断当前组件是否为自定义组件
             simple = typeof nodeName !== "function";
             if (simple) {
                 // 原生组件的子元素处理
-                if (child == null || child === "") {
-                    // null to ""
-                    continue;
-                    // child = "";
-                } else if (typeof child === "number") {
+                if (typeof child === "number") {
                     // num to string
                     child = String(child);
                 } else if (typeof child !== "string") {
