@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-     <script src="../dist/zreact.ie8.js"></script>
-    <!-- <script src="https://cdn.bootcss.com/preact/8.2.1/preact.js"></script> -->
+     <script src="../dist/zreact.js"></script>
+    <!-- <script src="../node_modules/preact/dist/preact.dev.js"></script> -->
     <title>Document</title>
 </head>
 <body>
@@ -15,281 +15,68 @@
         'use strict';
         var h = zreact.h;
         var render = zreact.render;
-
-        // var Foo = zreact.createClass({
-        //     $init: function(props, context) {
-        //         this.state = {
-        //             num: [1,2,3]
-        //         }
-        //         console.log(JSON.stringify(this.state))
-        //         // this.h = h
-        //         // this.test = this.test.bind(this)
-        //     },
-        //     render: function(props, state, c, h) {
-        //         var self = this
-        //         console.log('map', JSON.stringify(state))
-        //         var test = state.num.map(function(i, index) {
-        //             return h("li", null, i, h("button", { onClick: self["delete"].bind(self, index, e) }, "x"))
-        //         });
-        //         console.log(JSON.stringify(state))
-        //         return h("div", null, h("ul", null, test), h("button", { onClick: this.test }, "添加"));
-        //     },
-        //     test: function() {
-        //         console.log("Foo test", JSON.stringify(this.state));
-        //         this.setState(function(state) {
-        //             state.num.push(state.num.length + 1);
-        //         })
-        //     },
-        //     "delete": function(index) {
-        //         this.setState(function(state) {
-        //             state.num.splice(index, 1);
-        //         })
-        //     }
-        // })
-        // function test () {
-        //     console.log(this, '---test---')
-        // }
-        // var Bar = zreact.createClass({
-        //     render: function(p, s, c, h) {
-        //         return h("button", { onClick: this.add}, "add")
-        //     },
-        //     add: function() {
-        //         this.$emit("Add")
-        //     }
-        // })
-        // var Foo = zreact.createClass({
-        //     $init: function(p, c) {
-        //         this.state = {
-        //             num: 1
-        //         }
-        //     },
-        //     render: function(p, s, c, h) {
-        //         return h("div", null, "num: " + s.num, h(Bar, { onAdd: this.add}))
-        //     },
-        //     add: function() {
-        //         console.log('--Foo--', this)
-        //         this.setState(function(state) {
-        //             state.num += 1
-        //         })
-        //     }
-        // })
-        // var scratch = document.querySelector("#app");
-        // var vdom = zreact.render(zreact.h(Foo), scratch)
-
-
-        // var Test = function(p) {
-        //     var h = h.bind(this)
-        //     console.log(p)
-        //     return h('div', { class: 'test' }, 'test', p.children)
-        // }
-        // var Test2 = function() {
-        //     return h(Test, null, h('span', null, "Test2"))
-        // }
-        // var scratch = document.querySelector("#app");
-        // render(zreact.h(Test2), scratch, )
-        // fiber test
-        // var dotStyle = {
-        //     position: 'absolute',
-        //     background: '#61dafb',
-        //     font: 'normal 15px sans-serif',
-        //     textAlign: 'center',
-        //     cursor: 'pointer',
-        // };
-        // var containerStyle = {
-        //     position: 'absolute',
-        //     transformOrigin: '0 0',
-        //     left: '50%',
-        //     top: '50%',
-        //     width: '10px',
-        //     height: '10px',
-        //     background: '#eee',
-        // };
-        // var targetSize = 25;
-        // var Dot = zreact.createClass({
-        //     $init: function() {
-        //         this.state = { hover: false }
-        //     },
-        //     enter: function() {
-        //         this.setState({
-        //             hover: true
-        //         });
-        //     },
-        //     leave: function() {
-        //         this.setState({
-        //             hover: false
-        //         });
-        //     },
-        //     render: function() {
-        //         var props = this.props;
-        //         var s = props.size * 1.3;
-        //         var style = Object.assign({}, dotStyle, {
-        //             width: s + 'px',
-        //             height: s + 'px',
-        //             left: props.x + 'px',
-        //             top: props.y + 'px',
-        //             borderRadius: s / 2 + 'px',
-        //             lineHeight: s + 'px',
-        //             background: this.state.hover ? '#ff0' : dotStyle.background
-        //         })
-        //         var _this2 = this
-        //         return h(
-        //             'div',
-        //             {
-        //                 style: style,
-        //                 onMouseEnter: function onMouseEnter() {
-        //                     return _this2.enter();
-        //                 },
-        //                 onMouseLeave: function onMouseLeave() {
-        //                     return _this2.leave();
-        //                 }
-        //             },
-        //             this.state.hover ? '*' + props.text + '*' : props.text
-        //         );
-        //     }
-        // })
-        // function SierpinskiTriangle(props) {
-        //     var x = props.x;
-        //     var y = props.y;
-        //     var s = props.s;
-        //     var children = props.children;
-        //     if (s <= targetSize) {
-        //         return h(Dot, {
-        //             x: x - targetSize / 2,
-        //             y: y - targetSize / 2,
-        //             size: targetSize,
-        //             text: children
-        //         });
-        //         //return r;
-        //     }
-        //     var newSize = s / 2;
-        //     var slowDown = true;
-        //     if (slowDown) {
-        //         // var e = performance.now() + 0.8;
-        //         // while (performance.now() < e) {
-        //         //     // Artificially long execution time.
-        //         // }
-        //     }
-        //     s /= 2;
-        //     return h("div", null,
-        //         h(
-        //             SierpinskiTriangle,
-        //             { x: x, y: y - s / 2, s: s },
-        //             children
-        //         ),
-        //         h(
-        //             SierpinskiTriangle,
-        //             { x: x - s, y: y + s / 2, s: s },
-        //             children
-        //         ),
-        //         h(
-        //             SierpinskiTriangle,
-        //             { x: x + s, y: y + s / 2, s: s },
-        //             children
-        //         )
-        //     );
-        // }
-        // SierpinskiTriangle.shouldComponentUpdate = function(oldProps, newProps) {
-        //     var o = oldProps;
-        //     var n = newProps;
-        //     return !(
-        //         o.x === n.x &&
-        //         o.y === n.y &&
-        //         o.s === n.s &&
-        //         o.children === n.children
-        //     );
-        // };
-        // var ExampleApplication = zreact.createClass({
-        //     $init: function() {
-        //         this.state = { seconds: 0 };
-        //         this.tick = this.tick.bind(this);
-        //     },
-        //     componentDidMount: function() {
-        //         this.intervalID = setInterval(() => {
-        //             requestAnimationFrame(this.tick)
-        //         }, 1000);
-        //     },
-        //     tick: function() {
-        //         //ReactDOMFiber.unstable_deferredUpdates(() =>
-        //             this.setState(function(state) {return ({ seconds: (state.seconds % 10) + 1 })})
-        //         //);
-        //     },
-        //     componentWillUnmount: function() {
-        //         clearInterval(this.intervalID);
-        //     },
-        //     render: function() {
-        //         var seconds = this.state.seconds;
-        //         var elapsed = this.props.elapsed;
-        //         var t = (elapsed / 1000) % 10;
-        //         var scale = 1 + (t > 5 ? 10 - t : t) / 10;
-        //         var transform = 'scaleX(' + (scale / 2.1) + ') scaleY(0.7) translateZ(0.1px)';
-        //         return (
-        //             h("div", { style: Object.assign({}, containerStyle, { transform: transform }) },
-        //                 h("div", null,
-        //                     h(SierpinskiTriangle, { x: 0, y: 0, s: 1000 },
-        //                         this.state.seconds
-        //                     )
-        //                 )
-        //             )
-        //         );
-        //     }
-        // })
-        // var start = new Date().getTime();
-        // var vdom
-        // var root = document.getElementById('app')
-        // var App = zreact.createClass({
-        //     $init: function() {
-        //         this.state = {
-        //             elapsed: new Date().getTime() - start
-        //         }
-        //         this.update = this.update.bind(this)
-        //     },
-        //     update: function() {
-        //         this.setState({
-        //             elapsed: new Date().getTime() - start
-        //         })
-        //         requestAnimationFrame(this.update)
-        //     },
-        //     componentDidMount: function() {
-        //         requestAnimationFrame(this.update)
-        //     },
-        //     render: function() {
-        //         return h(ExampleApplication, {elapsed: this.state.elapsed})
-        //     }
-        // })
-        // function update() {
-        //     vdom = render(
-        //         h(App),
-        //         root,
-        //         vdom
-        //     );
-        //     requestAnimationFrame(update);
-        // }
-        // requestAnimationFrame(update);
-
-        var Bar = zreact.createClass({
-            componentDidMount: function() {
-                console.log(this)
-                console.log('A.componentDidMount, '+document.querySelectorAll('.bar').length)
-            },
-            componentWillUnmount: function() {
-                console.log('A.componentWillUnmount, '+document.querySelectorAll('.bar').length)
-		        console.log(document.body.innerHTML)
-            },
-            render: function() {
-                return h('p', { class: 'bar' }, "Bar")
+        class App extends zreact.Component {
+            componentWillUnmount() {
+                console.log("App componentWillUnmount")
             }
-        });
-        var Foo = function() {
-            return h("div", null, "Foo")
+            constructor(props) {
+                super(props)
+            }
+            render() {
+                return this.props.show
+            }
         }
-        var scratch = document.querySelector("#app");
-        render(h(
-            "div", { id: "zreact-app" },
-            h(Bar),
-            h(Foo)
-        ), document.body, scratch)
+        class test extends zreact.Component {
+            constructor(props) {
+                super(props)
+                this.state = {
+                    show: true,
+                    num: 0
+                }
+            }
+            test() {
+                if (this.state.num < 3) {
+                    this.setState({
+                        num: this.state.num + 1
+                    })
+                } else {
+                    this.setState({
+                        num: 0
+                    })
+                }
+            }
+            test2() {
+                if (this.state.num < 3) {
+                    this.setState({
+                        show: !this.state.show,
+                        num: this.state.num + 1
+                    })
+                } else {
+                    this.setState({
+                        show: !this.state.show,
+                        num: 0
+                    })
+                }
+            }
+            render() {
+                var state = this.state;
+                var vnode
+                if (state.num === 1) {
+                    vnode = h("div", null, "测试1")
+                } else if (state.num === 2) {
+                    vnode = h("p", null, "测试2")
+                } else if (state.num === 3) {
+                    vnode = h("button", null, "测试3")
+                } else {
+                    vnode = null
+                }
+                return h("div", null, h('button', {onClick: this.test.bind(this)}, "切换"), h('button', {onClick: this.test2.bind(this)}, "卸载"), state.show ? h(App, { show: vnode }) : null)
+            }
+        }
+        render(h(test), document.getElementById('app'))
+
     </script>
-    <script src="../devtools.js"></script>
+    <script src="../devtools-run.js"></script>
     <!-- <script src="../node_modules/preact/devtools.js"></script> -->
 </body>
 </html>

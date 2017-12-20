@@ -225,10 +225,9 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
 
             if (initialVDom || opts === SYNC_RENDER) {
                 // 组件dom，缓存dom，同步渲染
-                const tmpVDom = findVDom(component);
-                if (tmpVDom && tmpVDom.component) {
+                if (cvdom && cvdom.component) {
                     // 清理component索引防止使用同一个component情况下却卸载了。
-                    tmpVDom.component = undefined;
+                    cvdom.component = undefined;
                     //
                     // const b: any = cbase;
                     // b._component = undefined;

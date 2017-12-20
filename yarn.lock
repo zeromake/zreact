@@ -3930,6 +3930,10 @@ preact-render-to-string@^3.2.0, preact-render-to-string@^3.7.0:
   dependencies:
     pretty-format "^3.5.1"
 
+preact@^8.2.7:
+  version "8.2.7"
+  resolved "http://registry.npm.taobao.org/preact/download/preact-8.2.7.tgz#316249fb678cd5e93e7cee63cea7bfb62dbd6814"
+
 prelude-ls@~1.1.2:
   version "1.1.2"
   resolved "http://registry.npm.taobao.org/prelude-ls/download/prelude-ls-1.1.2.tgz#21932a549f5e52ffd9a827f570e04be62a97da54"
