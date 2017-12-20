@@ -29,8 +29,8 @@
   resolved "http://registry.npm.taobao.org/@types/minimatch/download/@types/minimatch-2.0.29.tgz#5002e14f75e2d71e564281df0431c8c1b4a2a36a"
 
 "@types/node@*":
-  version "8.0.58"
-  resolved "http://registry.npm.taobao.org/@types/node/download/@types/node-8.0.58.tgz#5b3881c0be3a646874803fee3197ea7f1ed6df90"
+  version "8.5.1"
+  resolved "http://registry.npm.taobao.org/@types/node/download/@types/node-8.5.1.tgz#4ec3020bcdfe2abffeef9ba3fbf26fca097514b5"
 
 "@types/shelljs@0.7.0":
   version "0.7.0"
@@ -39,8 +39,8 @@
     "@types/node" "*"
 
 JSONStream@^1.0.4:
-  version "1.3.1"
-  resolved "http://registry.npm.taobao.org/JSONStream/download/JSONStream-1.3.1.tgz#707f761e01dae9e16f1bcf93703b78c70966579a"
+  version "1.3.2"
+  resolved "http://registry.npm.taobao.org/JSONStream/download/JSONStream-1.3.2.tgz#c102371b6ec3a7cf3b847ca00c20bb0fce4c6dea"
   dependencies:
     jsonparse "^1.2.0"
     through ">=2.2.7 <3"
@@ -94,8 +94,8 @@ ajv@^4.9.1:
     json-stable-stringify "^1.0.1"
 
 ajv@^5.0.0, ajv@^5.1.0, ajv@^5.1.5:
-  version "5.5.1"
-  resolved "http://registry.npm.taobao.org/ajv/download/ajv-5.5.1.tgz#b38bb8876d9e86bee994956a04e721e88b248eb2"
+  version "5.5.2"
+  resolved "http://registry.npm.taobao.org/ajv/download/ajv-5.5.2.tgz#73b5eeca3fab653e3d3f9422b341ad42205dc965"
   dependencies:
     co "^4.6.0"
     fast-deep-equal "^1.0.0"
@@ -1194,8 +1194,8 @@ camelcase@^4.1.0:
   resolved "http://registry.npm.taobao.org/camelcase/download/camelcase-4.1.0.tgz#d545635be1e33c542649c69173e5de6acfae34dd"
 
 caniuse-lite@^1.0.30000780:
-  version "1.0.30000782"
-  resolved "http://registry.npm.taobao.org/caniuse-lite/download/caniuse-lite-1.0.30000782.tgz#5b82b8c385f25348745c471ca51320afb1b7f254"
+  version "1.0.30000784"
+  resolved "http://registry.npm.taobao.org/caniuse-lite/download/caniuse-lite-1.0.30000784.tgz#129ced74e9a1280a441880b6cd2bce30ef59e6c0"
 
 caseless@~0.12.0:
   version "0.12.0"
@@ -1305,6 +1305,10 @@ color-name@^1.1.1:
   version "1.1.3"
   resolved "http://registry.npm.taobao.org/color-name/download/color-name-1.1.3.tgz#a7d0558bd89c42f795dd42328f740831ca53bc25"
 
+color-support@^1.1.3:
+  version "1.1.3"
+  resolved "http://registry.npm.taobao.org/color-support/download/color-support-1.1.3.tgz#93834379a1cc9a0c61f82f52f0d04322251bd5a2"
+
 colors@^1.1.0:
   version "1.1.2"
   resolved "http://registry.npm.taobao.org/colors/download/colors-1.1.2.tgz#168a4701756b6a7f51a12ce0c97bfa28c084ed63"
@@ -1400,8 +1404,8 @@ content-type@~1.0.4:
   resolved "http://registry.npm.taobao.org/content-type/download/content-type-1.0.4.tgz#e138cc75e040c727b1966fe5e5f8c9aee256fe3b"
 
 conventional-changelog-angular@^1.5.2:
-  version "1.5.3"
-  resolved "http://registry.npm.taobao.org/conventional-changelog-angular/download/conventional-changelog-angular-1.5.3.tgz#ff0dd01d740e35bfdbc3f02dfea13cf0d96f0b82"
+  version "1.6.0"
+  resolved "http://registry.npm.taobao.org/conventional-changelog-angular/download/conventional-changelog-angular-1.6.0.tgz#0a26a071f2c9fcfcf2b86ba0cfbf6e6301b75bfa"
   dependencies:
     compare-func "^1.3.1"
     q "^1.4.1"
@@ -1429,8 +1433,8 @@ conventional-changelog-codemirror@^0.2.1:
     q "^1.4.1"
 
 conventional-changelog-core@^1.9.3:
-  version "1.9.4"
-  resolved "http://registry.npm.taobao.org/conventional-changelog-core/download/conventional-changelog-core-1.9.4.tgz#a541e5354f91072f8583b19e34abb9f6e461c367"
+  version "1.9.5"
+  resolved "http://registry.npm.taobao.org/conventional-changelog-core/download/conventional-changelog-core-1.9.5.tgz#5db7566dad7c0cb75daf47fbb2976f7bf9928c1d"
   dependencies:
     conventional-changelog-writer "^2.0.3"
     conventional-commits-parser "^2.1.0"
@@ -1808,8 +1812,8 @@ ee-first@1.1.1:
   resolved "http://registry.npm.taobao.org/ee-first/download/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
 
 electron-to-chromium@^1.3.28:
-  version "1.3.28"
-  resolved "http://registry.npm.taobao.org/electron-to-chromium/download/electron-to-chromium-1.3.28.tgz#8dd4e6458086644e9f9f0a1cf32e2a1f9dffd9ee"
+  version "1.3.29"
+  resolved "http://registry.npm.taobao.org/electron-to-chromium/download/electron-to-chromium-1.3.29.tgz#7a58236b95468c3e7660091348522d65d7736b36"
 
 elliptic@^6.0.0:
   version "6.4.0"
@@ -2105,10 +2109,11 @@ extsprintf@^1.2.0:
   resolved "http://registry.npm.taobao.org/extsprintf/download/extsprintf-1.4.0.tgz#e2689f8f356fad62cca65a3a91c5df5f9551692f"
 
 fancy-log@^1.1.0:
-  version "1.3.1"
-  resolved "http://registry.npm.taobao.org/fancy-log/download/fancy-log-1.3.1.tgz#c4a3462ba14adf5dfbab79731fd3844a2069cbbb"
+  version "1.3.2"
+  resolved "http://registry.npm.taobao.org/fancy-log/download/fancy-log-1.3.2.tgz#f41125e3d84f2e7d89a43d06d958c8f78be16be1"
   dependencies:
     ansi-gray "^0.1.1"
+    color-support "^1.1.3"
     time-stamp "^1.0.0"
 
 fast-deep-equal@^1.0.0:
@@ -3930,10 +3935,6 @@ preact-render-to-string@^3.2.0, preact-render-to-string@^3.7.0:
   dependencies:
     pretty-format "^3.5.1"
 
-preact@^8.2.7:
-  version "8.2.7"
-  resolved "http://registry.npm.taobao.org/preact/download/preact-8.2.7.tgz#316249fb678cd5e93e7cee63cea7bfb62dbd6814"
-
 prelude-ls@~1.1.2:
   version "1.1.2"
   resolved "http://registry.npm.taobao.org/prelude-ls/download/prelude-ls-1.1.2.tgz#21932a549f5e52ffd9a827f570e04be62a97da54"
@@ -4397,8 +4398,8 @@ rollup-watch@^4.3.1:
     rollup-pluginutils "^2.0.1"
 
 rollup@^0.52.2:
-  version "0.52.2"
-  resolved "http://registry.npm.taobao.org/rollup/download/rollup-0.52.2.tgz#d75bc6f37be02fd27cbb344e57e77b30042bd2cf"
+  version "0.52.3"
+  resolved "http://registry.npm.taobao.org/rollup/download/rollup-0.52.3.tgz#020d99fffe9619351e47b3894fd397c26f5e1bf6"
 
 safe-buffer@^5.0.1, safe-buffer@^5.1.0, safe-buffer@^5.1.1, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   version "5.1.1"
@@ -4864,7 +4865,7 @@ ts-loader@^3.2.0:
     loader-utils "^1.0.2"
     semver "^5.0.1"
 
-tslib@^1.7.1:
+tslib@^1.7.1, tslib@^1.8.0:
   version "1.8.1"
   resolved "http://registry.npm.taobao.org/tslib/download/tslib-1.8.1.tgz#6946af2d1d651a7b1863b531d6e5afa41aa44eac"
 
@@ -4885,10 +4886,10 @@ tslint@^5.8.0:
     tsutils "^2.12.1"
 
 tsutils@^2.12.1:
-  version "2.13.0"
-  resolved "http://registry.npm.taobao.org/tsutils/download/tsutils-2.13.0.tgz#0f52b6aabbc4216e72796b66db028c6cf173e144"
+  version "2.13.1"
+  resolved "http://registry.npm.taobao.org/tsutils/download/tsutils-2.13.1.tgz#d6d1cc0f7c04cf9fb3b28a292973cffb9cfbe09a"
   dependencies:
-    tslib "^1.7.1"
+    tslib "^1.8.0"
 
 tty-browserify@0.0.0:
   version "0.0.0"

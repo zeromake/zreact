@@ -1,6 +1,6 @@
 {
   "name": "zreact",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "React like,copy by preact",
   "main": "dist/zreact.js",
   "module": "dist/zreact.esm.js",
@@ -81,7 +81,6 @@
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^2.0.9",
     "mocha": "^4.0.1",
-    "preact": "^8.2.7",
     "preact-jsx-chai": "^2.2.1",
     "preact-render-to-string": "^3.7.0",
     "prop-types": "^15.5.10",

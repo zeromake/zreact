@@ -1,3 +1,18 @@
+<a name="0.3.1"></a>
+## [0.3.1](https://github.com/zeromake/zreact/compare/v0.3.0...v0.3.1) (2017-12-20)
+
+
+### Bug Fixes
+
+* **diff/component:** vdom.component not clear ([0f785ef](https://github.com/zeromake/zreact/commit/0f785ef))
+
+
+### Features
+
+* add tools Children ([d184736](https://github.com/zeromake/zreact/commit/d184736))
+
+
+
 <a name="0.3.0"></a>
 # [0.3.0](https://github.com/zeromake/zreact/compare/v0.2.2...v0.3.0) (2017-12-19)
 
