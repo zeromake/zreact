@@ -191,14 +191,14 @@ function idiff(
     // 获取虚拟的子节点
     const vchildren = (vnode as VNode).children;
     // dom可能进行过原生操作
-    if (props && typeof props === "object") {
-        for (let a = out.attributes, i = a.length; i-- ; ) {
-            const attr = a[i];
-            if (!(attr.name in props)) {
-                props[attr.name] = attr.value;
-            }
-        }
-    }
+    // if (props && typeof props === "object") {
+    //     for (let a = out.attributes, i = a.length; i-- ; ) {
+    //         const attr = a[i];
+    //         if (!(attr.name in props)) {
+    //             props[attr.name] = attr.value;
+    //         }
+    //     }
+    // }
     if (props == null || typeof props === "boolean") {
         // 上回的props不存在说明，这次一般为新建（preact有可能通过原生dom操作删除）
         vdom.props = props = {};
