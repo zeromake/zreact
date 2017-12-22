@@ -108,7 +108,7 @@ declare namespace zreact {
 	function h(node:string, params?:JSX.HTMLAttributes&JSX.SVGAttributes&{[propName: string]: any}, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
 	function render(node:JSX.Element, parent:Element|Document, mergeWith?:Element):Element;
 	function rerender():void;
-    function cloneElement(element:JSX.Element, props:any):JSX.Element;
+    function cloneElement(element:JSX.Element, props:any, ...children: JSX.Element[]):JSX.Element;
     /**
 	 * 判断是否为一个组件对象
 	 * @param element

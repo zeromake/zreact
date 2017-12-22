@@ -239,7 +239,12 @@ export function getInitDevTools(opt: typeof options, findDOMNode: typeof IfindDO
         };
         const componentUpdated = function componentUpdated_(component: Component<IKeyValue, IKeyValue>) {
             const prevRenderedChildren: IReactComponent[] = [];
-            visitNonCompositeChildren(instanceMap.get(component), function _(childInst: IReactComponent) {
+            const node = findDOMNode(component);
+            if (!instanceMap.has(node)) {
+                componentAdded(component);
+                return;
+            }
+            visitNonCompositeChildren(instanceMap.get(node), function _(childInst: IReactComponent) {
                 prevRenderedChildren.push(childInst);
             });
             const instance = updateReactComponent(component);
