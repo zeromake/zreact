@@ -1,3 +1,13 @@
+<a name="0.3.3"></a>
+## [0.3.3](https://github.com/zeromake/zreact/compare/v0.3.2...v0.3.3) (2017-12-22)
+
+
+### Bug Fixes
+
+* diffattributes ([86bb04a](https://github.com/zeromake/zreact/commit/86bb04a))
+
+
+
 <a name="0.3.2"></a>
 ## [0.3.2](https://github.com/zeromake/zreact/compare/v0.3.1...v0.3.2) (2017-12-22)
 
