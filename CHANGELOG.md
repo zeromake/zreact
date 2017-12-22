@@ -1,3 +1,18 @@
+<a name="0.3.2"></a>
+## [0.3.2](https://github.com/zeromake/zreact/compare/v0.3.1...v0.3.2) (2017-12-22)
+
+
+### Bug Fixes
+
+* **devtools:** componentUpdated instanceMap is Element key ([d7a05ab](https://github.com/zeromake/zreact/commit/d7a05ab))
+
+
+### Features
+
+* old dom attr ([9ca8ade](https://github.com/zeromake/zreact/commit/9ca8ade))
+
+
+
 <a name="0.3.1"></a>
 ## [0.3.1](https://github.com/zeromake/zreact/compare/v0.3.0...v0.3.1) (2017-12-20)
 
