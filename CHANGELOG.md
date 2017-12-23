@@ -1,3 +1,13 @@
+<a name="1.0.0"></a>
+# [1.0.0](https://github.com/zeromake/zreact/compare/v0.3.3...v1.0.0) (2017-12-23)
+
+
+### Bug Fixes
+
+* types.d.ts ([94f8728](https://github.com/zeromake/zreact/commit/94f8728))
+
+
+
 <a name="0.3.3"></a>
 ## [0.3.3](https://github.com/zeromake/zreact/compare/v0.3.2...v0.3.3) (2017-12-22)
 
