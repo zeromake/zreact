@@ -1,4 +1,5 @@
 import { IVDom } from "./vdom/index";
+import { VNode } from "./vnode";
 
 /**
  * 获取组件|vdom的dom对象

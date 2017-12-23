@@ -1,7 +1,7 @@
 import { createElement, createElement as h } from "./create-element";
 import { cloneElement } from "./clone-element";
 import { Component } from "./component";
-// import { PureComponent } from "./pure-component";
+import { PureComponent } from "./pure-component";
 import { render } from "./render";
 import options from "./options";
 import { createClass } from "./create-class";
@@ -26,7 +26,7 @@ function isValidElement(element: VNode| any): boolean {
 export default {
     Component,
     Children,
-    // PureComponent,
+    PureComponent,
     cloneElement,
     createClass,
     createElement,
@@ -43,7 +43,7 @@ export default {
 export {
     Component,
     Children,
-    // PureComponent,
+    PureComponent,
     cloneElement,
     createClass,
     createElement,

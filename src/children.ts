@@ -1,38 +1,45 @@
 import { VNode } from "./vnode";
 
+declare type Child = VNode[] | undefined | null;
+declare type ChildCallback = (item?: VNode, index?: number, arr?: VNode[]) => VNode[];
+
+const arrayMap = Array.prototype.map;
+const arrayForEach = Array.prototype.forEach;
+const arraySlice = Array.prototype.slice;
+
 const Children = {
-    map(children: VNode[] | undefined, callback: (item?: VNode, index?: number, arr?: VNode[]) => VNode, ctx?: any) {
+    map(children: Child, callback: ChildCallback, ctx?: any) {
         if (children == null) {
             return null;
         }
         if (ctx && ctx !== children) {
             callback = callback.bind(ctx);
         }
-        return Array.prototype.map.call(children, callback);
+        return arrayMap.call(children, callback);
     },
-    forEach(children: VNode[] | undefined, callback: (item?: VNode, index?: number, arr?: VNode[]) => any, ctx?: any) {
+    forEach(children: Child, callback: ChildCallback, ctx?: any) {
         if (children == null) {
             return null;
         }
         if (ctx && ctx !== children) {
             callback = callback.bind(ctx);
         }
-        return Array.prototype.forEach.call(children, callback);
+        return arrayForEach.call(children, callback);
     },
-    count(children: any) {
+    count(children: Child) {
         return children && children.length || 0;
     },
-    only(children: any) {
+    only(children: Child) {
         if (!children || children.length !== 1) {
-            throw new Error("Children.only() expects only one child.");
+            throw new TypeError("Children.only() expects only one child.");
         }
         return children[0];
     },
-    toArray(children: any) {
+    toArray(children: Child) {
         if (children == null) {
             return [];
         }
-        return Array.prototype.slice(children);
+        return arraySlice.call(children);
     },
 };
 

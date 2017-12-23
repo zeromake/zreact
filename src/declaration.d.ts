@@ -1,4 +1,4 @@
 declare module "prop-types" {
-    const props: any;
-    export default props;
+    const PropTypes: any;
+    export default PropTypes;
 }

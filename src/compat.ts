@@ -9,6 +9,7 @@ import {
     isValidElement,
     findDOMNode,
     findVDom,
+    PureComponent,
 } from "zreact";
 
 const version = "15.1.0"; // trick libraries to think we are react
@@ -567,15 +568,15 @@ extend(Component.prototype = new PreactComponent<any, any>({}, {}), {
     },
 });
 
-function PureComponent(this: any, props: any, context: any) {
-    Component.call(this, props, context);
-}
-F.prototype = Component.prototype;
-PureComponent.prototype = new (F as any)();
-PureComponent.prototype.isPureReactComponent = true;
-PureComponent.prototype.shouldComponentUpdate = function(props: any, state: any) {
-    return shallowDiffers(this.props, props) || shallowDiffers(this.state, state);
-};
+// function PureComponent(this: any, props: any, context: any) {
+//     Component.call(this, props, context);
+// }
+// F.prototype = Component.prototype;
+// PureComponent.prototype = new (F as any)();
+// PureComponent.prototype.isPureReactComponent = true;
+// PureComponent.prototype.shouldComponentUpdate = function(props: any, state: any) {
+//     return shallowDiffers(this.props, props) || shallowDiffers(this.state, state);
+// };
 
 export {
     REACT_ELEMENT_TYPE,
