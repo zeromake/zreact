@@ -2,7 +2,7 @@ declare type ChildType = zreact.VNode[] | undefined | null;
 declare type ChildCallbackType = (child?: zreact.VNode, index?: number, arr?: zreact.VNode[]) => (zreact.VNode)|any;
 
 declare namespace zreact {
-    interface Children {
+    const Children: {
         map: (children: ChildType, callback: ChildCallbackType, ctx?: any) => VNode[];
         forEach: (children: ChildType, callback: ChildCallbackType, ctx?: any) => any;
         count: (children: ChildType) => number;
@@ -209,7 +209,7 @@ declare namespace zreact {
 }
 
 declare module "zreact" {
-export default zreact;
+    export = zreact;
 }
 
 declare module "zreact/devtools" {
