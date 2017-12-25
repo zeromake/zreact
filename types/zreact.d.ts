@@ -1,13 +1,14 @@
-declare type ChildType = zreact.VNode[] | undefined | null;
 declare type ChildCallbackType = (child?: zreact.VNode, index?: number, arr?: zreact.VNode[]) => (zreact.VNode)|any;
 
 declare namespace zreact {
+    type childType = JSX.Element|string|boolean|null|undefined;
+    type childrenType = Array<childType|childType[]>;
     const Children: {
-        map: (children: ChildType, callback: ChildCallbackType, ctx?: any) => VNode[];
-        forEach: (children: ChildType, callback: ChildCallbackType, ctx?: any) => any;
-        count: (children: ChildType) => number;
-        only: (children: ChildType) => VNode;
-        toArray: (children: ChildType) => VNode[];
+        map: (children: childType[], callback: ChildCallbackType, ctx?: any) => VNode[];
+        forEach: (children: childType[], callback: ChildCallbackType, ctx?: any) => any;
+        count: (children: childType[]) => number;
+        only: (children: childType[]) => VNode;
+        toArray: (children: childType[]) => VNode[];
     }
     interface IVDom {
         /**
@@ -57,16 +58,17 @@ declare namespace zreact {
     }
 
     interface ZreactHTMLAttributes {
+        children?: childrenType;
         dangerouslySetInnerHTML?: DangerouslySetInnerHTML;
         key?: string;
-        ref?: (el?: Element) => void;
+        ref?: (el?: Element | IVDom) => void;
     }
 
     interface VNode {
         nodeName: ComponentConstructor<any, any>|string;
         attributes: {[name: string]: any};
-        children: VNode[];
-        key: string;
+        children: (childType[]) | undefined;
+        key?: string;
     }
 
     interface ComponentLifecycle<PropsType, StateType> {
@@ -115,23 +117,19 @@ declare namespace zreact {
         public props: PropsType & ComponentProps<this>;
         public context: any;
         constructor(props?: PropsType, context?: any);
-        // linkState: (name: string) => (event: Event) => void;
+        linkState: (name: string) => (event: Event) => void;
 
         public setState<K extends keyof StateType>(
             state: Pick<StateType, K>|((prevState: StateType, props: PropsType) => Pick<StateType, K>),
             callback?: () => void,
         ): void;
-        // public setState<K extends keyof StateType>(
-        //     fn: (prevState: StateType, props: PropsType) => Pick<StateType, K>,
-        //     callback?: () => void,
-        // ): void;
 
         public forceUpdate(callback?: () => void): void;
         public getChildContext?(): any;
         public abstract render(
             props?: PropsType & ComponentProps<this>,
             state?: StateType, context?: any,
-        ): JSX.Element|null;
+        ): childType;
     }
 
     interface Component<PropsType, StateType> extends ComponentLifecycle<PropsType, StateType> { }
@@ -139,32 +137,32 @@ declare namespace zreact {
     function h<PropsType>(
         node: ComponentConstructor<PropsType, any>|FunctionalComponent<PropsType>,
         params?: PropsType,
-        ...children: Array<JSX.Element|JSX.Element[]|string>,
+        ...children: childrenType,
     ): JSX.Element;
 
     function h(
         node: string,
         params?: JSX.HTMLAttributes&JSX.SVGAttributes&{[propName: string]: any},
-        ...children: Array<JSX.Element|JSX.Element[]|string>,
+        ...children: childrenType,
     ): JSX.Element;
 
     function render(
         node: JSX.Element,
         parent: Element|Document,
         mergeWith?: Element,
-    ): Element;
+    ): childType;
 
     function rerender(): void;
 
     function cloneElement(
         element: JSX.Element,
         props: any,
-        ...children: Array<JSX.Element|JSX.Element[]>,
+        ...children: childrenType,
     ): JSX.Element;
 
     function isValidElement(element: VNode| any): boolean;
 
-    function findDOMNode(componentOrVdom: any): Element;
+    function findDOMNode(componentOrVdom: any): HTMLElement;
 
     function findVDom(componentOrDom: any | Node | Element): IVDom;
 
