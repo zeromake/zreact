@@ -58,7 +58,7 @@ declare namespace zreact {
     }
 
     interface ZreactHTMLAttributes {
-        children?: childrenType;
+        children?: childType | childrenType;
         dangerouslySetInnerHTML?: DangerouslySetInnerHTML;
         key?: string;
         ref?: (el?: Element | IVDom) => void;
