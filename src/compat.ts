@@ -10,6 +10,9 @@ import {
     findDOMNode,
     findVDom,
     PureComponent,
+    unstable_renderSubtreeIntoContainer,
+    createFactory,
+    unmountComponentAtNode,
 } from "zreact";
 
 const version = "16.0.0"; // trick libraries to think we are react
@@ -183,42 +186,42 @@ function render(vnode: any, parent: any, callback?: () => void) {
     return vdom && vdom.component || out;
 }
 
-class ContextProvider {
-    public props: any;
-    public getChildContext() {
-        return this.props.context;
-    }
-    public render(props: any) {
-        return props.children[0];
-    }
-}
+// class ContextProvider {
+//     public props: any;
+//     public getChildContext() {
+//         return this.props.context;
+//     }
+//     public render(props: any) {
+//         return props.children[0];
+//     }
+// }
 
-function renderSubtreeIntoContainer(parentComponent: any, vnode: any, container: any, callback: any) {
-    const wrap = h(ContextProvider as any, { context: parentComponent.context }, vnode);
-    const renderContainer = render(wrap, container);
-    const vdom = findVDom(renderContainer);
-    const component = (renderContainer as any)._component || (vdom && vdom.base);
-    if (callback) {
-        callback.call(component, renderContainer);
-    }
-    return component;
-}
+// function renderSubtreeIntoContainer(parentComponent: any, vnode: any, container: any, callback: any) {
+//     const wrap = h(ContextProvider as any, { context: parentComponent.context }, vnode);
+//     const renderContainer = render(wrap, container);
+//     const vdom = findVDom(renderContainer);
+//     const component = (renderContainer as any)._component || (vdom && vdom.base);
+//     if (callback) {
+//         callback.call(component, renderContainer);
+//     }
+//     return component;
+// }
 
-function unmountComponentAtNode(container: any) {
-    const existing = container._zreactCompatRendered && container._zreactCompatRendered.vdom && container._zreactCompatRendered.vdom.base;
-    if (existing && existing.parentNode === container) {
-        zreactRender(h(EmptyComponent as any, null), container, existing);
-        return true;
-    }
-    return false;
-}
+// function unmountComponentAtNode(container: any) {
+//     const existing = container._zreactCompatRendered && container._zreactCompatRendered.vdom && container._zreactCompatRendered.vdom.base;
+//     if (existing && existing.parentNode === container) {
+//         zreactRender(h(EmptyComponent as any, null), container, existing);
+//         return true;
+//     }
+//     return false;
+// }
 
 /** Track current render() component for ref assignment */
 let currentComponent: any;
 
-function createFactory(type: any) {
-    return createElement.bind(null, type);
-}
+// function createFactory(type: any) {
+//     return createElement.bind(null, type);
+// }
 
 const DOM: any = {};
 for (let i = ELEMENTS.length; i--; ) {
@@ -594,7 +597,7 @@ export {
     unmountComponentAtNode,
     Component,
     PureComponent,
-    renderSubtreeIntoContainer as unstable_renderSubtreeIntoContainer,
+    unstable_renderSubtreeIntoContainer,
     // this is a really old hidden react api, but something out there uses it
     // https://twitter.com/Joseph_Wynn/status/888046593286574085
     extend as __spread,
@@ -616,6 +619,6 @@ export default {
     unmountComponentAtNode,
     Component,
     PureComponent,
-    unstable_renderSubtreeIntoContainer: renderSubtreeIntoContainer,
+    unstable_renderSubtreeIntoContainer,
     __spread: extend,
 };

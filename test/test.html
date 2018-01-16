@@ -15,65 +15,46 @@
         'use strict';
         var h = zreact.h;
         var render = zreact.render;
-        class App extends zreact.Component {
-            componentWillUnmount() {
-                console.log("App componentWillUnmount")
+        var Component = zreact.Component;
+        class Foo extends Component {
+            componentDidMount() {
+                console.log("Foo componentDidMount")
             }
-            constructor(props) {
-                super(props)
+            componentWillUnmount() {
+                console.log("Foo componentWillUnmount")
             }
             render() {
-                return this.props.show
+                return h("h1", null, "测试")
             }
         }
-        class test extends zreact.Component {
-            constructor(props) {
-                super(props)
+        class Bar extends Component {
+            componentDidMount() {
+                console.log("Bar componentDidMount")
+            }
+            componentWillUnmount() {
+                console.log("Bar componentWillUnmount")
+            }
+        }
+        class App extends Component {
+            constructor() {
+                super()
                 this.state = {
-                    show: true,
-                    num: 0
+                    child: Foo
                 }
+                this.test = this.test.bind(this)
             }
             test() {
-                if (this.state.num < 3) {
-                    this.setState({
-                        num: this.state.num + 1
-                    })
-                } else {
-                    this.setState({
-                        num: 0
-                    })
-                }
-            }
-            test2() {
-                if (this.state.num < 3) {
-                    this.setState({
-                        show: !this.state.show,
-                        num: this.state.num + 1
-                    })
-                } else {
-                    this.setState({
-                        show: !this.state.show,
-                        num: 0
-                    })
-                }
+                this.setState({
+                    child: this.state.child === Bar ? Foo : Bar
+                });
             }
             render() {
-                var state = this.state;
-                var vnode
-                if (state.num === 1) {
-                    vnode = h("div", null, "测试1")
-                } else if (state.num === 2) {
-                    vnode = h("p", null, "测试2")
-                } else if (state.num === 3) {
-                    vnode = h("button", null, "测试3")
-                } else {
-                    vnode = null
-                }
-                return h("div", null, h('button', {onClick: this.test.bind(this)}, "切换"), h('button', {onClick: this.test2.bind(this)}, "卸载"), state.show ? h(App, { show: vnode }) : null)
+                return h("div", null, h('button', {onClick: this.test}, "切换"), h(this.state.child))
             }
         }
-        render(h(test), document.getElementById('app'))
+        var dom = render(h(App), document.getElementById('app'))
+        // render(h("div"), document.getElementById('app'), dom)
+        // render(h(Bar), document.getElementById('app'))
 
     </script>
     <script src="../devtools-run.js"></script>

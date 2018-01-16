@@ -110,7 +110,7 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
     /**
      *
      */
-    public base?: Node | Element | Text;
+    public base?: Node | Element | Text | null;
 
     constructor(props: PropsType, context: IKeyValue) {
         // 初始化为true

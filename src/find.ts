@@ -23,3 +23,12 @@ export function setVDom(componentOrDom: any | Node | Element, vdom: IVDom | unde
         componentOrDom._vdom = vdom;
     }
 }
+
+export function findVoidNode(dom: any) {
+    return dom && dom._voidNode;
+}
+export function setVoidNode(dom: any, value: any) {
+    if (dom) {
+        dom._voidNode = value;
+    }
+}

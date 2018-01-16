@@ -112,7 +112,8 @@ describe('components', () => {
 			}
 		}
 
-		let a = React.render(<Parent/>, scratch);
+        let a
+        React.render(<Parent ref={com => a = com}/>, scratch);
 		a.forceUpdate();
 
 		expect(props).to.exist.and.deep.equal({

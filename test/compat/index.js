@@ -305,12 +305,16 @@ describe('preact-compat', () => {
 					this.renderInner();
 				}
 				renderInner() {
-					const wrapper = document.createElement('div');
-                    this.inner = unstable_renderSubtreeIntoContainer(this, <Inner/>, wrapper);
+                    const wrapper = document.createElement('div');
+                    const self = this;
+                    unstable_renderSubtreeIntoContainer(this, <Inner/>, wrapper, function(inner) {
+                        self.inner = inner;
+                    });
 				}
 			}
-			const root = document.createElement('div');
-            const app = render(<App/>, root);
+            const root = document.createElement('div');
+            let app
+            render(<App ref={com => app = com}/>, root);
 			expect(typeof app.inner.getNode === 'function').to.equal(true);
 		});
 
@@ -331,7 +335,8 @@ describe('preact-compat', () => {
 				}
 			}
 			const root = document.createElement('div');
-			const app = render(<App/>, root);
+            let app
+            render(<App ref={com => app = com}/>, root);
 			expect(typeof app.inner.getNode === 'function').to.equal(true);
 		});
 	});

@@ -1,4 +1,4 @@
-import { h, render, rerender, Component, findDOMNode } from 'zreact';
+import { h, render, rerender, Component, findDOMNode, findVDom } from 'zreact';
 /** @jsx h */
 
 let spyAll = obj => Object.keys(obj).forEach( key => sinon.spy(obj,key) );
@@ -227,7 +227,7 @@ describe('Lifecycle methods', () => {
 		it('should invoke componentWillUnmount for top-level components', () => {
 			class Foo extends Component {
 				componentDidMount() {}
-				componentWillUnmount() {}
+                componentWillUnmount() {}
 			}
 			class Bar extends Component {
 				componentDidMount() {}
@@ -236,14 +236,14 @@ describe('Lifecycle methods', () => {
 			spyAll(Foo.prototype);
 			spyAll(Bar.prototype);
 
-			let vdom = render(<Foo />, scratch, scratch.lastChild);
+            let vdom = render(<Foo/>, scratch, vdom);
 			expect(Foo.prototype.componentDidMount, 'initial render').to.have.been.calledOnce;
 
-			vdom = render(<Bar />, scratch, vdom);
+			vdom = render(<Bar/>, scratch, vdom);
 			expect(Foo.prototype.componentWillUnmount, 'when replaced').to.have.been.calledOnce;
 			expect(Bar.prototype.componentDidMount, 'when replaced').to.have.been.calledOnce;
 
-			vdom = render(<div />, scratch, vdom);
+			vdom = render(<div/>, scratch, vdom);
 			expect(Bar.prototype.componentWillUnmount, 'when removed').to.have.been.calledOnce;
 		});
 	});

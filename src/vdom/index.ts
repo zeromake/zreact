@@ -74,7 +74,7 @@ export interface IVDom {
     /**
      * 真实dom索引
      */
-    base: Element| Text | Node;
+    base: Element| Text | Node | null;
     /**
      * 每种事件的代理方法存放点, 真实绑定到dom上的方法。
      */

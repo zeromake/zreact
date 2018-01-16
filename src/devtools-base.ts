@@ -96,31 +96,74 @@ export function getInitDevTools(opt: typeof options, findDOMNode: typeof IfindDO
      */
     function createReactDOMComponent(vdom: IVDom): IReactComponent {
         const node = findDOMNode(vdom);
-        const childNodes = node.nodeType === Node.ELEMENT_NODE ?
+        const childNodes = node && node.nodeType === Node.ELEMENT_NODE ?
             Array.prototype.slice.call(node.childNodes, 0) : [];
-        const isText = node.nodeType === Node.TEXT_NODE;
+        const isText = node && node.nodeType === Node.TEXT_NODE;
         let element: string|IReactElement|null;
         if (isText) {
             element = node.textContent;
         } else {
             element = {
                 props: vdom.props,
-                type: node.nodeName.toLowerCase(),
+                type: node ? node.nodeName.toLowerCase() : "void-node",
             };
         }
         const children: IReactComponent[] = new Array();
-        childNodes.forEach(function _(child: any) {
-            const childVDom = findVDom(child);
-            if (childVDom) {
-                let component: IReactComponent;
-                if (childVDom.component) {
+        let offset = 0;
+        const voidNode = node && (node as any)._voidNode;
+        let len = childNodes.length;
+        let voidLen = -1;
+        if (voidNode) {
+            for (const key in voidNode) {
+                const keynum = +key;
+                voidLen = voidLen < keynum ? keynum : voidLen;
+            }
+            if (voidLen > -1) {
+                voidLen += 1;
+            }
+        }
+        if (len > 0) {
+            if (voidLen > -1 && voidLen > len) {
+                len = voidLen;
+            }
+            for (let i = 0; i < len; i++) {
+                let component: IReactComponent | undefined;
+                if (voidNode && (i + offset) in voidNode) {
+                    component = updateReactComponent(voidNode[(i + offset)].component);
+                    offset ++;
+                    i --;
+                    children.push(component);
+                    continue;
+                }
+                const childVDom = findVDom(childNodes[i]);
+                if (childVDom && childVDom.component) {
                     component = updateReactComponent(childVDom.component);
-                } else {
+                } else if (childVDom) {
                     component = updateReactComponent(childVDom);
                 }
+                if (component) {
+                    children.push(component);
+                }
+            }
+        } else if (voidNode) {
+            for (const key in voidNode) {
+                let component: IReactComponent;
+                component = updateReactComponent(voidNode[key].component);
                 children.push(component);
             }
-        });
+        }
+        // childNodes.forEach(function _(child: any) {
+        //     const childVDom = findVDom(child);
+        //     if (childVDom) {
+        //         let component: IReactComponent;
+        //         if (childVDom.component) {
+        //             component = updateReactComponent(childVDom.component);
+        //         } else {
+        //             component = updateReactComponent(childVDom);
+        //         }
+        //         children.push(component);
+        //     }
+        // });
         return {
             _currentElement: element,
             _inDevTools: false,

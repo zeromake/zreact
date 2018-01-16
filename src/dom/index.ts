@@ -46,7 +46,7 @@ export function setAccessor(
     isSvg: boolean,
     component?: Component<any, any> | void | null,
 ) {
-    const node = vdom.base;
+    const node = vdom.base as Element;
     if (name === "className") {
         // 把className重名为class
         name = "class";

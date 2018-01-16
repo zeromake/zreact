@@ -14,7 +14,6 @@ import {
     findVDom,
 } from "./find";
 import Children from "./children";
-import { defer as nextTick } from "./util";
 import { unmountComponent } from "./vdom/component";
 
 declare const VERSION_ENV: string;
@@ -58,13 +57,13 @@ function unstable_renderSubtreeIntoContainer(
     // @TODO: should handle props.context?
     const wrapper = createElement(
         WrapperComponent,
-        { context: parentComponent.context },
-        vnode,
+        { context: parentComponent.context},
+        cloneElement(vnode, {ref: (component: WrapperComponent<any, any>) => callback.call(component, component)}),
     );
     const rendered = render(wrapper as any, container);
-    if (callback) {
-        callback.call(rendered);
-    }
+    // if (callback) {
+    //     callback.call(rendered);
+    // }
     return rendered;
 }
 
@@ -88,7 +87,6 @@ export default {
     findVDom,
     isValidElement,
     h,
-    nextTick,
     options,
     render,
     rerender,
@@ -110,7 +108,6 @@ export {
     findVDom,
     isValidElement,
     h,
-    nextTick,
     options,
     render,
     rerender,

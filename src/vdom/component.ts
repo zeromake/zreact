@@ -8,7 +8,7 @@ import { removeNode } from "../dom/index";
 import { extend } from "../util";
 import { IKeyValue } from "../types";
 import { IVDom } from "./index";
-import { findVDom, setVDom } from "../find";
+import { findVDom, setVDom, findVoidNode, setVoidNode } from "../find";
 import {
     ASYNC_RENDER,
     // ATTR_KEY,
@@ -242,7 +242,7 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
                     // 父级或者该原生组件，原dom不存在说明必须触发生命周期
                     mountALL || !isUpdate,
                     // 把组件挂载到缓存dom的父级
-                    initialVDom && initialVDom.base.parentNode,
+                    initialVDom && initialVDom.base && initialVDom.base.parentNode,
                     // 以原生组件这里执行说明是自定义组件的第一个原生组件
                     true,
                 );
@@ -252,10 +252,10 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
         if (initialVDom && vdom !== initialVDom && inst !== initialChildComponent) {
             // 存在缓存dom，现dom和缓存dom不相同且新建过自定义子组件
             // 获取当前组件缓存dom的父级dom
-            const baseParent = initialVDom.base.parentNode;
-            if (vdom && baseParent && vdom.base !== baseParent) {
+            const baseParent = initialVDom.base && initialVDom.base.parentNode;
+            if (vdom && vdom.base && baseParent && vdom.base !== baseParent) {
                 // 替换到新dom
-                baseParent.replaceChild(vdom.base, initialVDom.base);
+                baseParent.replaceChild(vdom.base, initialVDom.base as Element);
                 if (!toUnmount) {
                     // 没有
                     initialVDom.component = undefined;
@@ -405,7 +405,6 @@ export function unmountComponent(component: Component<any, any>) {
     // 获取子组件
     const inner = component._component;
     if (inner) {
-
         unmountComponent(inner);
     } else if (vdom) {
         if (typeof vdom.props === "object" && vdom.props.ref) {
@@ -415,7 +414,9 @@ export function unmountComponent(component: Component<any, any>) {
         // 卸载组件dom前把它存到nextBase
         component._nextVDom = vdom;
         // 从dom上移除
-        removeNode(vdom.base);
+        if (vdom.base) {
+            removeNode(vdom.base);
+        }
         // 放入全局缓存对象保存
         collectComponent(component);
         // 清空上下文
