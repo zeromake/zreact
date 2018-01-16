@@ -9,8 +9,13 @@ import { rerender } from "./render-queue";
 import { IKeyValue } from "./types";
 import { IVDom } from "./vdom/index";
 import { VNode } from "./vnode";
-import { findDOMNode, findVDom } from "./find";
+import {
+    findDOMNode,
+    findVDom,
+} from "./find";
 import Children from "./children";
+import { defer as nextTick } from "./util";
+import { unmountComponent } from "./vdom/component";
 
 declare const VERSION_ENV: string;
 const version = VERSION_ENV;
@@ -23,20 +28,72 @@ function isValidElement(element: VNode| any): boolean {
     return element && (element instanceof VNode);
 }
 
+function unmountComponentAtNode(dom: any) {
+    const vdom = findVDom(dom);
+    if (vdom) {
+        unmountComponent(vdom.component as any);
+        return true;
+    }
+    return false;
+  }
+
+function createFactory(type: any) {
+    return createElement.bind(null, type);
+}
+
+class WrapperComponent<P, S> extends Component<P, S> {
+    public getChildContext() {
+        return (this.props as any).context;
+    }
+    public render() {
+        return Children.only((this.props as any).children);
+    }
+}
+function unstable_renderSubtreeIntoContainer(
+    parentComponent: any,
+    vnode: any,
+    container: any,
+    callback: any,
+  ) {
+    // @TODO: should handle props.context?
+    const wrapper = createElement(
+        WrapperComponent,
+        { context: parentComponent.context },
+        vnode,
+    );
+    const rendered = render(wrapper as any, container);
+    if (callback) {
+        callback.call(rendered);
+    }
+    return rendered;
+}
+
+function createPortal(vnode: any, container: HTMLElement) {
+    // mountVNode can handle array of vnodes for us
+    const first = container.firstElementChild;
+    render(vnode, container, first as any);
+    return null;
+}
+
 export default {
-    Component,
     Children,
+    Component,
     PureComponent,
+    createElement,
     cloneElement,
     createClass,
-    createElement,
+    createFactory,
+    createPortal,
     findDOMNode,
     findVDom,
     isValidElement,
     h,
+    nextTick,
     options,
     render,
     rerender,
+    unmountComponentAtNode,
+    unstable_renderSubtreeIntoContainer,
     version,
 };
 
@@ -47,12 +104,17 @@ export {
     cloneElement,
     createClass,
     createElement,
+    createFactory,
+    createPortal,
     findDOMNode,
     findVDom,
     isValidElement,
     h,
+    nextTick,
     options,
     render,
     rerender,
+    unmountComponentAtNode,
+    unstable_renderSubtreeIntoContainer,
     version,
 };

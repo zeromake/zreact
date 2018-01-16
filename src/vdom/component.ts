@@ -387,7 +387,7 @@ export function buildComponentFromVNode(
  * 卸载组件
  * @param component 组件
  */
-export function unmountComponent(component: Component<IKeyValue, IKeyValue>) {
+export function unmountComponent(component: Component<any, any>) {
     if (options.beforeUnmount) {
         // 触发全局钩子
         options.beforeUnmount(component);
