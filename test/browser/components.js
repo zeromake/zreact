@@ -81,7 +81,7 @@ describe('Components', () => {
 
 
 	it('should render components with props', () => {
-		const PROPS = { foo:'bar', onBaz:()=>{}, children: undefined };
+		const PROPS = { foo:'bar', onBaz:()=>{}, children: null };
 		let constructorProps;
 
 		class C2 extends Component {
@@ -96,7 +96,6 @@ describe('Components', () => {
 		sinon.spy(C2.prototype, 'render');
 
 		render(<C2 {...PROPS} />, scratch);
-        console.log("---------: ", constructorProps, PROPS)
 		expect(constructorProps).to.deep.equal(PROPS);
 
 		expect(C2.prototype.render)

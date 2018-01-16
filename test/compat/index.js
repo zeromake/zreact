@@ -280,8 +280,9 @@ describe('preact-compat', () => {
 		it('children argument takes precedence over props.children even if falsey', () => {
 			let element = <foo></foo>;
 			let childrenA = [<span>b</span>];
-			let clone = cloneElement(element, { children: childrenA }, undefined);
-			expect(clone.children).to.eql(undefined);
+            let clone = cloneElement(element, { children: childrenA }, null);
+            print("------------", clone.children)
+			expect(clone.children).to.eql(null);
 		});
 	});
 

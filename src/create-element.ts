@@ -16,7 +16,7 @@ import { IKeyValue, funComponent, childType } from "./types";
 export function createElement(this: Component<IKeyValue, IKeyValue> | undefined | void | null, nodeName: string | typeof Component | funComponent, attributes: IKeyValue | null, ...args: childType[]) {
     // 初始化子元素列表
     const stack: childType[] = [];
-    let children: Array<VNode|string|number|boolean> | undefined = [];
+    let children: Array<VNode|string|number|boolean> | null = [];
     // let i: number;
     // let child: any;
     // 是否为原生组件
@@ -86,7 +86,7 @@ export function createElement(this: Component<IKeyValue, IKeyValue> | undefined 
         }
     }
     if (children.length === 0) {
-        children = undefined;
+        children = null;
     }
     const p = new VNode(
         // 设置原生组件名字或自定义组件class(function)

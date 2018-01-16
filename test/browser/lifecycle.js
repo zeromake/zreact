@@ -3,7 +3,7 @@ import { h, render, rerender, Component, findDOMNode } from 'zreact';
 
 let spyAll = obj => Object.keys(obj).forEach( key => sinon.spy(obj,key) );
 
-const EMPTY_CHILDREN = undefined;
+const EMPTY_CHILDREN = null;
 
 describe('Lifecycle methods', () => {
 	let scratch;

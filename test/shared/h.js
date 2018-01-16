@@ -7,7 +7,7 @@ import { expect } from 'chai';
 
 const buildVNode = (nodeName, attributes, children) => ({
 	nodeName,
-	children,
+	children: children ? children : null,
     attributes,
     // component,
 	key: attributes && attributes.key
@@ -21,7 +21,7 @@ describe('h(jsx)', () => {
 		expect(r).to.be.an.instanceof(Object);
 		expect(r).to.have.property('nodeName', 'foo');
 		expect(r).to.have.property('attributes', undefined);
-		expect(r).to.have.property('children').that.eql(undefined);
+		expect(r).to.have.property('children').that.eql(null);
 	});
 
 	it('should perserve raw attributes', () => {

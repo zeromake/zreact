@@ -27,7 +27,7 @@ export class VNode {
     public component?: Component<IKeyValue, IKeyValue> | undefined | void | null;
     public zreactCompatUpgraded?: boolean;
     public zreactCompatNormalized?: boolean;
-    constructor(nodeName: string | typeof Component | funComponent, children: childType[] | undefined) {
+    constructor(nodeName: string | typeof Component | funComponent, children: childType[] | null) {
         this.nodeName = nodeName;
         this.children = children;
     }
