@@ -31,3 +31,9 @@ export const extend = Object.assign || /* istanbul ignore next */ function assig
     }
     return t;
 };
+
+export const hasSymbol = typeof Symbol === "function" && (Symbol as any).for;
+
+export const REACT_ELEMENT_TYPE = hasSymbol ? (Symbol as any).for("react.element") : 0xeac7;
+
+export const REACT_FRAGMENT_TYPE = hasSymbol ? (Symbol as any).for("react.fragment") : 0xeacb;

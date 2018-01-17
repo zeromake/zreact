@@ -6,14 +6,14 @@ export default {
     input: 'src/devtools.ts',
     external: ['zreact'],
     output: {
+        globals: {
+            zreact: 'zreact'
+        },
         format: 'es',
-        file: 'devtools.js'
+        file: 'devtools.js',
+        sourcemap: true
     },
-    globals: {
-		zreact: 'zreact'
-	},
     plugins: [
         rollupTypescriptPlugin,
     ],
-    sourcemap: true
 }

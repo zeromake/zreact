@@ -1,7 +1,6 @@
 import { Component } from "./component";
 import { IKeyValue, childType, funComponent } from "./types";
-
-export const REACT_ELEMENT_TYPE = (typeof Symbol !== "undefined" && (Symbol as any).for && (Symbol as any).for("react.element")) || 0xeac7;
+import { REACT_ELEMENT_TYPE } from "./util";
 export class VNode {
     public $$typeof: any = REACT_ELEMENT_TYPE;
     /**
