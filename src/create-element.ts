@@ -2,8 +2,10 @@ import { Component } from "./component";
 import options from "./options";
 import { VNode } from "./vnode";
 import { IKeyValue, funComponent, childType } from "./types";
+import { extend } from "./util";
 
 // const EMPTY_CHILDREN: any[] = [];
+// const REACT_ELEMENT_TYPE = (typeof Symbol !== "undefined" && (Symbol as any).for && (Symbol as any).for("react.element")) || 0xeac7;
 
 /** JSX/hyperscript reviver
  * Benchmarks: https://esbench.com/bench/57ee8f8e330ab09900a1a1a0
@@ -117,7 +119,14 @@ export function createElement(this: Component<IKeyValue, IKeyValue> | undefined 
     //     nodeName,
     // };
     // vnode 钩子
-    if (options.vnode !== undefined) {
+    if (children) {
+        p.props = extend({}, p.attributes, { children });
+    } else {
+        p.props = p.attributes;
+    }
+    p.type = nodeName;
+    // p.$$typeof = REACT_ELEMENT_TYPE;
+    if (options.vnode != null) {
         options.vnode(p);
     }
     return p;

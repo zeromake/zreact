@@ -283,8 +283,8 @@ describe('render()', () => {
 		expect(click).to.have.been.calledOnce
 			.and.calledWith(1);
 
-		proto.addEventListener.reset();
-		click.reset();
+		proto.addEventListener.resetHistory();
+		click.resetHistory();
 
 		vdom = render(<div onClick={ () => click(2) } />, scratch, vdom);
 
@@ -301,9 +301,9 @@ describe('render()', () => {
 		fireEvent(scratch.childNodes[0], 'mousedown');
 		expect(mousedown).not.to.have.been.called;
 
-		proto.removeEventListener.reset();
-		click.reset();
-		mousedown.reset();
+		proto.removeEventListener.resetHistory();
+		click.resetHistory();
+		mousedown.resetHistory();
 
 		vdom = render(<div />, scratch, vdom);
 

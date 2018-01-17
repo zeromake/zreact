@@ -8,7 +8,7 @@ import { createClass } from "./create-class";
 import { rerender } from "./render-queue";
 import { IKeyValue } from "./types";
 import { IVDom } from "./vdom/index";
-import { VNode } from "./vnode";
+import { VNode, REACT_ELEMENT_TYPE } from "./vnode";
 import {
     findDOMNode,
     findVDom,
@@ -93,6 +93,7 @@ export default {
     unmountComponentAtNode,
     unstable_renderSubtreeIntoContainer,
     version,
+    REACT_ELEMENT_TYPE,
 };
 
 export {
@@ -114,4 +115,5 @@ export {
     unmountComponentAtNode,
     unstable_renderSubtreeIntoContainer,
     version,
+    REACT_ELEMENT_TYPE,
 };

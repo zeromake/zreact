@@ -4,14 +4,26 @@ import { expect } from 'chai';
 /*eslint-env browser, mocha */
 
 /** @jsx h */
+const REACT_ELEMENT_TYPE = h("div").$$typeof;
 
-const buildVNode = (nodeName, attributes, children) => ({
-	nodeName,
-	children: children ? children : null,
-    attributes,
-    // component,
-	key: attributes && attributes.key
-});
+const buildVNode = (nodeName, attributes, children) => {
+    let props
+    if (children) {
+        props = {...attributes, children}
+    } else {
+        props = attributes
+    }
+    return ({
+        nodeName,
+        children: children ? children : null,
+        attributes,
+        props,
+        type: nodeName,
+        $$typeof: REACT_ELEMENT_TYPE,
+        // component,
+        key: attributes && attributes.key
+    });
+}
 
 describe('h(jsx)', () => {
 	it('should return a VNode', () => {
