@@ -14,10 +14,10 @@
         const h = React.createElement
         class App extends React.Component {
             render() {
-                return [
+                return h(React.Fragment, null,
                     h("div", {key: "1"}, "测试1"),
                     h("div", {key: "2"}, "测试2")
-                ]
+                )
             }
         }
         ReactDOM.render(h(App), document.getElementById("app"))

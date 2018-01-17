@@ -10,8 +10,6 @@ import {
     findDOMNode,
     findVDom,
     PureComponent,
-    unstable_renderSubtreeIntoContainer,
-    createFactory,
     unmountComponentAtNode,
 } from "zreact";
 
@@ -22,6 +20,37 @@ const ELEMENTS = "a abbr address area article aside audio b base bdi bdo big blo
 const REACT_ELEMENT_TYPE = (typeof Symbol !== "undefined" && (Symbol as any).for && (Symbol as any).for("react.element")) || 0xeac7;
 
 const COMPONENT_WRAPPER_KEY = typeof Symbol !== "undefined" ? (Symbol as any).for("__zreactCompatWrapper") : "__zreactCompatWrapper";
+
+function createFactory(type: any) {
+    return createElement.bind(null, type);
+}
+
+class WrapperComponent<P, S> extends PreactComponent<P, S> {
+    public getChildContext() {
+        return (this.props as any).context;
+    }
+    public render() {
+        return Children.only((this.props as any).children);
+    }
+}
+function unstable_renderSubtreeIntoContainer(
+    parentComponent: any,
+    vnode: any,
+    container: any,
+    callback: any,
+  ) {
+    // @TODO: should handle props.context?
+    const wrapper = createElement(
+        WrapperComponent,
+        { context: parentComponent.context},
+        cloneElement(vnode, {ref: (component: WrapperComponent<any, any>) => callback.call(component, component)}),
+    );
+    const rendered = render(wrapper as any, container);
+    // if (callback) {
+    //     callback.call(rendered);
+    // }
+    return rendered;
+}
 
 // don"t autobind these methods since they already have guaranteed context.
 const AUTOBIND_BLACKLIST = {
@@ -53,11 +82,11 @@ VNode.prototype.$$typeof = REACT_ELEMENT_TYPE;
 VNode.prototype.zreactCompatUpgraded = false;
 VNode.prototype.zreactCompatNormalized = false;
 
-Object.defineProperty(VNode.prototype, "type", {
-    get() { return this.nodeName; },
-    set(v) { this.nodeName = v; },
-    configurable: true,
-});
+// Object.defineProperty(VNode.prototype, "type", {
+//     get() { return this.nodeName; },
+//     set(v) { this.nodeName = v; },
+//     configurable: true,
+// });
 
 Object.defineProperty(VNode.prototype, "props", {
     get() { return this.attributes; },
