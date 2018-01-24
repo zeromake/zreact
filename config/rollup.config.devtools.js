@@ -1,7 +1,7 @@
 import rollupTypescript from 'rollup-plugin-typescript'
 
 // set new typescript
-const rollupTypescriptPlugin = rollupTypescript()
+const rollupTypescriptPlugin = rollupTypescript({typescript: require('typescript')})
 export default {
     input: 'src/devtools.ts',
     external: ['zreact'],

@@ -2,7 +2,7 @@ var check = () => {
     return check;
 };
 check.isRequired = check;
-export var PropTypes = {
+module.exports = {
     array: check,
     bool: check,
     func: check,

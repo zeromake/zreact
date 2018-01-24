@@ -6,7 +6,7 @@ const pkg = require('../package.json')
 
 const isProduction = process.env.NODE_ENV === 'production'
 
-const rollupTypescriptPlugin = rollupTypescript()
+const rollupTypescriptPlugin = rollupTypescript({typescript: require('typescript')})
 const replacePlugin = replace({
     VERSION_ENV: JSON.stringify(pkg.version),
     ENV: JSON.stringify(process.env.NODE_ENV)
