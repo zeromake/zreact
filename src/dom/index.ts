@@ -4,6 +4,11 @@ import options from "../options";
 import { IKeyValue } from "../types";
 import { Component } from "../component";
 
+enum NAME_NS {
+    SVG = "http://www.w3.org/2000/svg",
+    XLINK = "http://www.w3.org/1999/xlink",
+}
+
 /**
  * 创建一个原生html组件
  * @param nodeName 标签名
@@ -11,7 +16,7 @@ import { Component } from "../component";
  */
 export function createNode(nodeName: string, isSvg: boolean): HTMLElement {
     const node: any = isSvg
-        ? document.createElementNS("http://www.w3.org/2000/svg", nodeName)
+        ? document.createElementNS(NAME_NS.SVG, nodeName)
         : document.createElement(nodeName);
     // 设置原始的nodeName到dom上normalizedNodeName
     // node.normalizedNodeName = nodeName;
@@ -142,7 +147,7 @@ export function setAccessor(
         if (value == null || value === false) {
             if (ns) {
                 (node as Element).removeAttributeNS(
-                    "http://www.w3.org/1999/xlink",
+                    NAME_NS.XLINK,
                     name.toLowerCase(),
                 );
             } else {
@@ -151,7 +156,7 @@ export function setAccessor(
         } else if (typeof value !== "function") {
             if (ns) {
                 (node as Element).setAttributeNS(
-                    "http://www.w3.org/1999/xlink",
+                    NAME_NS.XLINK,
                     name.toLowerCase(),
                     value,
                 );

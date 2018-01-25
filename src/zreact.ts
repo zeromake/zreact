@@ -13,6 +13,7 @@ import { REACT_ELEMENT_TYPE } from "./util";
 import {
     findDOMNode,
     findVDom,
+    findVoidNode,
 } from "./find";
 import Children from "./children";
 import { unmountComponent } from "./vdom/component";
@@ -39,8 +40,10 @@ function unmountComponentAtNode(dom: any) {
 
 function createPortal(vnode: any, container: HTMLElement) {
     // mountVNode can handle array of vnodes for us
+    const voidNodes = findVoidNode(container);
+    const voidNode = voidNodes && voidNodes[0];
     const first = container.firstElementChild;
-    render(vnode, container, first as any);
+    render(vnode, container, (voidNode || first) as any);
     return null;
 }
 
