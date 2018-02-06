@@ -125,7 +125,8 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
         this._dirty = true;
         this.context = context;
         this.props = props;
-        this.state = {} as StateType;
+        const self: any = this;
+        this.state = self.state || {} as StateType;
         // if (options.eventBind) {
         //     const self = this;
         //     this.h = function _(){
