@@ -25,6 +25,8 @@ import {
     removeChildren,
 } from "./diff";
 
+const emptyObject = {};
+
 /**
  * 设置props，通常来自jsx
  * @param component 组件
@@ -56,11 +58,16 @@ export function setComponentProps(component: Component<IKeyValue, IKeyValue>, pr
     if (!vdom || mountAll) {
         // 如果没有插入到DOM树或正在被render渲染执行钩子
         if (component.componentWillMount) {
+            console.warn("componentWillMount is deprecated!");
             component.componentWillMount();
         }
-    } else if (component.componentWillReceiveProps) {
-        // 更新的钩子
-        component.componentWillReceiveProps(props, context);
+    } else {
+        const getDerivedStateFromProps = component.constructor && (component.constructor as typeof Component).getDerivedStateFromProps;
+        if (!getDerivedStateFromProps && component.componentWillReceiveProps) {
+            // 更新的钩子
+            console.warn("componentWillReceiveProps is deprecated!");
+            component.componentWillReceiveProps(props, context);
+        }
     }
     if (context && context !== component.context) {
         // 保存旧的context，设置新的context
@@ -111,7 +118,7 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
     // 获取组件props
     const props = component.props;
     // 获取组件state
-    const state = component.state;
+    let state = component.state;
     // 获取组件context
     let context = component.context;
     // 获取组件上一次的props没有取当前
@@ -146,9 +153,19 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
             // shouldComponentUpdate钩子把新的props,state,context作为参数传入
             // 如果shouldComponentUpdate钩子返回false，跳过下面的dom操作。
             skip = true;
-        } else if (component.componentWillUpdate) {
-            // render 前钩子与shouldComponentUpdate互斥, Component.forceUpdate更新依旧会触发该钩子。
-            component.componentWillUpdate(props, state, context);
+        } else {
+            const getDerivedStateFromProps = component.constructor && (component.constructor as typeof Component).getDerivedStateFromProps;
+            if (getDerivedStateFromProps) {
+                const oldState = component.state || emptyObject;
+                const newState = getDerivedStateFromProps.call(null, props, oldState);
+                if (newState != null) {
+                    state = extend({}, state || oldState, newState);
+                }
+            } else if (component.componentWillUpdate) {
+                // render Component.forceUpdate更新依旧会触发该钩子。
+                console.warn("componentWillUpdate is deprecated!");
+                component.componentWillUpdate(props, state, context);
+            }
         }
         // 把组件上的props，state，context都设置到新的
         component.props = props;

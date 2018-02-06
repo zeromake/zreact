@@ -18,6 +18,14 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
     public static defaultProps?: IKeyValue;
 
     /**
+     * componentWillReceiveProps react16.3后的替代品
+     * @param nextProps 将要接受的props
+     * @param previousState 当前state
+     * @returns 用于更改当前state为空不更改.
+     */
+    public static getDerivedStateFromProps?(nextProps: IKeyValue, previousState: IKeyValue): IKeyValue | null;
+
+    /**
      * 当前组件的状态,可以修改
      */
     public state: StateType;
@@ -117,7 +125,7 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
         this._dirty = true;
         this.context = context;
         this.props = props;
-        this.state = (this.state || {}) as StateType;
+        this.state = {} as StateType;
         // if (options.eventBind) {
         //     const self = this;
         //     this.h = function _(){
@@ -127,6 +135,9 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
     }
     /**
      * 在一个组件被渲染到 DOM 之前
+     * 在react16.3弃用: https://github.com/reactjs/rfcs/pull/6
+     * 原因是因为如果在dom渲染前进行异步的setState可能会造成，第一次的渲染效果不同
+     * @deprecated
      */
     public componentWillMount?(): void;
 
@@ -142,8 +153,10 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
 
     /**
      * 在新的 props 被接受之前
+     * Use static getDerivedStateFromProps() instead
      * @param { PropsType } nextProps
      * @param { IKeyValue } nextContext
+     * @deprecated
      */
     public componentWillReceiveProps?(nextProps: PropsType, nextContext: IKeyValue): void;
 
@@ -161,6 +174,7 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
      * @param { PropsType } nextProps
      * @param { StateType } nextState
      * @param { IKeyValue } nextContext
+     * @deprecated
      */
     public componentWillUpdate?(nextProps: PropsType, nextState: StateType, nextContext: IKeyValue): void;
 
@@ -182,7 +196,7 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
      * @param state 对象或方法
      * @param callback render执行完后的回调。
      */
-    public setState(state: StateType, callback?: () => void): void {
+    public setState(state: ((s: StateType, p: PropsType) => StateType) | StateType, callback?: () => void): void {
         const s: StateType = this.state;
         if (!this._prevState) {
             // 把旧的状态保存起来

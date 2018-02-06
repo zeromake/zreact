@@ -1,6 +1,8 @@
 import { Component } from "./component";
 import { IKeyValue, childType, funComponent } from "./types";
 import { REACT_ELEMENT_TYPE } from "./util";
+type node = string | typeof Component | funComponent;
+
 export class VNode {
     public $$typeof: any = REACT_ELEMENT_TYPE;
     /**
@@ -8,13 +10,13 @@ export class VNode {
      * {string} 为原生组件
      * {Component|function} 为自定义组件
      */
-    public nodeName: string | typeof Component | funComponent;
+    public nodeName: node;
     /**
      * 组件名
      * {string} 为原生组件
      * {Component|function} 为自定义组件
      */
-    public type: string | typeof Component | funComponent;
+    public type: node;
     /**
      * 子组件
      */
@@ -40,6 +42,7 @@ export class VNode {
     public zreactCompatNormalized?: boolean;
     constructor(nodeName: string | typeof Component | funComponent, children: childType[] | null) {
         this.nodeName = nodeName;
+        this.type = nodeName;
         this.children = children;
     }
 }

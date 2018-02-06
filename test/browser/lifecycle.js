@@ -22,6 +22,48 @@ describe('Lifecycle methods', () => {
 		scratch = null;
 	});
 
+	describe("static #getDerivedStateFromProps", () => {
+		it('should be called when rerender with new props from parent', () => {
+			let doRender;
+			class Outer extends Component {
+				constructor(p, c) {
+					super(p, c);
+					this.state = { i: 0 };
+				}
+				componentDidMount() {
+					doRender = () => this.setState({ i: this.state.i + 1 });
+				}
+				render(props, { i }) {
+					return <Inner i={i} {...props} />;
+				}
+			}
+			class Inner extends Component {
+				static getDerivedStateFromProps(nextProps, state) {
+					return null
+				}
+				componentWillUpdate(nextProps, nextState) {
+					expect(nextProps).to.be.deep.equal({ children:EMPTY_CHILDREN, i: 1 });
+					expect(nextState).to.be.deep.equal({});
+				}
+				render() {
+					return <div />;
+				}
+			}
+			sinon.spy(Inner.prototype, 'componentWillUpdate');
+			sinon.spy(Inner, 'getDerivedStateFromProps');
+			sinon.spy(Outer.prototype, 'componentDidMount');
+
+			// Initial render
+			render(<Outer />, scratch);
+
+			// Rerender inner with new props
+			doRender();
+			rerender();
+			expect(Inner.prototype.componentWillUpdate).not.to.have.been.called;
+			expect(Inner.getDerivedStateFromProps).to.have.been.called;
+		});
+
+	})
 
 	describe('#componentWillUpdate', () => {
 		it('should NOT be called on initial render', () => {

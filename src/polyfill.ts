@@ -6,14 +6,14 @@ if (!String.prototype.trim) {
 }
 if (!Function.prototype.bind) {
     // bind polyfill
-    Function.prototype.bind = function __(oThis) {
+    Function.prototype.bind = function __(this: any, oThis) {
         if (typeof this !== "function") {
             throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
         }
         const aArgs = Array.prototype.slice.call(arguments, 1);
         const fToBind = this;
-        const fNOP = function _() {};
-        const fBound = function _() {
+        const fNOP: any = function _() {};
+        const fBound = function _(this: any) {
             return fToBind.apply(this instanceof fNOP ? this : oThis || this, aArgs.concat(Array.prototype.slice.call(arguments)));
         };
 
@@ -68,8 +68,8 @@ if (!Array.prototype.map) {
         return A;
     };
 }
-if (typeof Object.assign !== "function") {
-    Object.assign = function _(target) {
+if (typeof (Object as any).assign !== "function") {
+    (Object as any) = function _(target: any) {
         if (target == null) {
             throw new TypeError("Cannot convert undefined or null to object");
         }

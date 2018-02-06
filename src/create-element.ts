@@ -124,7 +124,6 @@ export function createElement(this: Component<IKeyValue, IKeyValue> | undefined 
     } else {
         p.props = p.attributes;
     }
-    p.type = nodeName;
     // p.$$typeof = REACT_ELEMENT_TYPE;
     if (options.vnode != null) {
         options.vnode(p);
