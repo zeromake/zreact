@@ -1,3 +1,18 @@
+<a name="1.2.0"></a>
+# [1.2.0](https://github.com/zeromake/zreact/compare/v1.1.1...v1.2.0) (2018-02-06)
+
+
+### Bug Fixes
+
+* createPortal ([7ce4fe1](https://github.com/zeromake/zreact/commit/7ce4fe1))
+
+
+### Features
+
+* Component add static func getDerivedStateFromProps ([a5b3fd9](https://github.com/zeromake/zreact/commit/a5b3fd9))
+
+
+
 <a name="1.1.1"></a>
 ## [1.1.1](https://github.com/zeromake/zreact/compare/v1.1.0...v1.1.1) (2018-01-24)
 
