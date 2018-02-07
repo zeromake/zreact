@@ -307,7 +307,7 @@ function diffChildren(
                 pvdom = pchild && findVDom(pchild);
             }
             const props = pvdom && pvdom.props;
-            let key: string | undefined;
+            let key: string | undefined | number;
             if (pvdom && vlen > 0 && props) {
                 if (pvdom.component) {
                     key = pvdom.component._key;
