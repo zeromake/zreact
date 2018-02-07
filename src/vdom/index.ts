@@ -3,7 +3,7 @@ import { Component } from "../component";
 import { isTextNode } from "../dom/index";
 // import { ATTR_KEY } from "../constants";
 import { extend } from "../util";
-import { IKeyValue } from "../types";
+import { IKeyValue, IRefObject, ComponentContext, IBaseProps } from "../types";
 import { setVDom } from "../find";
 
 /**
@@ -82,7 +82,7 @@ export interface IVDom {
     /**
      * dom所属的props
      */
-    props?: IKeyValue | boolean;
+    props?: IBaseProps | boolean;
     /**
      * 通过props设置的事件方法, 通过eventProxy来调用, 保证在不停的props变化时不会一直绑定与解绑。
      */
@@ -119,5 +119,20 @@ export function buildVDom(base?: Element|Text|Node): IVDom | undefined {
         } catch (e) {
         }
         return vdom;
+    }
+}
+
+/**
+ * 统一设置ref
+ */
+export function setRef(ref: ((c: ComponentContext | null) => void) | IRefObject | undefined, context: ComponentContext | null): void {
+    if (ref != null) {
+        if (typeof ref === "function") {
+            ref(context);
+        } else if (typeof ref === "object") {
+            ref.value = context;
+        } else {
+            console.warn("not support ref by: ", ref);
+        }
     }
 }

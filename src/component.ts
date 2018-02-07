@@ -3,7 +3,7 @@ import { renderComponent } from "./vdom/component";
 import { VNode } from "./vnode";
 import { enqueueRender } from "./render-queue";
 import { extend } from "./util";
-import { IKeyValue } from "./types";
+import { IKeyValue, IRefObject, ComponentContext, IBaseProps } from "./types";
 import { IVDom } from "./vdom/index";
 // import { h } from "./h";
 import options from "./options";
@@ -11,7 +11,7 @@ import options from "./options";
 /**
  * 自定义组件所需继承类
  */
-export class Component <PropsType extends IKeyValue, StateType extends IKeyValue> {
+export class Component <PropsType extends IBaseProps, StateType extends IKeyValue> {
     /**
      * 默认props
      */
@@ -58,12 +58,12 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
     /**
      * 子组件
      */
-    public _component?: Component<IKeyValue, IKeyValue>;
+    public _component?: Component<IBaseProps, IKeyValue>;
 
     /**
      * 父组件
      */
-    public _parentComponent?: Component<IKeyValue, IKeyValue>;
+    public _parentComponent?: Component<IBaseProps, IKeyValue>;
 
     /**
      * 是否加入更新队列
@@ -93,7 +93,7 @@ export class Component <PropsType extends IKeyValue, StateType extends IKeyValue
     /**
      * react标准用于设置component实例
      */
-    public _ref?: (component: Component<PropsType, StateType> | null) => void;
+    public _ref?: ((component: ComponentContext | null) => void) | IRefObject;
 
     /**
      * 由父级组件传递的状态，不可修改

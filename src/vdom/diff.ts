@@ -4,7 +4,7 @@ import { isSameNodeType, isNamedNode } from "./index";
 import { VNode } from "../vnode";
 import { Component } from "../component";
 import { IKeyValue, childType } from "../types";
-import { IVDom, buildVDom } from "./index";
+import { IVDom, buildVDom, setRef } from "./index";
 import {
     buildComponentFromVNode,
     unmountComponent,
@@ -427,9 +427,10 @@ export function recollectNodeTree(node: IVDom, unmountOnly: boolean) {
         unmountComponent(component);
         // node.component = undefined;
     } else {
-        if (typeof node.props === "object" && node.props.ref) {
+        if (typeof node.props === "object") {
             // ref用于取消引用dom
-            node.props.ref(null);
+            setRef(node.props.ref, null);
+            // node.props.ref(null);
         }
         if ((unmountOnly === false || node.props == null) && node.base) {
             // 移除dom

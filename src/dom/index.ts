@@ -1,5 +1,5 @@
 import { IS_NON_DIMENSIONAL } from "../constants";
-import { IVDom } from "../vdom/index";
+import { IVDom, setRef } from "../vdom/index";
 import options from "../options";
 import { IKeyValue } from "../types";
 import { Component } from "../component";
@@ -61,19 +61,22 @@ export function setAccessor(
     } else if ("ref" === name) {
         if (old) {
             // 对旧的ref设置null保证原方法里的引用移除
-            old(null);
+            setRef(old, null);
+            // old(null);
         }
         if (value) {
             // 给新方法设置vdom
+            let context: Element | Node | IVDom | null = null;
             if (options.ref) {
                 if (typeof options.ref === "function") {
-                    value(options.ref(vdom));
+                    context = options.ref(vdom);
                 } else {
-                    value(vdom.base);
+                    context = vdom.base;
                 }
             } else {
-                value(vdom);
+                context = vdom;
             }
+            setRef(value, context);
         }
     } else if ("class" === name && !isSvg) {
         // 直接通过className设置class

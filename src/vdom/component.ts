@@ -3,7 +3,7 @@ import { enqueueRender } from "../render-queue";
 import { Component } from "../component";
 import { VNode } from "../vnode";
 import { createComponent, collectComponent } from "./component-recycler";
-import { getNodeProps } from "./index";
+import { getNodeProps, setRef } from "./index";
 import { removeNode } from "../dom/index";
 import { extend } from "../util";
 import { IKeyValue } from "../types";
@@ -98,9 +98,7 @@ export function setComponentProps(component: Component<IKeyValue, IKeyValue>, pr
         }
     }
     // 用于react的标准ref用于dom实例化完成后组件引用，多用于函数组件。
-    if (component._ref) {
-        component._ref(component);
-    }
+    setRef(component._ref, component);
 }
 
 /**
@@ -424,9 +422,10 @@ export function unmountComponent(component: Component<any, any>) {
     if (inner) {
         unmountComponent(inner);
     } else if (vdom) {
-        if (typeof vdom.props === "object" && vdom.props.ref) {
+        if (typeof vdom.props === "object") {
             // 触发dom卸载时的ref事件解除dom索引
-            vdom.props.ref(null);
+            setRef(vdom.props.ref, null);
+            // vdom.props.ref(null);
         }
         // 卸载组件dom前把它存到nextBase
         component._nextVDom = vdom;
@@ -439,8 +438,6 @@ export function unmountComponent(component: Component<any, any>) {
         // 清空上下文
         removeChildren(vdom);
     }
-    if (component._ref) {
-        // 解除外部对组件实例的索引
-        component._ref(null);
-    }
+    // 解除外部对组件实例的索引
+    setRef(component._ref, null);
 }

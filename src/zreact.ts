@@ -10,6 +10,7 @@ import { IKeyValue } from "./types";
 import { IVDom } from "./vdom/index";
 import { VNode } from "./vnode";
 import { REACT_ELEMENT_TYPE } from "./util";
+import { createRef } from "./create-ref";
 import {
     findDOMNode,
     findVDom,
@@ -50,6 +51,7 @@ function createPortal(vnode: any, container: HTMLElement) {
 export default {
     Children,
     Component,
+    createRef,
     PureComponent,
     createElement,
     cloneElement,
@@ -70,6 +72,7 @@ export default {
 export {
     Component,
     Children,
+    createRef,
     PureComponent,
     cloneElement,
     createClass,
