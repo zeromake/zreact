@@ -1,4 +1,5 @@
 import React from 'zreact-compat';
+import children from '../../build/children';
 const {
 	render,
 	createClass,
@@ -9,6 +10,7 @@ const {
 	unstable_renderSubtreeIntoContainer,
 	__spread,
 	REACT_ELEMENT_TYPE,
+	Children
 } = React;
 const h = React.createElement;
 
@@ -197,10 +199,11 @@ describe('preact-compat', () => {
 			expect(vnode).to.have.property('type', 'div');
 			expect(vnode).to.have.property('props').that.is.an('object');
 			expect(vnode.props).to.have.property('children');
-			expect(vnode.props.children[0]).to.have.property('$$typeof', $$typeof);
-			expect(vnode.props.children[0]).to.have.property('type', 'a');
-			expect(vnode.props.children[0]).to.have.property('props').that.is.an('object');
-			expect(vnode.props.children[0].props).to.eql({ children:['t'] });
+			let _children = Children.toArray(vnode.props.children)
+			expect(_children[0]).to.have.property('$$typeof', $$typeof);
+			expect(_children[0]).to.have.property('type', 'a');
+			expect(_children[0]).to.have.property('props').that.is.an('object');
+			expect(_children[0].props).to.eql({ children: 't' });
 		});
 
 		it('should normalize onChange', () => {
@@ -259,14 +262,14 @@ describe('preact-compat', () => {
 			let element = <foo children={<span>c</span>}><div>b</div></foo>;
 			let clone = cloneElement(element);
 			expect(clone).to.eql(element);
-			expect(clone.children[0].nodeName).to.eql('div');
+			expect(Children.toArray(clone.children)[0].nodeName).to.eql('div');
 		});
 
 		it('should support children in prop argument', () => {
 			let element = <foo></foo>;
 			let children = [<span>b</span>];
 			let clone = cloneElement(element, { children });
-			expect(clone.children).to.eql(children);
+			expect(Children.toArray(clone.children)).to.eql(children);
 		});
 
 		it('children argument takes precedence over props.children', () => {
@@ -274,14 +277,13 @@ describe('preact-compat', () => {
 			let childrenA = [<span>b</span>];
 			let childrenB = [<div>c</div>];
 			let clone = cloneElement(element, { children: childrenA }, ...childrenB);
-			expect(clone.children).to.eql(childrenB);
+			expect(Children.toArray(clone.children)).to.eql(childrenB);
 		});
 
 		it('children argument takes precedence over props.children even if falsey', () => {
 			let element = <foo></foo>;
 			let childrenA = [<span>b</span>];
             let clone = cloneElement(element, { children: childrenA }, null);
-            print("------------", clone.children)
 			expect(clone.children).to.eql(null);
 		});
 	});

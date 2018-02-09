@@ -3,7 +3,7 @@ import { Component } from "../component";
 import { isTextNode } from "../dom/index";
 // import { ATTR_KEY } from "../constants";
 import { extend } from "../util";
-import { IKeyValue, IRefObject, ComponentContext, IBaseProps } from "../types";
+import { IKeyValue, IRefObject, ComponentContext, IBaseProps, childType } from "../types";
 import { setVDom } from "../find";
 
 /**
@@ -12,7 +12,10 @@ import { setVDom } from "../find";
  * @param vnode
  * @param hydrating
  */
-export function isSameNodeType(node: IVDom, vnode: string|number|boolean|VNode, hydrating: boolean) {
+export function isSameNodeType(node: IVDom, vnode: childType, hydrating: boolean): boolean {
+    if (vnode == null) {
+        return false;
+    }
     if (typeof vnode === "string" || typeof vnode === "number" || typeof vnode === "boolean") {
         // vnode是文本节点,判断dom是否为文本节点
         return isTextNode(node.base);
@@ -31,9 +34,12 @@ export function isSameNodeType(node: IVDom, vnode: string|number|boolean|VNode, 
 export function isNamedNode(
     node: IVDom,
     nodeName: string,
-) {
-    return node.normalizedNodeName === nodeName
-        || (node.base && node.base.nodeName.toLowerCase() === nodeName.toLowerCase());
+): boolean {
+    return !!(node.normalizedNodeName === nodeName ||
+    (
+        node.base &&
+        node.base.nodeName.toLowerCase() === nodeName.toLowerCase()
+    ));
 }
 
 /**

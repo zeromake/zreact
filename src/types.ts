@@ -16,11 +16,11 @@ export interface IBaseProps extends IKeyValue {
 /**
  * 函数组件
  */
-export type funComponent = (props?: IKeyValue, content?: any) => VNode;
+export type funComponent = (props?: IBaseProps, content?: any) => childType;
 /**
  * nodeName的类型
  */
-export type childType = VNode|string|number|boolean;
+export type childType = VNode|string|number|boolean|null|undefined;
 
 export type ComponentContext = Component<any, any> | Element | Node | HTMLElement | IVDom;
 

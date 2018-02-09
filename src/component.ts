@@ -3,7 +3,7 @@ import { renderComponent } from "./vdom/component";
 import { VNode } from "./vnode";
 import { enqueueRender } from "./render-queue";
 import { extend } from "./util";
-import { IKeyValue, IRefObject, ComponentContext, IBaseProps } from "./types";
+import { IKeyValue, IRefObject, ComponentContext, IBaseProps, childType } from "./types";
 import { IVDom } from "./vdom/index";
 // import { h } from "./h";
 import options from "./options";
@@ -240,7 +240,8 @@ export class Component <PropsType extends IBaseProps, StateType extends IKeyValu
      * @param state
      * @param context
      */
-    public render(props: PropsType, state: StateType, context: IKeyValue): VNode | void {
+    public render(props: PropsType, state: StateType, context: IKeyValue): childType {
         // console.error("not set render");
+        return null;
     }
 }

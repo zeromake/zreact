@@ -1,8 +1,13 @@
 import { Component } from "./component";
 import options from "./options";
 import { VNode } from "./vnode";
-import { IKeyValue, funComponent, childType } from "./types";
-import { extend } from "./util";
+import { IKeyValue, IBaseProps, funComponent, childType } from "./types";
+import { extend, REACT_ELEMENT_TYPE, REACT_FRAGMENT_TYPE } from "./util";
+import Children from "./children";
+
+function Fragment(props: IBaseProps | undefined) {
+    return props && Children.only(props.children);
+}
 
 // const EMPTY_CHILDREN: any[] = [];
 // const REACT_ELEMENT_TYPE = (typeof Symbol !== "undefined" && (Symbol as any).for && (Symbol as any).for("react.element")) || 0xeac7;
@@ -18,7 +23,7 @@ import { extend } from "./util";
 export function createElement(this: Component<IKeyValue, IKeyValue> | undefined | void | null, nodeName: string | typeof Component | funComponent, attributes: IKeyValue | null, ...args: childType[]) {
     // 初始化子元素列表
     const stack: childType[] = [];
-    let children: Array<VNode|string|number|boolean> | null = [];
+    let children: childType[] | childType | null = [];
     // let i: number;
     // let child: any;
     // 是否为原生组件
@@ -87,14 +92,21 @@ export function createElement(this: Component<IKeyValue, IKeyValue> | undefined 
             lastSimple = simple;
         }
     }
-    if (children.length === 0) {
+    const childrenLen = children.length;
+    if (childrenLen === 0) {
         children = null;
+    } else if (childrenLen === 1) {
+        children = children[0];
+    }
+    if (nodeName === REACT_FRAGMENT_TYPE) {
+        nodeName = Fragment;
     }
     const p = new VNode(
         // 设置原生组件名字或自定义组件class(function)
         nodeName,
         // 设置子元素
         children,
+        REACT_ELEMENT_TYPE,
     );
     // 设置属性
     p.attributes = attributes == null ? undefined : attributes;

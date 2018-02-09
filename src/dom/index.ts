@@ -3,6 +3,7 @@ import { IVDom, setRef } from "../vdom/index";
 import options from "../options";
 import { IKeyValue } from "../types";
 import { Component } from "../component";
+import { innerHTML } from "../util";
 
 enum NAME_NS {
     SVG = "http://www.w3.org/2000/svg",
@@ -102,7 +103,7 @@ export function setAccessor(
                 && IS_NON_DIMENSIONAL.test(i) === false ? (value[i] + "px") : value[i];
             }
         }
-    } else if ("dangerouslySetInnerHTML" === name) {
+    } else if (innerHTML === name) {
         if (value) {
             // innerHTML
             (node as Element).innerHTML = value.__html || "";

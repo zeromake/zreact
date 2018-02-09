@@ -1,4 +1,4 @@
-import { h, cloneElement, render, rerender, Component } from 'zreact';
+import { h, cloneElement, render, rerender, Component, Children } from 'zreact';
 /** @jsx h */
 
 let spyAll = obj => Object.keys(obj).forEach( key => obj[key] = sinon.spy(obj,key) );
@@ -303,7 +303,7 @@ describe('Components', () => {
 				.and.to.have.returned(sinon.match({
 					nodeName: 'div',
 					attributes: PROPS,
-					children: ['inner']
+					children: 'inner'
 				}));
 
 			expect(scratch.innerHTML).to.equal('<div foo="bar">inner</div>');
@@ -656,7 +656,7 @@ describe('Components', () => {
 				componentWillMount() {
                 }
 				render({ children }) {
-					if (!useIntermediary) return children[0];
+					if (!useIntermediary) return Children.only(children);
 					let I = useIntermediary===true ? Intermediary : useIntermediary;
                     const vnode = <I>{children}</I>;
                     return vnode
@@ -666,7 +666,7 @@ describe('Components', () => {
 			return C;
 		};
 
-		let createFunction = () => sinon.spy( ({ children }) => children[0] );
+		let createFunction = () => sinon.spy( ({ children }) => Children.only(children) );
 
 		let root;
 		let rndr = n => root = render(n, scratch, root);

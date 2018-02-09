@@ -1,10 +1,9 @@
 import { Component } from "./component";
 import { IKeyValue, childType, funComponent } from "./types";
-import { REACT_ELEMENT_TYPE } from "./util";
 type node = string | typeof Component | funComponent;
 
 export class VNode {
-    public $$typeof: any = REACT_ELEMENT_TYPE;
+    public $$typeof: any;
     /**
      * 组件名
      * {string} 为原生组件
@@ -20,7 +19,7 @@ export class VNode {
     /**
      * 子组件
      */
-    public children?: childType[] | null;
+    public children?: childType[] | childType | null;
     /**
      * 组件所属的属性
      */
@@ -40,9 +39,10 @@ export class VNode {
     public component?: Component<IKeyValue, IKeyValue> | undefined | void | null;
     public zreactCompatUpgraded?: boolean;
     public zreactCompatNormalized?: boolean;
-    constructor(nodeName: string | typeof Component | funComponent, children: childType[] | null) {
+    constructor(nodeName: string | typeof Component | funComponent, children: childType[] | childType | null, vtype: any) {
         this.nodeName = nodeName;
         this.type = nodeName;
         this.children = children;
+        this.$$typeof = vtype;
     }
 }

@@ -9,6 +9,9 @@ const REACT_ELEMENT_TYPE = h("div").$$typeof;
 const buildVNode = (nodeName, attributes, children) => {
     let props
     if (children) {
+		if (children.length === 1) {
+			children = children[0]
+		} 
         props = {...attributes, children}
     } else {
         props = attributes
@@ -137,11 +140,11 @@ describe('h(jsx)', () => {
 
 		expect(
 			h('foo', { children: m('a') })
-		).to.have.property('children').that.eql([m('a')]);
+		).to.have.property('children').that.eql(m('a'));
 
 		expect(
 			h('foo', { children: 'a' })
-		).to.have.property('children').that.eql(['a']);
+		).to.have.property('children').that.eql('a');
 	});
 
 	it('should support text children', () => {
@@ -153,8 +156,7 @@ describe('h(jsx)', () => {
 
 		expect(r).to.be.an('object')
 			.with.property('children')
-			.with.length(1)
-			.with.property('0')
+			.with.length(9)
 			.that.equals('textstuff');
 	});
 
@@ -200,9 +202,7 @@ describe('h(jsx)', () => {
 
 		expect(r).to.be.an('object')
 			.with.property('children')
-			.that.deep.equals([
-				'onetwothreefourfivesix'
-			]);
+			.that.deep.equals('onetwothreefourfivesix');
 	});
 	it('should not merge children that are boolean values', () => {
 		let r = h(
@@ -217,7 +217,7 @@ describe('h(jsx)', () => {
 
 		expect(r).to.be.an('object')
 			.with.property('children')
-			.that.deep.equals(['onetwothree']);
+			.that.deep.equals('onetwothree');
 	});
 
 	it('should not merge children of components', () => {

@@ -1,7 +1,9 @@
 import { VNode } from "./vnode";
+import { childType } from "./types";
+import { isArray } from "./util";
 
-declare type Child = VNode[] | undefined | null;
-declare type ChildCallback = (item?: VNode, index?: number, arr?: VNode[]) => VNode[];
+declare type Child = childType[] | childType;
+declare type ChildCallback = (item?: childType, index?: number, arr?: childType[]) => VNode[];
 
 const arrayMap = Array.prototype.map;
 const arrayForEach = Array.prototype.forEach;
@@ -12,6 +14,9 @@ const Children = {
         if (children == null) {
             return null;
         }
+        if (!isArray(children)) {
+            children = [children as childType];
+        }
         if (ctx && ctx !== children) {
             callback = callback.bind(ctx);
         }
@@ -21,23 +26,34 @@ const Children = {
         if (children == null) {
             return null;
         }
+        if (!isArray(children)) {
+            children = [children as childType];
+        }
         if (ctx && ctx !== children) {
             callback = callback.bind(ctx);
         }
         return arrayForEach.call(children, callback);
     },
-    count(children: Child) {
-        return children && children.length || 0;
-    },
-    only(children: Child) {
-        if (!children || children.length !== 1) {
-            throw new TypeError("Children.only() expects only one child.");
+    count(children: Child): number {
+        if (children == null) {
+            return 0;
         }
-        return children[0];
+        if (!isArray(children)) {
+            return 1;
+        }
+        return (children as childType[]).length;
+    },
+    only(children: Child): childType {
+        if (children != null && !isArray(children)) {
+            return children as childType;
+        }
+        throw new TypeError("Children.only() expects only one child.");
     },
     toArray(children: Child) {
         if (children == null) {
             return [];
+        } else if (!isArray(children)) {
+            return [children as childType];
         }
         return arraySlice.call(children);
     },

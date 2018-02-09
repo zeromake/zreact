@@ -6,7 +6,7 @@ import { createComponent, collectComponent } from "./component-recycler";
 import { getNodeProps, setRef } from "./index";
 import { removeNode } from "../dom/index";
 import { extend } from "../util";
-import { IKeyValue } from "../types";
+import { IKeyValue, childType } from "../types";
 import { IVDom } from "./index";
 import { findVDom, setVDom, findVoidNode, setVoidNode } from "../find";
 import {
@@ -179,7 +179,7 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
     component._dirty = false;
 
     if (!skip) {
-        let rendered: VNode | void;
+        let rendered: childType;
         // 当前组件的render函数返回的VNode
         rendered = component.render(props, state, context);
         //
@@ -188,18 +188,18 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
             context = extend(context, component.getChildContext());
         }
         // 取出VNode的nodeName
-        const childComponent = rendered && rendered.nodeName;
+        const childComponent = rendered && typeof rendered === "object" && rendered.nodeName;
         let toUnmount: Component<IKeyValue, IKeyValue> | undefined;
         let vdom: IVDom | undefined;
 
-        if (typeof childComponent === "function" && rendered) {
+        if (typeof childComponent === "function") {
             // 如果是自定义组件
 
             // if (component.child) {
             //     component.child = undefined;
             // }
             // 获取VNode上的props
-            const childProps = getNodeProps(rendered);
+            const childProps = getNodeProps(rendered as VNode);
             inst = initialChildComponent;
             if (inst && inst.constructor === childComponent && childProps.key === inst._key) {
                 // 子组件已存在且key未变化只改变props
@@ -210,7 +210,7 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
                     toUnmount = inst;
                 }
                 // 新建Component
-                inst = createComponent(childComponent, childProps, context, rendered.component);
+                inst = createComponent(childComponent, childProps, context, (rendered as VNode).component);
                 // 子组件索引保证下次相同子组件不会重新创建
                 component._component = inst;
                 // 设置好缓存dom

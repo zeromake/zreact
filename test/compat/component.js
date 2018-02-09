@@ -1,6 +1,7 @@
 import renderToString from 'preact-render-to-string';
 import { rerender } from 'zreact';
 import React from 'zreact-compat';
+import { Children } from '../../build/zreact';
 
 const h = React.createElement;
 
@@ -134,7 +135,7 @@ describe('components', () => {
 		const data = [{a: ''}];
 		React.render(<Foo>{ data }</Foo>, scratch);
 
-		expect(children).to.exist.and.deep.equal(data);
+		expect(Children.toArray(children)).to.exist.and.deep.equal(data);
 	});
 
 	describe('getInitialState', () => {

@@ -9,7 +9,7 @@ import { rerender } from "./render-queue";
 import { IKeyValue } from "./types";
 import { IVDom } from "./vdom/index";
 import { VNode } from "./vnode";
-import { REACT_ELEMENT_TYPE } from "./util";
+import { REACT_ELEMENT_TYPE, REACT_FRAGMENT_TYPE } from "./util";
 import { createRef } from "./create-ref";
 import {
     findDOMNode,
@@ -67,6 +67,7 @@ export default {
     unmountComponentAtNode,
     version,
     Element: REACT_ELEMENT_TYPE,
+    Fragment: REACT_FRAGMENT_TYPE,
 };
 
 export {
@@ -88,4 +89,5 @@ export {
     unmountComponentAtNode,
     version,
     REACT_ELEMENT_TYPE as Element,
+    REACT_FRAGMENT_TYPE as Fragment,
 };

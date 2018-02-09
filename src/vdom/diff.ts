@@ -18,6 +18,7 @@ import {
     isTextNode,
 } from "../dom/index";
 import { findVDom, setVDom, findVoidNode, setVoidNode } from "../find";
+import { innerHTML , isArray} from "../util";
 
 export const mounts: Array<Component<any, any>> = [];
 
@@ -54,7 +55,7 @@ export function flushMounts() {
  */
 export function diff(
     vdom: IVDom | undefined,
-    vnode: VNode | void,
+    vnode: childType,
     context: IKeyValue,
     mountAll: boolean,
     parent: any,
@@ -108,7 +109,7 @@ export function diff(
  */
 function idiff(
     vdom: IVDom | undefined | null,
-    vnode: VNode | string | number | boolean | void,
+    vnode: childType,
     context: IKeyValue,
     mountAll: boolean,
     componentRoot?: boolean,
@@ -210,24 +211,23 @@ function idiff(
 
     if (
         !hydrating
-        && vchildren
-        && vchildren.length === 1
-        && typeof vchildren[0] === "string"
+        && !isArray(vchildren)
+        && typeof vchildren === "string"
         && fc != null
         && isTextNode(fc)
         && fc.nextSibling == null
     ) {
         // 如果未渲染过，且vnode的子元素和dom子元素长度都为1且为文本
         // 替换文本
-        if (fc.nodeValue !== vchildren[0]) {
-            fc.nodeValue = String(vchildren[0]);
+        if (fc.nodeValue !== vchildren) {
+            fc.nodeValue = String(vchildren);
         }
-    } else if (vchildren && vchildren.length || fc != null) {
+    } else if (vchildren || fc != null) {
         // vnode子元素需要渲染或者为空但dom子元素需要清空
-        const childrenHydrating = hydrating || (typeof props === "object" && props.dangerouslySetInnerHTML != null);
+        const childrenHydrating = hydrating || (typeof props === "object" && props[innerHTML] != null);
         diffChildren(
             vdom,
-            vchildren as childType[],
+            vchildren,
             context,
             mountAll,
             childrenHydrating,
@@ -256,7 +256,7 @@ function idiff(
  */
 function diffChildren(
     vdom: IVDom,
-    vchildren: childType[],
+    vchildren: childType[] | childType,
     context: any,
     mountAll: boolean,
     isHydrating: boolean,
@@ -270,7 +270,16 @@ function diffChildren(
     let keyedLen = 0;
     let min = 0;
     let childrenLen = 0;
-    const vlen = vchildren ? vchildren.length : 0;
+    let vlen = 0;
+    if (vchildren) {
+        if (isArray(vchildren)) {
+            vlen = (vchildren as childType[]).length;
+        } else {
+            vchildren = [vchildren as childType];
+            vlen = 1;
+        }
+    }
+    // const vlen = vchildren ? isArray(vchildren) ? (vchildren as childType[]).length : 1 : 0;
     let len = originalChildren ? originalChildren.length : 0;
     let j;
     let c;
@@ -340,9 +349,9 @@ function diffChildren(
     if (vlen !== 0) {
         let offset = 0;
         for (let i = 0; i < vlen; i++) {
-            vchild = vchildren[i];
+            vchild = (vchildren as childType[])[i];
             child = null;
-            const key = typeof vchild === "object" && vchild.key;
+            const key = vchild && typeof vchild === "object" && vchild.key;
             if (key != null && typeof key !== "boolean") {
                 if (keyedLen && keyed[key] !== undefined) {
                     child = keyed[key];
