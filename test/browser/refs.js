@@ -1,4 +1,4 @@
-import { h, render, Component, options, findDOMNode, findVDom } from 'zreact';
+import { h, render, Component, options, findDOMNode, findVDom, createRef } from 'zreact';
 /** @jsx h */
 
 // gives call count and argument errors names (otherwise sinon just uses "spy"):
@@ -328,5 +328,25 @@ describe('refs', () => {
 
         const dom = render(<div><Wrapper ref={ c => ref(findVDom(c)) } /></div>, scratch, scratch.firstChild);
 		expect(ref).to.have.been.calledOnce.and.calledWith(findVDom(dom.firstChild));
+	});
+
+	it('createRef -> should add refs to components representing DOM nodes with no attributes if they have been pre-rendered', () => {
+		// Simulate pre-render
+		let parent = document.createElement('div');
+		let child = document.createElement('div');
+		parent.appendChild(child);
+		scratch.appendChild(parent); // scratch contains: <div><div></div></div>
+
+        let ref = createRef() //spy('ref');
+		class Wrapper {
+			render() {
+				return <div></div>;
+			}
+		}
+
+        let dom = render(<div><Wrapper ref={ ref } /></div>, scratch, scratch.firstChild);
+		expect(findDOMNode(ref.value)).to.equal(dom.firstChild);
+        dom = render(<div></div>, scratch, scratch.firstChild);
+		expect(ref.value).to.equal(null);
 	});
 });
