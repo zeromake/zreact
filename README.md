@@ -20,3 +20,10 @@ copy to [preact](https://github.com/developit/preact)
     - unmountComponentAtNode
     - unstable_renderSubtreeIntoContainer
     - Children
+- add react 16 api:
+    - createRef
+    - Component.getDerivedStateFromProps
+- deprecated:
+    - Component.prototype.componentWillMount
+    - Component.prototype.componentWillReceiveProps
+    - Component.prototype.componentWillUpdate
