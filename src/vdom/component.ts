@@ -6,7 +6,7 @@ import { createComponent, collectComponent } from "./component-recycler";
 import { getNodeProps, setRef } from "./index";
 import { removeNode } from "../dom/index";
 import { extend } from "../util";
-import { IKeyValue, childType } from "../types";
+import { IKeyValue, childType, IReactContext, IReactProvider } from "../types";
 import { IVDom } from "./index";
 import { findVDom, setVDom, findVoidNode, setVoidNode } from "../find";
 import {
@@ -340,6 +340,7 @@ export function buildComponentFromVNode(
     vnode: VNode,
     context: IKeyValue,
     mountALL: boolean,
+    newContext?: IReactContext<any>| IReactProvider<any>,
 ): IVDom {
     // 获取根组件缓存
     let c = vdom && vdom.component;
@@ -367,7 +368,7 @@ export function buildComponentFromVNode(
             vdom = oldVDom = null;
         }
         // 通过缓存组件的方式创建组件实例
-        c = createComponent(vnode.nodeName, props, context, vnode.component);
+        c = createComponent(vnode.nodeName, props, context, vnode.component, newContext);
         if (vdom && !c._nextVDom) {
             // 上次这个标签为原生组件，把将要卸载的组件dom缓存
             c._nextVDom = vdom;

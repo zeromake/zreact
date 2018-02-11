@@ -1,5 +1,6 @@
 import { Component } from "../component";
-import { IKeyValue } from "../types";
+import { IKeyValue, IReactContext, IReactProvider} from "../types";
+
 // import { h } from "../h";
 
 /**
@@ -33,12 +34,22 @@ export function collectComponent(component: Component<IKeyValue, IKeyValue>) {
  * @param props
  * @param context
  */
-export function createComponent(Ctor: any, props: IKeyValue, context: IKeyValue, component: Component<IKeyValue, IKeyValue> | undefined | void | null): Component<IKeyValue, IKeyValue> {
+export function createComponent(
+    Ctor: any,
+    props: IKeyValue,
+    context: IKeyValue,
+    component: Component<IKeyValue, IKeyValue> | undefined | void | null,
+    newContext?: IReactContext<any>| IReactProvider<any>,
+): Component<IKeyValue, IKeyValue> {
     const list = components[Ctor.name];
     let inst: Component<IKeyValue, IKeyValue>;
     // 创建组件实例
     if (Ctor.prototype && Ctor.prototype.render) {
-        inst = new Ctor(props, context);
+        if (newContext) {
+            inst = new Ctor(props, context, newContext);
+        } else {
+            inst = new Ctor(props, context);
+        }
         Component.call(inst, props, context);
     } else {
         // 一个方法

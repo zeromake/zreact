@@ -16,43 +16,93 @@
         var h = zreact.h;
         var render = zreact.render;
         var Component = zreact.Component;
-        class Foo extends Component {
-            componentDidMount() {
-                console.log("Foo componentDidMount")
-            }
-            componentWillUnmount() {
-                console.log("Foo componentWillUnmount")
-            }
-            render() {
-                return h("h1", null, "测试")
-            }
-        }
-        class Bar extends Component {
-            componentDidMount() {
-                console.log("Bar componentDidMount")
-            }
-            componentWillUnmount() {
-                console.log("Bar componentWillUnmount")
-            }
+        const ThemeContext = zreact.createContext({
+            background: 'red',
+            color: 'white'
+        });
+        const ContextMap = {
+            1: { background: 'red', color: 'white' },
+            2: { background: 'green', color: 'white' }
         }
         class App extends Component {
             constructor() {
                 super()
                 this.state = {
-                    child: Foo
+                    map: 1
                 }
-                this.test = this.test.bind(this)
             }
-            test() {
-                this.setState({
-                    child: this.state.child === Bar ? Foo : Bar
-                });
-            }
-            render() {
-                return h("div", null, h('button', {onClick: this.test}, "切换"), h(this.state.child))
+            render () {
+                return (
+                    h("div", null,
+                        h(ThemeContext.Provider, {value: ContextMap[this.state.map]},
+                            h(Header)
+                        ),
+                        h("button", {onClick: () => this.setState({
+                            map: this.state.map === 1 ? 2: 1
+                        })}, "测试")
+                    )
+                    
+                );
             }
         }
-        var dom = render(h(App), document.getElementById('app'))
+        class Header extends Component {
+            shouldComponentUpdate() {
+                return false
+            }
+            render () {
+                return h(Title, null, "Hello React Context API")
+            }
+        }
+        class Title extends Component {
+            render () {
+                return h(ThemeContext.Consumer, null,
+                    context => h("h1", {style: {background: context.background, color: context.color}},
+                        this.props.children
+                    )
+                );
+            }
+        }
+        render(
+            h(App), 
+            document.getElementById('app')
+        );
+        // class Foo extends Component {
+        //     componentDidMount() {
+        //         console.log("Foo componentDidMount")
+        //     }
+        //     componentWillUnmount() {
+        //         console.log("Foo componentWillUnmount")
+        //     }
+        //     render() {
+        //         return h("h1", null, "测试")
+        //     }
+        // }
+        // class Bar extends Component {
+        //     componentDidMount() {
+        //         console.log("Bar componentDidMount")
+        //     }
+        //     componentWillUnmount() {
+        //         console.log("Bar componentWillUnmount")
+        //     }
+        // }
+        // class App extends Component {
+        //     constructor() {
+        //         super()
+        //         this.state = {
+        //             child: Foo
+        //         }
+        //         this.test = this.test.bind(this)
+        //     }
+        //     test() {
+        //         this.setState({
+        //             child: this.state.child === Bar ? Foo : Bar
+        //         });
+        //     }
+        //     render() {
+        //         return h("div", null, h('button', {onClick: this.test}, "切换"), h(this.state.child))
+        //     }
+        // }
+        // var dom = render(h(App), document.getElementById('app'))
         // render(h("div"), document.getElementById('app'), dom)
         // render(h(Bar), document.getElementById('app'))
 

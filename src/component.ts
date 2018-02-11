@@ -256,7 +256,5 @@ export class Component <PropsType extends IBaseProps, StateType extends IKeyValu
      * @param context
      */
     public render(props: PropsType, state: StateType, context: IKeyValue): childType {
-        // console.error("not set render");
-        return null;
     }
 }

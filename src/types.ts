@@ -20,7 +20,7 @@ export type funComponent = (props?: IBaseProps, content?: any) => childType;
 /**
  * nodeName的类型
  */
-export type childType = VNode|string|number|boolean|null|undefined;
+export type childType = VNode|string|number|boolean|null|undefined|void;
 
 export type ComponentContext = Component<any, any> | Element | Node | HTMLElement | IVDom;
 
@@ -37,6 +37,7 @@ export interface IReactContext<T> extends IBaseVNode {
     defaultValue: T;
     currentValue: T;
     changedBits: number;
+    ConsumerChildren: any[];
     Provider: IReactProvider<T>;
     Consumer: IReactContext<T>;
 }
@@ -45,4 +46,4 @@ export interface IReactProvider<T> extends IBaseVNode {
     context: IReactContext<T>;
 }
 
-export type NodeName = string | typeof Component | funComponent | IReactContext<any> | IReactContext<any>;
+export type NodeName = string | typeof Component | funComponent | IReactContext<any> | IReactProvider<any>;

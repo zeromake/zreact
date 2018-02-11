@@ -3,7 +3,7 @@ import options from "../options";
 import { isSameNodeType, isNamedNode } from "./index";
 import { VNode } from "../vnode";
 import { Component } from "../component";
-import { IKeyValue, childType } from "../types";
+import { IKeyValue, childType, IBaseVNode, IReactContext, IReactProvider } from "../types";
 import { IVDom, buildVDom, setRef } from "./index";
 import {
     buildComponentFromVNode,
@@ -19,8 +19,12 @@ import {
 } from "../dom/index";
 import { findVDom, setVDom, findVoidNode, setVoidNode } from "../find";
 import { innerHTML , isArray, REACT_CONTEXT_TYPE, REACT_PROVIDER_TYPE } from "../util";
+import { buildConsumer, buildProvider } from "./context";
 
-export const mounts: Array<Component<any, any>> = [];
+let Consumer: any = null;
+let Provider: any = null;
+
+export const mounts: any[] = [];
 
 export let diffLevel = 0;
 
@@ -164,10 +168,20 @@ function idiff(
     if (typeof vnodeName === "function") {
         // 是一个组件,创建或复用组件实例，返回dom
         return buildComponentFromVNode(vdom, (vnode as VNode), context, mountAll); // , (vnode as VNode).component);
-    } else if (vnodeName === REACT_CONTEXT_TYPE) {
-        return VOID_NODE;
-    } else if (vnodeName === REACT_PROVIDER_TYPE) {
-        return VOID_NODE;
+    } else if (vnodeName && (vnodeName as IBaseVNode).$$typeof === REACT_CONTEXT_TYPE) {
+        if (Consumer === null) {
+            Consumer = buildConsumer(Component);
+        }
+        (vnode as any).nodeName = Consumer;
+        return buildComponentFromVNode(vdom, (vnode as VNode), context, mountAll, vnodeName as IReactContext<any>);
+        // return VOID_NODE;
+    } else if (vnodeName && (vnodeName as IBaseVNode).$$typeof === REACT_PROVIDER_TYPE) {
+        if (Provider === null) {
+            Provider = buildProvider(Component);
+        }
+        (vnode as any).nodeName = Provider;
+        return buildComponentFromVNode(vdom, (vnode as VNode), context, mountAll, vnodeName as IReactProvider<any>);
+        // return VOID_NODE;
     }
     // 重新判断一下是否要创建svg
     isSvgMode = vnodeName === "svg"
