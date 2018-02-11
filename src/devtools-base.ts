@@ -2,6 +2,17 @@ import { options, Component, findDOMNode as IfindDOMNode, findVDom as IfindVDom}
 import { IKeyValue } from "./types";
 import { IVDom } from "./vdom/index";
 
+const isArray = Array.isArray;
+enum ComponentChildType {
+    COMPONENT = 0,
+    DOM = 1,
+}
+
+interface IComponentChild {
+    type: ComponentChildType;
+    index: number;
+}
+
 interface IReactElement {
     props?: boolean|IKeyValue;
     type: any;
@@ -82,11 +93,41 @@ export function getInitDevTools(opt: typeof options, findDOMNode: typeof IfindDO
             setState: component.setState && component.setState.bind(component),
             state: component.state,
         };
+        // const updateChild = function _() {
         if (component._component) {
             instance._renderedComponent = updateReactComponent(component._component);
-        } else if (findVDom(component)) {
-            instance._renderedComponent = updateReactComponent(findVDom(component));
+        } else {
+            const vdom: IVDom = findVDom(component) as IVDom;
+            if (vdom && vdom.base != null) {
+                instance._renderedComponent = updateReactComponent(vdom);
+            }
         }
+        // };
+        // if (component._children != null) {
+        //     const childrenLen = component._children.length;
+        //     if (childrenLen > 0) {
+        //         if (childrenLen === 1) {
+        //             updateChild();
+        //         } else {
+        //             const vdom = findVDom(component) as IVDom[];
+        //             const children: IReactComponent[] = [];
+        //             component._children.forEach((item) => {
+        //                 let obj: Component<IKeyValue, IKeyValue> | IVDom | null = null;
+        //                 if (item.type === 0) {
+        //                     obj = (component._component as Array<Component<IKeyValue, IKeyValue>>)[item.index];
+        //                 } else if (item.type === 1) {
+        //                     obj = (vdom as IVDom[])[item.index];
+        //                 }
+        //                 if (obj != null) {
+        //                     children.push(updateReactComponent(obj));
+        //                 }
+        //             });
+        //             instance._renderedChildren = children;
+        //         }
+        //     }
+        // } else {
+        // updateChild();
+        // }
         return instance;
     }
 
@@ -105,7 +146,7 @@ export function getInitDevTools(opt: typeof options, findDOMNode: typeof IfindDO
         } else {
             element = {
                 props: vdom.props,
-                type: node ? node.nodeName.toLowerCase() : "void-node",
+                type: node ? node.nodeName.toLowerCase() : "undefined",
             };
         }
         const children: IReactComponent[] = new Array();
@@ -135,7 +176,7 @@ export function getInitDevTools(opt: typeof options, findDOMNode: typeof IfindDO
                     children.push(component);
                     continue;
                 }
-                const childVDom = findVDom(childNodes[i]);
+                const childVDom = findVDom(childNodes[i]) as IVDom;
                 if (childVDom && childVDom.component) {
                     component = updateReactComponent(childVDom.component);
                 } else if (childVDom) {
@@ -196,7 +237,7 @@ export function getInitDevTools(opt: typeof options, findDOMNode: typeof IfindDO
 
     function findRoots(node: Element, roots: IKeyValue) {
         Array.prototype.forEach.call(node.childNodes, function _(child: any) {
-            const vdom = findVDom(child);
+            const vdom = findVDom(child) as IVDom;
             if (vdom && vdom.component) {
                 roots[nextRootKey(roots)] = updateReactComponent(vdom.component);
             } else {
@@ -211,7 +252,7 @@ export function getInitDevTools(opt: typeof options, findDOMNode: typeof IfindDO
         }
         const base = findDOMNode(component);
         const parentElement: any = base && base.parentElement;
-        const vdom = findVDom(parentElement);
+        const vdom = findVDom(parentElement) as IVDom;
         if (vdom && vdom.props) {
             return false;
         }

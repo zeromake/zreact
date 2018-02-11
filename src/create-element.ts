@@ -1,7 +1,15 @@
 import { Component } from "./component";
 import options from "./options";
 import { VNode } from "./vnode";
-import { IKeyValue, IBaseProps, funComponent, childType } from "./types";
+import {
+    IKeyValue,
+    IBaseProps,
+    funComponent,
+    childType,
+    IReactContext,
+    IReactProvider,
+    NodeName,
+} from "./types";
 import { extend, REACT_ELEMENT_TYPE, REACT_FRAGMENT_TYPE } from "./util";
 import Children from "./children";
 
@@ -20,7 +28,7 @@ function Fragment(props: IBaseProps | undefined) {
  * @see http://jasonformat.com/wtf-is-jsx
  * @public
  */
-export function createElement(this: Component<IKeyValue, IKeyValue> | undefined | void | null, nodeName: string | typeof Component | funComponent, attributes: IKeyValue | null, ...args: childType[]) {
+export function createElement(this: Component<IKeyValue, IKeyValue> | undefined | void | null, nodeName: NodeName, attributes: IKeyValue | null, ...args: childType[]) {
     // 初始化子元素列表
     const stack: childType[] = [];
     let children: childType[] | childType | null = [];

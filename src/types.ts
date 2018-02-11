@@ -27,3 +27,22 @@ export type ComponentContext = Component<any, any> | Element | Node | HTMLElemen
 export interface IRefObject {
     value: ComponentContext|null;
 }
+
+export interface IBaseVNode {
+    $$typeof: any;
+}
+
+export interface IReactContext<T> extends IBaseVNode {
+    calculateChangedBits: ((a: T, b: T) => number) | null;
+    defaultValue: T;
+    currentValue: T;
+    changedBits: number;
+    Provider: IReactProvider<T>;
+    Consumer: IReactContext<T>;
+}
+export interface IReactProvider<T> extends IBaseVNode {
+    $$typeof: any;
+    context: IReactContext<T>;
+}
+
+export type NodeName = string | typeof Component | funComponent | IReactContext<any> | IReactContext<any>;

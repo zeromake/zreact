@@ -18,11 +18,15 @@ import {
     isTextNode,
 } from "../dom/index";
 import { findVDom, setVDom, findVoidNode, setVoidNode } from "../find";
-import { innerHTML , isArray} from "../util";
+import { innerHTML , isArray, REACT_CONTEXT_TYPE, REACT_PROVIDER_TYPE } from "../util";
 
 export const mounts: Array<Component<any, any>> = [];
 
 export let diffLevel = 0;
+
+const VOID_NODE: IVDom = {
+    base: null,
+};
 
 let isSvgMode = false;
 
@@ -119,9 +123,7 @@ function idiff(
 
     if (vnode == null || typeof vnode === "boolean") {
         // 去除空，布尔值转为空字符串
-        return {
-            base: null,
-        };
+        return VOID_NODE;
     } else if (typeof vnode === "string" || typeof vnode === "number") {
         // 文本节点处理
         if (
@@ -162,6 +164,10 @@ function idiff(
     if (typeof vnodeName === "function") {
         // 是一个组件,创建或复用组件实例，返回dom
         return buildComponentFromVNode(vdom, (vnode as VNode), context, mountAll); // , (vnode as VNode).component);
+    } else if (vnodeName === REACT_CONTEXT_TYPE) {
+        return VOID_NODE;
+    } else if (vnodeName === REACT_PROVIDER_TYPE) {
+        return VOID_NODE;
     }
     // 重新判断一下是否要创建svg
     isSvgMode = vnodeName === "svg"

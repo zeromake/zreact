@@ -8,6 +8,16 @@ import { IVDom } from "./vdom/index";
 // import { h } from "./h";
 import options from "./options";
 
+enum ComponentChildType {
+    COMPONENT = 0,
+    DOM = 1,
+}
+
+interface IComponentChild {
+    type: ComponentChildType;
+    index: number;
+}
+
 /**
  * 自定义组件所需继承类
  */
@@ -29,6 +39,11 @@ export class Component <PropsType extends IBaseProps, StateType extends IKeyValu
      * 当前组件的状态,可以修改
      */
     public state: StateType;
+
+    /**
+     * react render 16 多node支持
+     */
+    public _children?: IComponentChild[];
 
     /**
      * 被移除时的vdom缓存

@@ -11,6 +11,7 @@ import { IVDom } from "./vdom/index";
 import { VNode } from "./vnode";
 import { REACT_ELEMENT_TYPE, REACT_FRAGMENT_TYPE } from "./util";
 import { createRef } from "./create-ref";
+import { createContext } from "./create-context";
 import {
     findDOMNode,
     findVDom,
@@ -30,7 +31,7 @@ function isValidElement(element: VNode| any): boolean {
     return element && (element instanceof VNode);
 }
 
-function unmountComponentAtNode(dom: any) {
+function unmountComponentAtNode(dom: any): boolean {
     const vdom = findVDom(dom);
     if (vdom) {
         unmountComponent(vdom.component as any);
@@ -39,7 +40,7 @@ function unmountComponentAtNode(dom: any) {
     return false;
 }
 
-function createPortal(vnode: any, container: HTMLElement) {
+function createPortal(vnode: any, container: HTMLElement): null {
     // mountVNode can handle array of vnodes for us
     const voidNodes = findVoidNode(container);
     const voidNode = voidNodes && voidNodes[0];

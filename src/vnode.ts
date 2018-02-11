@@ -1,21 +1,20 @@
 import { Component } from "./component";
-import { IKeyValue, childType, funComponent } from "./types";
-type node = string | typeof Component | funComponent;
+import { IKeyValue, childType, funComponent, NodeName, IBaseVNode } from "./types";
 
-export class VNode {
+export class VNode implements IBaseVNode {
     public $$typeof: any;
     /**
      * 组件名
      * {string} 为原生组件
      * {Component|function} 为自定义组件
      */
-    public nodeName: node;
+    public nodeName: NodeName;
     /**
      * 组件名
      * {string} 为原生组件
      * {Component|function} 为自定义组件
      */
-    public type: node;
+    public type: NodeName;
     /**
      * 子组件
      */
@@ -39,7 +38,7 @@ export class VNode {
     public component?: Component<IKeyValue, IKeyValue> | undefined | void | null;
     public zreactCompatUpgraded?: boolean;
     public zreactCompatNormalized?: boolean;
-    constructor(nodeName: string | typeof Component | funComponent, children: childType[] | childType | null, vtype: any) {
+    constructor(nodeName: NodeName, children: childType[] | childType | null, vtype: any) {
         this.nodeName = nodeName;
         this.type = nodeName;
         this.children = children;

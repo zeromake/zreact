@@ -3,6 +3,19 @@ declare type ChildCallbackType = (child?: zreact.VNode, index?: number, arr?: zr
 declare namespace zreact {
     type childType = JSX.Element|string|boolean|null|undefined;
     type childrenType = Array<childType|childType[]>;
+    interface IReactProvider<T> {
+        $$typeof: any;
+        context: IReactContext<T>;
+    }
+    interface IReactContext<T> {
+        $$typeof: any;
+        calculateChangedBits: ((a: T, b: T) => number) | null;
+        defaultValue: T;
+        currentValue: T;
+        changedBits: number;
+        Provider: IReactProvider<T>;
+        Consumer: IReactContext<T>;
+    }
     const Children: {
         map: (children: childType[], callback: ChildCallbackType, ctx?: any) => VNode[];
         forEach: (children: childType[], callback: ChildCallbackType, ctx?: any) => any;
@@ -10,6 +23,9 @@ declare namespace zreact {
         only: (children: childType[]) => VNode;
         toArray: (children: childType[]) => VNode[];
     }
+    const Element: any;
+    const Fragment: any;
+    function createContext<T>(defaultValue: T, calculateChangedBits?: ((a: T, b: T) => number)| null): IReactContext<T>;
     interface IVDom {
         /**
          * dom所属的顶级Component
@@ -166,6 +182,10 @@ declare namespace zreact {
 
     function findVDom(componentOrDom: any | Node | Element): IVDom;
 
+    function unmountComponentAtNode(dom: any): boolean;
+
+    function createPortal(vnode: any, container: HTMLElement): null
+    function createRef(): { value: Component<any, any> | Element | Node | IVDom | null };
     const options: {
         /**
          * render更新后钩子比componentDidUpdate更后面执行
