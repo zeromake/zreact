@@ -19,10 +19,7 @@ import {
 } from "../dom/index";
 import { findVDom, setVDom, findVoidNode, setVoidNode } from "../find";
 import { innerHTML , isArray, REACT_CONTEXT_TYPE, REACT_PROVIDER_TYPE } from "../util";
-import { buildConsumer, buildProvider } from "./context";
-
-let Consumer: any = null;
-let Provider: any = null;
+// import { buildConsumer, buildProvider } from "./context";
 
 export const mounts: any[] = [];
 
@@ -168,20 +165,6 @@ function idiff(
     if (typeof vnodeName === "function") {
         // 是一个组件,创建或复用组件实例，返回dom
         return buildComponentFromVNode(vdom, (vnode as VNode), context, mountAll); // , (vnode as VNode).component);
-    } else if (vnodeName && (vnodeName as IBaseVNode).$$typeof === REACT_CONTEXT_TYPE) {
-        if (Consumer === null) {
-            Consumer = buildConsumer(Component);
-        }
-        (vnode as any).nodeName = Consumer;
-        return buildComponentFromVNode(vdom, (vnode as VNode), context, mountAll, vnodeName as IReactContext<any>);
-        // return VOID_NODE;
-    } else if (vnodeName && (vnodeName as IBaseVNode).$$typeof === REACT_PROVIDER_TYPE) {
-        if (Provider === null) {
-            Provider = buildProvider(Component);
-        }
-        (vnode as any).nodeName = Provider;
-        return buildComponentFromVNode(vdom, (vnode as VNode), context, mountAll, vnodeName as IReactProvider<any>);
-        // return VOID_NODE;
     }
     // 重新判断一下是否要创建svg
     isSvgMode = vnodeName === "svg"

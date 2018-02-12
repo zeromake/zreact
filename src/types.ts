@@ -37,7 +37,6 @@ export interface IReactContext<T> extends IBaseVNode {
     defaultValue: T;
     currentValue: T;
     changedBits: number;
-    ConsumerChildren: any[];
     Provider: IReactProvider<T>;
     Consumer: IReactContext<T>;
 }

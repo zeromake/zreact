@@ -10,11 +10,13 @@ import {
     IReactProvider,
     NodeName,
 } from "./types";
-import { extend, REACT_ELEMENT_TYPE, REACT_FRAGMENT_TYPE } from "./util";
+import { extend, REACT_ELEMENT_TYPE, REACT_FRAGMENT_TYPE, REACT_CONTEXT_TYPE, REACT_PROVIDER_TYPE } from "./util";
 import Children from "./children";
+import { Consumer } from "./context-consumer";
+import { Provider } from "./context-provider";
 
 function Fragment(props: IBaseProps | undefined) {
-    return props && Children.only(props.children);
+    return props && props.children;
 }
 
 // const EMPTY_CHILDREN: any[] = [];
@@ -106,8 +108,17 @@ export function createElement(this: Component<IKeyValue, IKeyValue> | undefined 
     } else if (childrenLen === 1) {
         children = children[0];
     }
+    let context: IReactContext<any> | IReactProvider<any> | null = null;
     if (nodeName === REACT_FRAGMENT_TYPE) {
         nodeName = Fragment;
+    } else if (typeof nodeName === "object") {
+        if (nodeName.$$typeof === REACT_CONTEXT_TYPE) {
+            context = nodeName;
+            (nodeName as any) = Consumer;
+        } else if (nodeName.$$typeof === REACT_PROVIDER_TYPE) {
+            context = nodeName;
+            (nodeName as any) = Provider;
+        }
     }
     const p = new VNode(
         // 设置原生组件名字或自定义组件class(function)
@@ -147,6 +158,9 @@ export function createElement(this: Component<IKeyValue, IKeyValue> | undefined 
     // p.$$typeof = REACT_ELEMENT_TYPE;
     if (options.vnode != null) {
         options.vnode(p);
+    }
+    if (context != null) {
+        p.context = context;
     }
     return p;
 }

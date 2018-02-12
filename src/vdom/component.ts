@@ -210,7 +210,7 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
                     toUnmount = inst;
                 }
                 // 新建Component
-                inst = createComponent(childComponent, childProps, context, (rendered as VNode).component);
+                inst = createComponent(childComponent, childProps, context, (rendered as VNode).component, (rendered as VNode).context);
                 // 子组件索引保证下次相同子组件不会重新创建
                 component._component = inst;
                 // 设置好缓存dom
@@ -340,7 +340,6 @@ export function buildComponentFromVNode(
     vnode: VNode,
     context: IKeyValue,
     mountALL: boolean,
-    newContext?: IReactContext<any>| IReactProvider<any>,
 ): IVDom {
     // 获取根组件缓存
     let c = vdom && vdom.component;
@@ -368,7 +367,7 @@ export function buildComponentFromVNode(
             vdom = oldVDom = null;
         }
         // 通过缓存组件的方式创建组件实例
-        c = createComponent(vnode.nodeName, props, context, vnode.component, newContext);
+        c = createComponent(vnode.nodeName, props, context, vnode.component, vnode.context);
         if (vdom && !c._nextVDom) {
             // 上次这个标签为原生组件，把将要卸载的组件dom缓存
             c._nextVDom = vdom;

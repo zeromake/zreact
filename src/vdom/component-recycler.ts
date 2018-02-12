@@ -45,11 +45,8 @@ export function createComponent(
     let inst: Component<IKeyValue, IKeyValue>;
     // 创建组件实例
     if (Ctor.prototype && Ctor.prototype.render) {
-        if (newContext) {
-            inst = new Ctor(props, context, newContext);
-        } else {
-            inst = new Ctor(props, context);
-        }
+        // if (newContext) {
+        inst = new Ctor(props, context, newContext);
         Component.call(inst, props, context);
     } else {
         // 一个方法
@@ -70,9 +67,6 @@ export function createComponent(
             }
         }
     }
-    // if (!inst._emitComponent && component) {
-    //     inst._emitComponent = component;
-    // }
     return inst;
 }
 

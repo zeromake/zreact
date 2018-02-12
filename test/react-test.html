@@ -5,22 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
-    <script src="https://cdn.bootcss.com/react/16.2.0/umd/react.development.js"></script>
-    <script src="https://cdn.bootcss.com/react-dom/16.2.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.bootcss.com/react/16.3.0-alpha.0/umd/react.development.js"></script>
+    <script src="https://cdn.bootcss.com/react-dom/16.3.0-alpha.0/umd/react-dom.development.js"></script>
 </head>
 <body>
     <div id="app"></div>
     <script>
         const h = React.createElement
-        class App extends React.Component {
-            render() {
-                return h(React.Fragment, null,
-                    h("div", {key: "1"}, "测试1"),
-                    h("div", {key: "2"}, "测试2")
-                )
+        const render = ReactDOM.render
+        const Component = React.Component
+        const ThemeContext = React.createContext({
+            background: 'red',
+            color: 'white'
+        });
+        const ContextMap = {
+            1: { background: 'red', color: 'white' },
+            2: { background: 'green', color: 'white' }
+        }
+        class App extends Component {
+            constructor() {
+                super()
+                this.state = {
+                    map: 1
+                }
+            }
+            select() {
+                console.log(JSON.stringify(ThemeContext.currentValue), ThemeContext.changedBits)
+                this.setState({
+                    map: this.state.map === 1 ? 2: 1
+                }, function() {
+                    console.log(JSON.stringify(ThemeContext.currentValue), ThemeContext.changedBits)
+                })
+            }
+            render () {
+                return (
+                    h("div", null,
+                        h(ThemeContext.Provider, {value: ContextMap[this.state.map === 1 ? 2: 1]},
+                            h(Header, {map: this.state.map})
+                        ),
+                        h(ThemeContext.Provider, {value: ContextMap[this.state.map]},
+                            h(Header, {map: this.state.map === 1 ? 2: 1})
+                        ),
+                        h("button", {onClick: () => this.select()}, "测试")
+                    )
+                    
+                );
             }
         }
-        ReactDOM.render(h(App), document.getElementById("app"))
+        class Header extends Component {
+            shouldComponentUpdate() {
+                return false
+            }
+            render () {
+                return h(Title, this.props, "Hello React Context API")
+            }
+        }
+        class Title extends Component {
+            render () {
+                return h(ThemeContext.Consumer, null,
+                    context => h(this.props.map === 1 ? "h1": "h2", {style: {background: context.background, color: context.color}},
+                        this.props.children
+                    )
+                )
+                // h(ThemeContext.Consumer, null,
+                //     context => h("h2", {style: {background: context.background, color: context.color}},
+                //         this.props.children
+                //     )
+                // ),
+            }
+        }
+        render(
+            h(App), 
+            document.getElementById('app')
+        );
+        // class App extends React.Component {
+        //     render() {
+        //         return h(React.Fragment, null,
+        //             h("div", {key: "1"}, "测试1"),
+        //             h("div", {key: "2"}, "测试2")
+        //         )
+        //     }
+        // }
+        // ReactDOM.render(h(App), document.getElementById("app"))
     </script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 import { Component } from "./component";
-import { IKeyValue, childType, funComponent, NodeName, IBaseVNode } from "./types";
+import { IKeyValue, childType, funComponent, NodeName, IBaseVNode, IReactContext, IReactProvider } from "./types";
 
 export class VNode implements IBaseVNode {
     public $$typeof: any;
@@ -38,6 +38,8 @@ export class VNode implements IBaseVNode {
     public component?: Component<IKeyValue, IKeyValue> | undefined | void | null;
     public zreactCompatUpgraded?: boolean;
     public zreactCompatNormalized?: boolean;
+
+    public context?: IReactContext<any> | IReactProvider<any>;
     constructor(nodeName: NodeName, children: childType[] | childType | null, vtype: any) {
         this.nodeName = nodeName;
         this.type = nodeName;

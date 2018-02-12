@@ -20,6 +20,7 @@
             background: 'red',
             color: 'white'
         });
+        window.ThemeContext = ThemeContext;
         const ContextMap = {
             1: { background: 'red', color: 'white' },
             2: { background: 'green', color: 'white' }
@@ -31,35 +32,49 @@
                     map: 1
                 }
             }
+            select() {
+                console.log(JSON.stringify(ThemeContext.currentValue), ThemeContext.changedBits)
+                this.setState({
+                    map: this.state.map === 1 ? 2: 1
+                }, function() {
+                    console.log(JSON.stringify(ThemeContext.currentValue), ThemeContext.changedBits)
+                })
+            }
             render () {
                 return (
                     h("div", null,
-                        h(ThemeContext.Provider, {value: ContextMap[this.state.map]},
-                            h(Header)
+                        h(ThemeContext.Provider, {value: ContextMap[this.state.map === 1 ? 2: 1]},
+                            h(Header, {map: this.state.map})
                         ),
-                        h("button", {onClick: () => this.setState({
-                            map: this.state.map === 1 ? 2: 1
-                        })}, "测试")
+                        h(ThemeContext.Provider, {value: ContextMap[this.state.map]},
+                            h(Header, {map: this.state.map === 1 ? 2: 1})
+                        ),
+                        h("button", {onClick: () => this.select()}, "测试")
                     )
                     
                 );
             }
         }
         class Header extends Component {
-            shouldComponentUpdate() {
-                return false
-            }
+            // shouldComponentUpdate() {
+            //     return false
+            // }
             render () {
-                return h(Title, null, "Hello React Context API")
+                return h(Title, this.props, "Hello React Context API")
             }
         }
         class Title extends Component {
             render () {
                 return h(ThemeContext.Consumer, null,
-                    context => h("h1", {style: {background: context.background, color: context.color}},
+                    context => h(this.props.map === 1 ? "h1": "h2", {style: {background: context.background, color: context.color}},
                         this.props.children
                     )
-                );
+                )
+                // h(ThemeContext.Consumer, null,
+                //     context => h("h2", {style: {background: context.background, color: context.color}},
+                //         this.props.children
+                //     )
+                // ),
             }
         }
         render(

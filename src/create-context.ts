@@ -12,7 +12,6 @@ export function createContext<T>(defaultValue: T, calculateChangedBits?: ((a: T,
         defaultValue,
         currentValue: defaultValue,
         changedBits: 0,
-        ConsumerChildren: [],
         Provider: null as any,
         Consumer: null as any,
     };
