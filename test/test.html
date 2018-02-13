@@ -20,7 +20,6 @@
             background: 'red',
             color: 'white'
         });
-        window.ThemeContext = ThemeContext;
         const ContextMap = {
             1: { background: 'red', color: 'white' },
             2: { background: 'green', color: 'white' }
@@ -56,20 +55,32 @@
             }
         }
         class Header extends Component {
-            // shouldComponentUpdate() {
-            //     return false
-            // }
+            shouldComponentUpdate() {
+                return false
+            }
             render () {
                 return h(Title, this.props, "Hello React Context API")
             }
         }
         class Title extends Component {
+            constructor(p, c) {
+                super(p, c)
+                this.state = {
+                    isShow: true,
+                }
+                this.select = this.select.bind(this)
+            }
+            select() {
+                this.setState({
+                    isShow: !this.state.isShow
+                })
+            }
             render () {
-                return h(ThemeContext.Consumer, null,
+                return h("div", null, this.state.isShow ? h(ThemeContext.Consumer, {key: 1},
                     context => h(this.props.map === 1 ? "h1": "h2", {style: {background: context.background, color: context.color}},
                         this.props.children
                     )
-                )
+                ): null, h("button", {onClick: () => this.select(), key: 2}, "切换"))
                 // h(ThemeContext.Consumer, null,
                 //     context => h("h2", {style: {background: context.background, color: context.color}},
                 //         this.props.children
