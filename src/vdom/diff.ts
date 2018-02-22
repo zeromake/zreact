@@ -171,7 +171,7 @@ function idiff(
         ? true : vnodeName === "foreignObject" ? false : isSvgMode;
     // 一般通过babel的jsx无法发生非字符串的vnodeName
     vnodeName = String(vnodeName);
-    if (!vdom || !isNamedNode(vdom, vnodeName) || !out) {
+    if (!vdom || !isNamedNode(vdom, vnodeName) || (!componentRoot && vdom.component)) {
         // 没有原dom或者原dom与vnode里的不同，新建一个
         out = createNode(vnodeName, isSvgMode);
         const newVDom: IVDom = {
@@ -196,7 +196,7 @@ function idiff(
         vdom = newVDom;
         vdom.normalizedNodeName = vnodeName;
     }
-    const fc = out.firstChild;
+    const fc = out && out.firstChild;
     // 取出上次存放的props
     let props = vdom.props;
     // 获取虚拟的子节点
@@ -206,9 +206,11 @@ function idiff(
         vdom.props = props = {};
         // 把dom中的attributes也就是我们常见的setAttribute的属性，取出
         // 据说ie6-7的property也在attributes，就是style，id，class这种
-        for (let a = out.attributes, i = a.length; i-- ; ) {
-            const attr = a[i];
-            props[attr.name] = attr.value;
+        if (out && out.attributes) {
+            for (let a = out.attributes, i = a.length; i-- ; ) {
+                const attr = a[i];
+                props[attr.name] = attr.value;
+            }
         }
     }
 

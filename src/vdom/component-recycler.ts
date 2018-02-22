@@ -47,7 +47,7 @@ export function createComponent(
     if (Ctor.prototype && Ctor.prototype.render) {
         // if (newContext) {
         inst = new Ctor(props, context, newContext);
-        Component.call(inst, props, context);
+        // Component.call(inst, props, context);
     } else {
         // 一个方法
         inst = new Component(props, context);
