@@ -185,7 +185,7 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
         //
         let inst: Component<IKeyValue, IKeyValue> | undefined;
         if (component.getChildContext) {
-            context = extend(context, component.getChildContext());
+            context = extend({}, context, component.getChildContext());
         }
         // 取出VNode的nodeName
         const childComponent = rendered && typeof rendered === "object" && rendered.nodeName;

@@ -35,7 +35,6 @@ export interface IBaseVNode {
 export interface IReactContext<T> extends IBaseVNode {
     calculateChangedBits: ((a: T, b: T) => number) | null;
     defaultValue: T;
-    currentValue: T;
     changedBits: number;
     Provider: IReactProvider<T>;
     Consumer: IReactContext<T>;
