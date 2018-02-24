@@ -1,3 +1,39 @@
+<a name="1.4.0"></a>
+# [1.4.0](https://github.com/zeromake/zreact/compare/v1.3.0...v1.4.0) (2018-02-24)
+
+
+### Bug Fixes
+
+* context ([e7090e9](https://github.com/zeromake/zreact/commit/e7090e9))
+* context support react 16.3-alpha.0 ([8316a76](https://github.com/zeromake/zreact/commit/8316a76))
+* preact bug ([2d977ef](https://github.com/zeromake/zreact/commit/2d977ef))
+* preact bug ([d33c554](https://github.com/zeromake/zreact/commit/d33c554))
+
+
+### Features
+
+* add context ([dc29e67](https://github.com/zeromake/zreact/commit/dc29e67))
+* devtools void Component support ([20319f4](https://github.com/zeromake/zreact/commit/20319f4))
+* props children change to react ([6bb9bcc](https://github.com/zeromake/zreact/commit/6bb9bcc))
+* react 16 context api update ([c22f811](https://github.com/zeromake/zreact/commit/c22f811))
+
+
+
+<a name="1.3.0"></a>
+# [1.3.0](https://github.com/zeromake/zreact/compare/v1.2.1...v1.3.0) (2018-02-09)
+
+
+### Bug Fixes
+
+* typescript key is number ([6cb8edf](https://github.com/zeromake/zreact/commit/6cb8edf))
+
+
+### Features
+
+* add react 16.3 createRef ([3befb77](https://github.com/zeromake/zreact/commit/3befb77))
+
+
+
 <a name="1.2.1"></a>
 ## [1.2.1](https://github.com/zeromake/zreact/compare/v1.2.0...v1.2.1) (2018-02-06)
 
