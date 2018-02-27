@@ -48,3 +48,12 @@ export function isArray(obj: any): boolean {
     }
     return toString.call(obj) === "[object Array]";
 }
+
+/**
+ * 判断是否为Text节点
+ * @param node
+ */
+export function isTextNode(node: Text | any): boolean {
+    return node && node.nodeType === 3;
+    // return node.splitText !== undefined;
+}

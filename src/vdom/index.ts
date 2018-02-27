@@ -1,8 +1,7 @@
 import { VNode } from "../vnode";
 import { Component } from "../component";
-import { isTextNode } from "./utils";
 // import { ATTR_KEY } from "../constants";
-import { extend } from "../util";
+import { extend, isTextNode } from "../util";
 import { IKeyValue, IRefObject, ComponentContext, IBaseProps, childType } from "../types";
 import { setVDom } from "../find";
 

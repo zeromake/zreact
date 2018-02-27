@@ -15,11 +15,10 @@ import {
     removeNode,
     getPreviousSibling,
     getLastChild,
-    isTextNode,
     setRef,
 } from "../dom/index";
 import { findVDom, setVDom, findVoidNode, setVoidNode } from "../find";
-import { innerHTML , isArray, REACT_CONTEXT_TYPE, REACT_PROVIDER_TYPE } from "../util";
+import { innerHTML , isArray, REACT_CONTEXT_TYPE, REACT_PROVIDER_TYPE, isTextNode } from "../util";
 // import { buildConsumer, buildProvider } from "./context";
 
 export const mounts: any[] = [];
