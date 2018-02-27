@@ -1,14 +1,13 @@
 import options from "../options";
-import { enqueueRender } from "../render-queue";
-import { Component } from "../component";
+import { Component, createComponent, collectComponent } from "../component";
 import { VNode } from "../vnode";
-import { createComponent, collectComponent } from "./component-recycler";
-import { getNodeProps, setRef } from "./index";
-import { removeNode } from "../dom/index";
-import { extend } from "../util";
-import { IKeyValue, childType, IReactContext, IReactProvider } from "../types";
+// import {  } from "./component-recycler";
+import { getNodeProps } from "./index";
+import { removeNode, setRef } from "../dom/index";
+import { extend, defer } from "../util";
+import { IKeyValue, childType, IReactContext, IReactProvider, IBaseProps } from "../types";
 import { IVDom } from "./index";
-import { findVDom, setVDom, findVoidNode, setVoidNode } from "../find";
+import { findVDom, setVDom } from "../find";
 import {
     ASYNC_RENDER,
     // ATTR_KEY,
@@ -136,7 +135,7 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
     // 略过dom更新标记
     let skip = false;
     let cvdom: IVDom | undefined;
-    if (isUpdate) {
+    if (isUpdate && !component.isFunctionComponent) {
         // 有dom元素在组件上说明是更新操作.
         // 把组件上的props，state，context都返回到更新前
         component.props = previousProps;
@@ -247,6 +246,14 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
                     // const b: any = cbase;
                     // b._component = undefined;
                 }
+                let parentNode = null;
+                if (initialVDom) {
+                    if (!initialVDom.base) {
+                        parentNode = initialVDom.parent;
+                    } else {
+                        parentNode = initialVDom.base && initialVDom.base.parentNode;
+                    }
+                }
                 // 渲染原生组件
                 vdom = diff(
                     // 原dom
@@ -257,7 +264,7 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
                     // 父级或者该原生组件，原dom不存在说明必须触发生命周期
                     mountALL || !isUpdate,
                     // 把组件挂载到缓存dom的父级
-                    initialVDom && initialVDom.base && initialVDom.base.parentNode,
+                    parentNode,
                     // 以原生组件这里执行说明是自定义组件的第一个原生组件
                     true,
                 );
@@ -267,14 +274,29 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
         if (initialVDom && vdom !== initialVDom && inst !== initialChildComponent) {
             // 存在缓存dom，现dom和缓存dom不相同且新建过自定义子组件
             // 获取当前组件缓存dom的父级dom
-            const baseParent = initialVDom.base && initialVDom.base.parentNode;
+            let baseParent = initialVDom.parent;
+            if (initialVDom.base) {
+                baseParent = initialVDom.base && initialVDom.base.parentNode;
+            }
             if (vdom && vdom.base && baseParent && vdom.base !== baseParent) {
-                // 替换到新dom
-                baseParent.replaceChild(vdom.base, initialVDom.base as Element);
-                if (!toUnmount) {
-                    // 没有
-                    initialVDom.component = undefined;
-                    recollectNodeTree(initialVDom, false);
+                if (vdom.base) {
+                    // 替换到新dom
+                    if (initialVDom.base) {
+                        baseParent.replaceChild(vdom.base, initialVDom.base as Element);
+                    } else {
+                        baseParent.appendChild(vdom.base);
+                    }
+                    if (!toUnmount) {
+                        // 没有
+                        initialVDom.component = undefined;
+                        recollectNodeTree(initialVDom, false);
+                    }
+                } else if (initialVDom.base) {
+                    if (!toUnmount) {
+                        // 没有
+                        initialVDom.component = undefined;
+                        recollectNodeTree(initialVDom, false);
+                    }
                 }
             }
         }
@@ -440,4 +462,39 @@ export function unmountComponent(component: Component<any, any>) {
     }
     // 解除外部对组件实例的索引
     setRef(component._ref, null);
+}
+
+let items: Array<Component<IBaseProps, IKeyValue>> = [];
+
+/**
+ * 根据Component队列更新dom。
+ * 可以setState后直接执行这个方法强制同步更新dom
+ */
+export function rerender() {
+    let p: Component<IBaseProps, IKeyValue> | undefined;
+    const list = items;
+    items = [];
+    while (p = list.pop()) {
+        if (p._dirty) {
+            // 防止多次render。
+            renderComponent(p);
+        }
+    }
+}
+
+/**
+ * 把Component放入队列中等待更新
+ * @param component 组件
+ */
+export function enqueueRender(component: Component<any, any>) {
+    if (!component._dirty) {
+        // 防止多次render
+        component._dirty = true;
+        const len = items.push(component);
+        if (len === 1) {
+            // 在第一次时添加一个异步render，保证同步代码执行完只有一个异步render。
+            const deferFun = options.debounceRendering || defer;
+            deferFun(rerender);
+        }
+    }
 }

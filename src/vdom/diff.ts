@@ -4,7 +4,7 @@ import { isSameNodeType, isNamedNode } from "./index";
 import { VNode } from "../vnode";
 import { Component } from "../component";
 import { IKeyValue, childType, IBaseVNode, IReactContext, IReactProvider } from "../types";
-import { IVDom, buildVDom, setRef } from "./index";
+import { IVDom, buildVDom } from "./index";
 import {
     buildComponentFromVNode,
     unmountComponent,
@@ -16,6 +16,7 @@ import {
     getPreviousSibling,
     getLastChild,
     isTextNode,
+    setRef,
 } from "../dom/index";
 import { findVDom, setVDom, findVoidNode, setVoidNode } from "../find";
 import { innerHTML , isArray, REACT_CONTEXT_TYPE, REACT_PROVIDER_TYPE } from "../util";
@@ -25,9 +26,12 @@ export const mounts: any[] = [];
 
 export let diffLevel = 0;
 
-const VOID_NODE: IVDom = {
-    base: null,
-};
+function buildVoidNode() {
+    return {
+        base: null,
+        props: true,
+    };
+}
 
 let isSvgMode = false;
 
@@ -85,12 +89,17 @@ export function diff(
         mountAll,
         componentRoot,
     );
+    if (parent) {
     // 如果有父dom直接appendChild
-    if (parent && ret.base && ret.base.parentNode !== parent) {
-        parent.appendChild(ret.base);
-    }
-    if (parent && !ret.base && ret.component) {
-        setVoidNode(parent, {0: ret});
+        ret.parent = parent;
+        if (ret.base && ret.base.parentNode !== parent) {
+            parent.appendChild(ret.base);
+        }
+        if (!ret.base) {
+            if (!findVoidNode(parent)) {
+                setVoidNode(parent, {0: ret});
+            }
+        }
     }
     if (!--diffLevel) {
         // diff调用递归层为0,说明已经全部diff完毕
@@ -121,17 +130,24 @@ function idiff(
 ): IVDom {
     const prevSvgMode = isSvgMode;
     let out = vdom && vdom.base;
-
+    const childHandle = vdom && vdom.childHandle;
     if (vnode == null || typeof vnode === "boolean") {
         // 去除空，布尔值转为空字符串
-        return VOID_NODE;
+        const newVDom = buildVoidNode();
+        if (vdom) {
+            recollectNodeTree(vdom, false);
+            if (childHandle) {
+                childHandle.replaceChild(newVDom);
+            }
+        }
+        return newVDom;
     } else if (typeof vnode === "string" || typeof vnode === "number") {
         // 文本节点处理
         if (
             vdom
             && vdom.base
             && isTextNode(vdom.base)
-            && vdom.base.parentNode
+            && vdom.parent
             && (!vdom.component || componentRoot)
         ) {
             // 原dom就是文本节点，更新文本内容
@@ -150,8 +166,13 @@ function idiff(
             }
             if (vdom) {
                 // 如果有旧dom，就替换并卸载旧的。
-                if (vdom.base && vdom.base.parentNode) {
-                    vdom.base.parentNode.replaceChild(dom, vdom.base);
+                if (vdom.base && vdom.parent) {
+                    vdom.parent.replaceChild(dom, vdom.base);
+                    if (childHandle) {
+                        childHandle.replaceChild(newVDom);
+                    }
+                } else if (childHandle) {
+                    childHandle.insertChild(newVDom);
                 }
                 recollectNodeTree(vdom, true);
             }
@@ -189,6 +210,11 @@ function idiff(
                 if (vdom.base.parentNode) {
                     vdom.base.parentNode.replaceChild(out, vdom.base);
                 }
+                if (childHandle) {
+                    childHandle.replaceChild(newVDom);
+                }
+            } else if (childHandle) {
+                childHandle.insertChild(newVDom);
             }
             // 卸载旧dom 或者空白dom
             recollectNodeTree(vdom, true);
@@ -250,6 +276,157 @@ function idiff(
     isSvgMode = prevSvgMode;
     return vdom;
 }
+interface ICacheChildren {
+    keyed: {[name: string]: IVDom| undefined};
+    children: Array<IVDom|undefined>;
+    vOriginalChildren: Node[];
+    findCache(vchild: childType): IVDom| null | undefined;
+    clearCache(): void;
+    findChild(index: number): Node | undefined;
+}
+
+/**
+ * 获取原有缓存dom
+ * @param parentNode 父节点
+ * @param vlen 虚拟dom数
+ * @param isHydrating 是否已渲染
+ */
+function cacheChildren(parentNode: Element | Node | null, vlen: number, isHydrating: boolean): ICacheChildren {
+    const voidNodes: {[name: number]: IVDom} = findVoidNode(parentNode);
+    const originalChildren = parentNode && parentNode.childNodes;
+    const keyed: {[name: string]: IVDom | undefined} = {};
+    const children: Array<IVDom | undefined> = [];
+    let len = originalChildren ? originalChildren.length : 0;
+    let voidLen = 0;
+    let keyedLen = 0;
+    let childrenLen = 0;
+    if (voidNodes) {
+        for (const key in voidNodes) {
+            voidLen ++;
+        }
+    }
+    const vOriginalChildren: Node[] = [];
+    let lastIndex: number = -1;
+    if (len > 0) {
+        let offset = 0;
+        len += voidLen;
+        for (let i = 0; i + offset < len; i++) {
+            let pvdom: IVDom | undefined;
+            let pchild;
+            if (voidLen && voidNodes && (i + offset) in voidNodes) {
+                pvdom = voidNodes[i + offset];
+                offset ++;
+                i --;
+                pchild = null;
+            } else {
+                pchild = (originalChildren as NodeList)[i];
+                if (pchild) {
+                    let h: number = i + offset;
+                    while (h > lastIndex) {
+                        vOriginalChildren[h] = pchild;
+                        h --;
+                    }
+                    lastIndex = i + offset;
+                }
+                pvdom = pchild && findVDom(pchild);
+            }
+            const props = pvdom && pvdom.props;
+            let key: string | undefined | number;
+            if (pvdom && vlen > 0 && props) {
+                if (pvdom.component) {
+                    key = pvdom.component._key;
+                } else if (typeof props === "object") {
+                    key = props.key;
+                }
+            }
+            // const key = pvdom && vlen && props ? pvdom.component ? pvdom.component._key : typeof props === "object" && props.key : null;
+            if (key != null) {
+                keyedLen++;
+                keyed[key] = pvdom as IVDom;
+            } else if (
+                props
+                || (
+                   pchild && isTextNode(pchild)
+                    ? (isHydrating ? pchild.nodeValue && pchild.nodeValue.trim() : true)
+                    : isHydrating
+                )
+                ) {
+                childrenLen ++;
+                children.push(pvdom as IVDom || buildVDom(pchild as any));
+            } else if (!pchild && pvdom && pvdom.component) {
+                childrenLen ++;
+                children.push(pvdom);
+            }
+        }
+    } else if (voidLen > 0) {
+        for (const key in voidNodes) {
+            const vdom = voidNodes[key];
+            childrenLen ++;
+            children[key] = vdom;
+        }
+    }
+    (keyed as any).length = keyedLen;
+    let min = 0;
+    let j = 0;
+    const findCache = function findCache_(vchild: childType): IVDom| null | undefined {
+        let child: IVDom| null | undefined = null;
+        const key = vchild && typeof vchild === "object" && vchild.key;
+        if (key != null && typeof key !== "boolean") {
+            if (keyedLen) {
+                const temp = keyed[key];
+                if (temp !== undefined) {
+                    child = temp;
+                    keyed[key] = undefined;
+                    keyedLen--;
+                }
+            }
+        } else if (!child && min < childrenLen) {
+            for (j = min; j < childrenLen; j++) {
+                const c = children[j];
+                if (c !== undefined && isSameNodeType(c, vchild, isHydrating)) {
+                    child = c;
+                    children[j] = undefined;
+                    if (j === childrenLen - 1) {
+                        childrenLen--;
+                    }
+                    if (j === min) {
+                        min++;
+                    }
+                    break;
+                }
+            }
+        }
+        return child;
+    };
+    const clearCache = function clearCache_() {
+        if (keyedLen) {
+            for (const i in keyed) {
+                const keyItem = keyed[i];
+                if (keyItem != null && i !== "length") {
+                    recollectNodeTree(keyItem, false);
+                }
+            }
+        }
+        // remove orphaned unkeyed children:
+        while (min <= childrenLen) {
+            const child = children[childrenLen--];
+            if (child !== undefined) {
+                recollectNodeTree(child, false);
+            }
+        }
+    };
+    const findChild = function findChild_(index: number): Node|undefined {
+        return vOriginalChildren[index];
+    };
+    return {
+        keyed,
+        children,
+        vOriginalChildren,
+        findCache,
+        clearCache,
+        findChild,
+    };
+}
 
 /**
  * 比较子元素进行更新
@@ -267,14 +444,8 @@ function diffChildren(
     isHydrating: boolean,
 ) {
     // 取出上次的子元素
-    const originalChildren = vdom.base && vdom.base.childNodes;
-    const children: Array<IVDom|undefined> = [];
-    const keyed: {
-        [name: string]: IVDom | undefined;
-    } = {};
-    let keyedLen = 0;
-    let min = 0;
-    let childrenLen = 0;
+    const parentNode = vdom.base;
+    // let min = 0;
     let vlen = 0;
     if (vchildren) {
         if (isArray(vchildren)) {
@@ -284,149 +455,75 @@ function diffChildren(
             vlen = 1;
         }
     }
-    // const vlen = vchildren ? isArray(vchildren) ? (vchildren as childType[]).length : 1 : 0;
-    let len = originalChildren ? originalChildren.length : 0;
-    let j;
-    let c;
+    // let j;
+    // let c;
     let f;
     let vchild: childType;
     let child: IVDom | null | undefined;
-    const voidNodes: {[name: number]: IVDom} = findVoidNode(vdom.base);
-    if (vdom.base && voidNodes) {
-        setVoidNode(vdom.base, null);
-    }
-    let voidLen = -1;
-    if (voidNodes) {
-        for (const key in voidNodes) {
-            const keynum = +key;
-            voidLen = voidLen < keynum ? keynum : voidLen;
-        }
-        if (voidLen > -1) {
-            voidLen += 1;
-        }
-    }
-    if (len > 0) {
-        let offset = 0;
-        len = Math.max(len, voidLen);
-        for (let i = 0; i < len; i++) {
-            let pvdom: IVDom | undefined;
-            let pchild;
-            if (voidNodes && (i + offset) in voidNodes) {
-                pvdom = voidNodes[i + offset];
-                offset ++;
-                i --;
-                pchild = null;
-            } else {
-                pchild = (originalChildren as NodeList)[i];
-                pvdom = pchild && findVDom(pchild);
-            }
-            const props = pvdom && pvdom.props;
-            let key: string | undefined | number;
-            if (pvdom && vlen > 0 && props) {
-                if (pvdom.component) {
-                    key = pvdom.component._key;
-                } else if (typeof props === "object") {
-                    key = props.key;
-                }
-            }
-            // const key = pvdom && vlen && props ? pvdom.component ? pvdom.component._key : typeof props === "object" && props.key : null;
-            if (key != null) {
-                keyedLen++;
-                keyed[key] = pvdom;
-            } else if (
-                props
-                || (
-                   pchild && isTextNode(pchild)
-                    ? (isHydrating ? pchild.nodeValue && pchild.nodeValue.trim() : true)
-                    : isHydrating
-                )
-                ) {
-                children[childrenLen++] = pvdom || buildVDom(pchild as any);
-            } else if (!pchild && pvdom && pvdom.component) {
-                children[childrenLen++] = pvdom;
-            }
-        }
-    } else if (voidNodes) {
-        for (const key in voidNodes) {
-            children[key] = voidNodes[key];
-        }
+    // 获取缓存
+    const { vOriginalChildren, findCache, clearCache } = cacheChildren(parentNode, vlen, isHydrating);
+    // let keyedLen = (keyed as any).length;
+    // let childrenLen = children.length;
+    const voidNodes = { } as any;
+    if (parentNode) {
+        setVoidNode(parentNode, voidNodes);
     }
     if (vlen !== 0) {
         let offset = 0;
         for (let i = 0; i < vlen; i++) {
             vchild = (vchildren as childType[])[i];
-            child = null;
-            const key = vchild && typeof vchild === "object" && vchild.key;
-            if (key != null && typeof key !== "boolean") {
-                if (keyedLen && keyed[key] !== undefined) {
-                    child = keyed[key];
-                    keyed[key] = undefined;
-                    keyedLen--;
-                }
-            } else if (!child && min < childrenLen) {
-                for (j = min; j < childrenLen; j++) {
-                    c = children[j];
-                    if (c !== undefined && isSameNodeType(c, vchild, isHydrating)) {
-                        child = c;
-                        children[j] = undefined;
-                        if (j === childrenLen - 1) {
-                            childrenLen--;
+            child = findCache(vchild);
+            if (child) {
+                child.childHandle = {
+                    replaceChild(pvdom: IVDom) {
+                        if (pvdom.base) {
+                            vOriginalChildren[i + offset] = pvdom.base;
+                        } else {
+                            offset ++;
                         }
-                        if (j === min) {
-                            min++;
+                    },
+                    insertChild(pvdom: IVDom) {
+                        const old = vOriginalChildren[i + offset];
+                        if (old && parentNode && pvdom.base) {
+                            parentNode.insertBefore(pvdom.base, old);
+                            vOriginalChildren[i + offset] = pvdom.base;
+                            // offset --;
                         }
-                        break;
-                    }
-                }
+                    },
+                };
             }
             // morph the matched/found/created DOM child to match vchild (deep)
             const pchild = idiff(child, vchild, context, mountAll, false);
+            if (child && child.childHandle) {
+                delete child.childHandle;
+            }
             // 获取真实
-            f = originalChildren && originalChildren[i + offset];
-            if (pchild.base !== vdom.base && pchild.base !== f) {
-                if (f == null && vdom.base && pchild.base) {
-                    vdom.base.appendChild(pchild.base);
+            f = vOriginalChildren[i + offset];
+            pchild.parent = parentNode;
+            if (!pchild.base) {
+                voidNodes[i] = pchild;
+            }
+            if (pchild.base !== parentNode && pchild.base !== f) {
+                if (f == null && parentNode && pchild.base) {
+                    parentNode.appendChild(pchild.base);
                 } else if (f && pchild.base === f.nextSibling) {
                     // 处理组件卸载生命周期
-                    const fvdom = findVDom(f as any);
-                    if ( fvdom && fvdom.component) {
-                        offset ++;
+                    const fvdom = findVDom(f);
+                    if (fvdom) {
+                        recollectNodeTree(fvdom, false);
                     } else {
                         removeNode(f as any);
                     }
+                    offset ++;
                 } else {
-                    if (vdom.base && pchild.base && f) {
-                        vdom.base.insertBefore(pchild.base, f);
+                    if (parentNode && pchild.base && f) {
+                        parentNode.insertBefore(pchild.base, f);
                     }
                 }
             }
-            if (vdom.base && !pchild.base && pchild.component) {
-                let voidNode = findVoidNode(vdom.base);
-                if (!voidNode) {
-                    voidNode = {};
-                    setVoidNode(vdom.base, voidNode);
-                }
-                voidNode[i] = pchild;
-            }
         }
     }
-    // remove unused keyed children:
-    if (keyedLen) {
-        for (const i in keyed) {
-            const keyItem = keyed[i];
-            if (keyItem != null) {
-                recollectNodeTree(keyItem, false);
-            }
-        }
-    }
-
-    // remove orphaned unkeyed children:
-    while (min <= childrenLen) {
-        child = children[childrenLen--];
-        if (child !== undefined) {
-            recollectNodeTree(child, false);
-        }
-    }
+    clearCache();
 }
 
 /** 递归回收(或者只是卸载一个)
@@ -457,6 +554,10 @@ export function recollectNodeTree(node: IVDom, unmountOnly: boolean) {
 
 export function removeChildren(node: IVDom) {
     // 触发子元素的生命周期
+    // if (typeof node !== "object") {
+    //     return;
+    // }
+    node.parent = undefined;
     const voidNode = findVoidNode(node.base);
     if (voidNode) {
         for (const key in voidNode) {

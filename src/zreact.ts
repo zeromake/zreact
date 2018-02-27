@@ -5,7 +5,7 @@ import { PureComponent } from "./pure-component";
 import { render } from "./render";
 import options from "./options";
 import { createClass } from "./create-class";
-import { rerender } from "./render-queue";
+// import {  } from "./rerender";
 import { IKeyValue } from "./types";
 import { IVDom } from "./vdom/index";
 import { VNode } from "./vnode";
@@ -18,7 +18,7 @@ import {
     findVoidNode,
 } from "./find";
 import Children from "./children";
-import { unmountComponent } from "./vdom/component";
+import { unmountComponent, rerender } from "./vdom/component";
 
 declare const VERSION_ENV: string;
 const version = VERSION_ENV;

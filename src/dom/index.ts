@@ -1,7 +1,7 @@
 import { IS_NON_DIMENSIONAL } from "../constants";
-import { IVDom, setRef } from "../vdom/index";
+import { IVDom } from "../vdom/index";
 import options from "../options";
-import { IKeyValue } from "../types";
+import { IKeyValue, ComponentContext, IRefObject } from "../types";
 import { Component } from "../component";
 import { innerHTML } from "../util";
 
@@ -262,5 +262,20 @@ function removeEventListener(vdom: IVDom, name: string, useCapture: boolean) {
         node.removeEventListener(name, eventProxyFun, useCapture);
     } else {
         node.detachEvent("on" + name, eventProxyFun);
+    }
+}
+
+/**
+ * 统一设置ref
+ */
+export function setRef(ref: ((c: ComponentContext | null) => void) | IRefObject | undefined, context: ComponentContext | null): void {
+    if (ref != null) {
+        if (typeof ref === "function") {
+            ref(context);
+        } else if (typeof ref === "object") {
+            ref.value = context;
+        } else {
+            console.warn("not support ref by: ", ref);
+        }
     }
 }

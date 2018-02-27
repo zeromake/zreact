@@ -153,23 +153,17 @@ export function getInitDevTools(opt: typeof options, findDOMNode: typeof IfindDO
         let offset = 0;
         const voidNode = node && (node as any)._voidNode;
         let len = childNodes.length;
-        let voidLen = -1;
+        let voidLen = 0;
         if (voidNode) {
             for (const key in voidNode) {
-                const keynum = +key;
-                voidLen = voidLen < keynum ? keynum : voidLen;
-            }
-            if (voidLen > -1) {
-                voidLen += 1;
+                voidLen ++;
             }
         }
         if (len > 0) {
-            if (voidLen > -1 && voidLen > len) {
-                len = voidLen;
-            }
-            for (let i = 0; i < len; i++) {
+            len += voidLen;
+            for (let i = 0; i + offset < len; i++) {
                 let component: IReactComponent | undefined;
-                if (voidNode && (i + offset) in voidNode) {
+                if (voidLen > 0 && voidNode && (i + offset) in voidNode) {
                     component = updateReactComponent(voidNode[(i + offset)].component);
                     offset ++;
                     i --;
@@ -186,7 +180,7 @@ export function getInitDevTools(opt: typeof options, findDOMNode: typeof IfindDO
                     children.push(component);
                 }
             }
-        } else if (voidNode) {
+        } else if (voidNode > 0) {
             for (const key in voidNode) {
                 let component: IReactComponent;
                 component = updateReactComponent(voidNode[key].component);
@@ -238,8 +232,12 @@ export function getInitDevTools(opt: typeof options, findDOMNode: typeof IfindDO
     function findRoots(node: Element, roots: IKeyValue) {
         Array.prototype.forEach.call(node.childNodes, function _(child: any) {
             const vdom = findVDom(child) as IVDom;
-            if (vdom && vdom.component) {
-                roots[nextRootKey(roots)] = updateReactComponent(vdom.component);
+            if (vdom) {
+                if (vdom.component) {
+                    roots[nextRootKey(roots)] = updateReactComponent(vdom.component);
+                } else {
+                    roots[nextRootKey(roots)] = updateReactComponent(vdom);
+                }
             } else {
                 findRoots(child, roots);
             }

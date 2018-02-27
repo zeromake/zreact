@@ -1,6 +1,6 @@
 import { VNode } from "../vnode";
 import { Component } from "../component";
-import { isTextNode } from "../dom/index";
+import { isTextNode } from "./utils";
 // import { ATTR_KEY } from "../constants";
 import { extend } from "../util";
 import { IKeyValue, IRefObject, ComponentContext, IBaseProps, childType } from "../types";
@@ -101,6 +101,12 @@ export interface IVDom {
      * component类(原型)
      */
     componentConstructor?: any;
+
+    parent?: Node|null;
+    childHandle?: {
+        replaceChild(pvdom: IVDom): void;
+        insertChild(pvdom: IVDom): void;
+    };
     // constructor(base: Element| Text | Node) {
     //     this.base = base;
     // }
@@ -125,20 +131,5 @@ export function buildVDom(base?: Element|Text|Node): IVDom | undefined {
         } catch (e) {
         }
         return vdom;
-    }
-}
-
-/**
- * 统一设置ref
- */
-export function setRef(ref: ((c: ComponentContext | null) => void) | IRefObject | undefined, context: ComponentContext | null): void {
-    if (ref != null) {
-        if (typeof ref === "function") {
-            ref(context);
-        } else if (typeof ref === "object") {
-            ref.value = context;
-        } else {
-            console.warn("not support ref by: ", ref);
-        }
     }
 }

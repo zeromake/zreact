@@ -16,133 +16,30 @@
         var h = zreact.h;
         var render = zreact.render;
         var Component = zreact.Component;
-
-        // class App extends Component {
-        //     componentDidMount() { console.log('componentDidMount') }
-        //     componentWillUnmount() { console.log('componentWillUnmount') }
-        //     render() { return h('div', {}, '[component]') }
-        // }
-        // const app = document.getElementById('app')
-        // render(h(App), app);
-        // // 1. This is not firing componentWillUnmount() 
-        // render(h('div', {}, '[div]'), app, app.lastChild);
-        // // 2. Neither this
-        // render(h('div', {}, h('div', {}, '[another diff]')), app, app.lastChild);
-
-        const ThemeContext = zreact.createContext({
-            background: 'red',
-            color: 'white'
-        });
-        const ContextMap = {
-            1: { background: 'red', color: 'white' },
-            2: { background: 'green', color: 'white' }
+        function Text(props) {
+            return props.value
         }
         class App extends Component {
-            constructor() {
-                super()
-                this.state = {
-                    map: 1
-                }
-            }
-            select() {
-                // console.log(JSON.stringify(ThemeContext.currentValue), ThemeContext.changedBits)
-                this.setState({
-                    map: this.state.map === 1 ? 2: 1
-                })
-            }
-            render () {
-                return (
-                    h("div", null,
-                        h(ThemeContext.Provider, {value: ContextMap[this.state.map === 1 ? 2: 1]},
-                            h(Header, {map: this.state.map})
-                        ),
-                        h(ThemeContext.Provider, {value: ContextMap[this.state.map]},
-                            h(Header, {map: this.state.map === 1 ? 2: 1})
-                        ),
-                        h("button", {onClick: () => this.select()}, "测试")
-                    )
-                    
-                );
-            }
-        }
-        class Header extends Component {
-            shouldComponentUpdate() {
-                return false
-            }
-            render () {
-                return h(Title, this.props, "Hello React Context API")
-            }
-        }
-        class Title extends Component {
             constructor(p, c) {
                 super(p, c)
                 this.state = {
-                    isShow: true,
+                    1: null,
+                    2: "null2",
+                    3: null
+                };
+            }
+            render() {
+                const TextChild = []
+                const ButtonChild = []
+                for (const key in this.state) {
+                    const val = this.state[key]
+                    TextChild.push(h(Text, {value: val, key}))
+                    ButtonChild.push(h("button", {key, "onClick": () => this.setState({[key]: val? null : "null" + key})}, "button"+ key))
                 }
-                this.select = this.select.bind(this)
-            }
-            select() {
-                this.setState({
-                    isShow: !this.state.isShow
-                })
-            }
-            render () {
-                return h("div", null, this.state.isShow ? h(ThemeContext.Consumer, {key: 1},
-                    context => h(this.props.map === 1 ? "h1": "h2", {style: {background: context.background, color: context.color}},
-                        this.props.children
-                    )
-                ): null, h("button", {onClick: () => this.select(), key: 2}, "切换"))
-                // h(ThemeContext.Consumer, null,
-                //     context => h("h2", {style: {background: context.background, color: context.color}},
-                //         this.props.children
-                //     )
-                // ),
+                return h("div", null, h("div", null, TextChild), h("div", null, ButtonChild))
             }
         }
-        render(
-            h(App), 
-            document.getElementById('app')
-        );
-        // class Foo extends Component {
-        //     componentDidMount() {
-        //         console.log("Foo componentDidMount")
-        //     }
-        //     componentWillUnmount() {
-        //         console.log("Foo componentWillUnmount")
-        //     }
-        //     render() {
-        //         return h("h1", null, "测试")
-        //     }
-        // }
-        // class Bar extends Component {
-        //     componentDidMount() {
-        //         console.log("Bar componentDidMount")
-        //     }
-        //     componentWillUnmount() {
-        //         console.log("Bar componentWillUnmount")
-        //     }
-        // }
-        // class App extends Component {
-        //     constructor() {
-        //         super()
-        //         this.state = {
-        //             child: Foo
-        //         }
-        //         this.test = this.test.bind(this)
-        //     }
-        //     test() {
-        //         this.setState({
-        //             child: this.state.child === Bar ? Foo : Bar
-        //         });
-        //     }
-        //     render() {
-        //         return h("div", null, h('button', {onClick: this.test}, "切换"), h(this.state.child))
-        //     }
-        // }
-        // var dom = render(h(App), document.getElementById('app'))
-        // render(h("div"), document.getElementById('app'), dom)
-        // render(h(Bar), document.getElementById('app'))
-
+        render(h(App), document.getElementById("app"))
     </script>
     <script src="../devtools-run.js"></script>
     <!-- <script src="../node_modules/preact/devtools.js"></script> -->
