@@ -1,3 +1,14 @@
+<a name="1.4.1"></a>
+## [1.4.1](https://github.com/zeromake/zreact/compare/v1.4.0...v1.4.1) (2018-02-27)
+
+
+### Bug Fixes
+
+* move isTextNode on utils ([7da9746](https://github.com/zeromake/zreact/commit/7da9746))
+* void node ([0e70ef3](https://github.com/zeromake/zreact/commit/0e70ef3))
+
+
+
 <a name="1.4.0"></a>
 # [1.4.0](https://github.com/zeromake/zreact/compare/v1.3.0...v1.4.0) (2018-02-24)
 
