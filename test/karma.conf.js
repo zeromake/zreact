@@ -153,11 +153,12 @@ module.exports = function(config) {
 			plugins: [
 				new webpack.DefinePlugin({
 					coverage: coverage,
-					NODE_ENV: JSON.stringify(process.env.NODE_ENV || ''),
+					// NODE_ENV: JSON.stringify(process.env.NODE_ENV || ''),
 					ENABLE_PERFORMANCE: performance,
 					DISABLE_FLAKEY: !!String(process.env.FLAKEY).match(/^(0|false)$/gi)
 				})
-			]
+			],
+			mode: process.env.NODE_ENV || "development"
 		},
 
 		webpackMiddleware: {

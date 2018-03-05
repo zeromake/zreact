@@ -109,7 +109,8 @@ export function createElement(this: Component<IKeyValue, IKeyValue> | undefined 
         children = children[0];
     }
     let context: IReactContext<any> | IReactProvider<any> | null = null;
-    if (nodeName === REACT_FRAGMENT_TYPE) {
+    if (nodeName == null) {
+    } else if (nodeName === REACT_FRAGMENT_TYPE) {
         nodeName = Fragment;
     } else if (typeof nodeName === "object") {
         if (nodeName.$$typeof === REACT_CONTEXT_TYPE) {
