@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
-    <script src="https://cdn.bootcss.com/react/16.3.0-alpha.0/umd/react.development.js"></script>
-    <script src="https://cdn.bootcss.com/react-dom/16.3.0-alpha.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.bootcss.com/react/16.4.0-alpha.0911da3/umd/react.development.js"></script>
+    <script src="https://cdn.bootcss.com/react-dom/16.4.0-alpha.0911da3/umd/react-dom.development.js"></script>
 </head>
 <body>
     <div id="app"></div>
@@ -14,91 +14,59 @@
         const h = React.createElement
         const render = ReactDOM.render
         const Component = React.Component
-        const ThemeContext = React.createContext({
-            background: 'red',
-            color: 'white'
-        });
-        const ContextMap = {
-            1: { background: 'red', color: 'white' },
-            2: { background: 'green', color: 'white' }
+        class Test extends Component {
+            // static getDerivedStateFromProps(nextProps, previousState) {
+            //     console.log(nextProps, previousState)
+            //     return null
+            // }
+            constructor() {
+                super()
+                this.state = {
+                    count: 1
+                }
+                this.add = this.add.bind(this)
+            }
+            UNSAFE_componentWillReceiveProps(nextProps) {
+                console.log(nextProps)
+            }
+            add() {
+                this.setState(function(state){
+                    return {count: state.count + 1}
+                })
+            }
+            render() {
+                return h(
+                    "div",
+                    null,
+                    h("h2", null, this.props.title),
+                    h("span", null, this.state.count),
+                    h("button", {onClick: this.add}, "add")
+                )
+            }
         }
         class App extends Component {
             constructor() {
                 super()
                 this.state = {
-                    map: 1
+                    title: "",
                 }
+                this.test = this.test.bind(this)
             }
-            select() {
-                console.log(JSON.stringify(ThemeContext.currentValue), ThemeContext.changedBits)
-                this.setState({
-                    map: this.state.map === 1 ? 2: 1
-                }, function() {
-                    console.log(JSON.stringify(ThemeContext.currentValue), ThemeContext.changedBits)
+            test() {
+                this.setState(function(state) {
+                    return {title: state.title === "" ? "props": ""}
                 })
             }
-            render () {
-                return (
-                    h("div", null,
-                        h(ThemeContext.Provider, {value: ContextMap[this.state.map === 1 ? 2: 1]},
-                            h(Header, {map: this.state.map})
-                        ),
-                        h(ThemeContext.Provider, {value: ContextMap[this.state.map]},
-                            h(Header, {map: this.state.map === 1 ? 2: 1})
-                        ),
-                        h("button", {onClick: () => this.select()}, "测试")
-                    )
-                    
-                );
+            render() {
+                return h(
+                    "div",
+                    null,
+                    h(Test, {title: this.state.title}),
+                    h("button", {onClick: this.test}, "test")
+                )
             }
         }
-        class Header extends Component {
-            shouldComponentUpdate() {
-                return false
-            }
-            render () {
-                return h(Title, this.props, "Hello React Context API")
-            }
-        }
-        class Title extends Component {
-            constructor(p, c) {
-                super(p, c)
-                this.state = {
-                    isShow: true,
-                }
-                this.select = this.select.bind(this)
-            }
-            select() {
-                this.setState({
-                    isShow: !this.state.isShow
-                })
-            }
-            render () {
-                return [this.state.isShow ? h(ThemeContext.Consumer, {key: 1},
-                    context => h(this.props.map === 1 ? "h1": "h2", {style: {background: context.background, color: context.color}},
-                        this.props.children
-                    )
-                ): null, h("button", {onClick: () => this.select(), key: 2}, "切换")]
-                // h(ThemeContext.Consumer, null,
-                //     context => h("h2", {style: {background: context.background, color: context.color}},
-                //         this.props.children
-                //     )
-                // ),
-            }
-        }
-        render(
-            h(App), 
-            document.getElementById('app')
-        );
-        // class App extends React.Component {
-        //     render() {
-        //         return h(React.Fragment, null,
-        //             h("div", {key: "1"}, "测试1"),
-        //             h("div", {key: "2"}, "测试2")
-        //         )
-        //     }
-        // }
-        // ReactDOM.render(h(App), document.getElementById("app"))
+        render(h(App), document.getElementById("app"))
     </script>
 </body>
 </html>

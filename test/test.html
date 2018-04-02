@@ -16,27 +16,59 @@
         var h = zreact.h;
         var render = zreact.render;
         var Component = zreact.Component;
-        function Text(props) {
-            return props.value
-        }
-        class App extends Component {
-            constructor(p, c) {
-                super(p, c)
+        class Test extends Component {
+            static getDerivedStateFromProps(nextProps, previousState) {
+                console.log(nextProps, previousState)
+                return null
+            }
+            constructor() {
+                super()
                 this.state = {
-                    1: null,
-                    2: "null2",
-                    3: null
-                };
+                    count: 1
+                }
+                this.add = this.add.bind(this)
+            }
+            // componentWillReceiveProps(nextProps) {
+            //     console.log(nextProps)
+            // }
+            add() {
+                this.setState(function(state){
+                    return {count: state.count + 1}
+                })
             }
             render() {
-                const TextChild = []
-                const ButtonChild = []
-                for (const key in this.state) {
-                    const val = this.state[key]
-                    TextChild.push(h(Text, {value: val, key}))
-                    ButtonChild.push(h("button", {key, "onClick": () => this.setState({[key]: val? null : "null" + key})}, "button"+ key))
+                return h(
+                    "div",
+                    null,
+                    h("h2", null, this.props.title),
+                    h("span", null, this.state.count),
+                    h("button", {onClick: this.add}, "add")
+                )
+            }
+        }
+        function Test1(props) {
+            return h(Test, props)
+        }
+        class App extends Component {
+            constructor() {
+                super()
+                this.state = {
+                    title: "",
                 }
-                return h("div", null, h("div", null, TextChild), h("div", null, ButtonChild))
+                this.test = this.test.bind(this)
+            }
+            test() {
+                this.setState(function(state) {
+                    return {title: state.title === "" ? "props": ""}
+                })
+            }
+            render() {
+                return h(
+                    "div",
+                    null,
+                    h(Test1, {title: this.state.title}),
+                    h("button", {onClick: this.test}, "test")
+                )
             }
         }
         render(h(App), document.getElementById("app"))

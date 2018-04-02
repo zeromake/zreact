@@ -125,7 +125,7 @@ function idiff(
     vnode: childType,
     context: IKeyValue,
     mountAll: boolean,
-    componentRoot?: boolean,
+    componentRoot: boolean,
 ): IVDom {
     const prevSvgMode = isSvgMode;
     let out = vdom && vdom.base;

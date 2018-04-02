@@ -54,6 +54,14 @@ export function setComponentProps(component: Component<IKeyValue, IKeyValue>, pr
         delete props.key;
     }
     const vdom = findVDom(component);
+    const getDerivedStateFromProps = component.constructor && (component.constructor as typeof Component).getDerivedStateFromProps;
+    if (getDerivedStateFromProps) {
+        const oldState = component._prevState || component.state;
+        const newState = getDerivedStateFromProps(props, oldState);
+        if (newState != null) {
+            component.state = extend({}, oldState, newState);
+        }
+    }
     if (!vdom || mountAll) {
         // 如果没有插入到DOM树或正在被render渲染执行钩子
         if (component.componentWillMount) {
@@ -61,7 +69,6 @@ export function setComponentProps(component: Component<IKeyValue, IKeyValue>, pr
             component.componentWillMount();
         }
     } else {
-        const getDerivedStateFromProps = component.constructor && (component.constructor as typeof Component).getDerivedStateFromProps;
         if (!getDerivedStateFromProps && component.componentWillReceiveProps) {
             // 更新的钩子
             console.warn("componentWillReceiveProps is deprecated!");
@@ -115,7 +122,7 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
     // 获取组件props
     const props = component.props;
     // 获取组件state
-    let state = component.state;
+    const state = component.state;
     // 获取组件context
     let context = component.context;
     // 获取组件上一次的props没有取当前
@@ -150,19 +157,10 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
             // shouldComponentUpdate钩子把新的props,state,context作为参数传入
             // 如果shouldComponentUpdate钩子返回false，跳过下面的dom操作。
             skip = true;
-        } else {
-            const getDerivedStateFromProps = component.constructor && (component.constructor as typeof Component).getDerivedStateFromProps;
-            if (getDerivedStateFromProps) {
-                const oldState = component.state || emptyObject;
-                const newState = getDerivedStateFromProps.call(null, props, oldState);
-                if (newState != null) {
-                    state = extend({}, state || oldState, newState);
-                }
-            } else if (component.componentWillUpdate) {
-                // render Component.forceUpdate更新依旧会触发该钩子。
-                console.warn("componentWillUpdate is deprecated!");
-                component.componentWillUpdate(props, state, context);
-            }
+        } else if (component.componentWillUpdate) {
+            // render Component.forceUpdate更新依旧会触发该钩子。
+            console.warn("componentWillUpdate is deprecated!");
+            component.componentWillUpdate(props, state, context);
         }
         // 把组件上的props，state，context都设置到新的
         component.props = props;
@@ -463,21 +461,25 @@ export function unmountComponent(component: Component<any, any>) {
     // 解除外部对组件实例的索引
     setRef(component._ref, null);
 }
+interface IAsyncJob {
+    component: Component<IBaseProps, IKeyValue>;
+    args: any[];
+}
 
-let items: Array<Component<IBaseProps, IKeyValue>> = [];
+let items: IAsyncJob[] = [];
 
 /**
  * 根据Component队列更新dom。
  * 可以setState后直接执行这个方法强制同步更新dom
  */
 export function rerender() {
-    let p: Component<IBaseProps, IKeyValue> | undefined;
+    let p: IAsyncJob | undefined;
     const list = items;
     items = [];
     while (p = list.pop()) {
-        if (p._dirty) {
+        if (p.component._dirty) {
             // 防止多次render。
-            renderComponent(p);
+            renderComponent(p.component, ...p.args);
         }
     }
 }
@@ -486,11 +488,11 @@ export function rerender() {
  * 把Component放入队列中等待更新
  * @param component 组件
  */
-export function enqueueRender(component: Component<any, any>) {
+export function enqueueRender(component: Component<any, any>, ...args: any[]) {
     if (!component._dirty) {
         // 防止多次render
         component._dirty = true;
-        const len = items.push(component);
+        const len = items.push({component, args});
         if (len === 1) {
             // 在第一次时添加一个异步render，保证同步代码执行完只有一个异步render。
             const deferFun = options.debounceRendering || defer;

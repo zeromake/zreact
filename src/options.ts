@@ -23,7 +23,7 @@ const options: {
     /**
      * 自定义异步调度方法，会异步执行传入的方法
      */
-    debounceRendering?: (render: () => void) => void;
+    debounceRendering?: (render: (...args: any[]) => void) => void;
     /**
      * vnode实例创建时的钩子
      */
