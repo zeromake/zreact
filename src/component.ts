@@ -203,12 +203,20 @@ export class Component <PropsType extends IBaseProps, StateType extends IKeyValu
      * @param { StateType } previousState
      * @param { IKeyValue } previousContext
      */
-    public componentDidUpdate?(previousProps: PropsType, previousState: StateType, previousContext: IKeyValue): void;
+    public componentDidUpdate?(previousProps: PropsType, previousState: StateType, snapshot: any, previousContext: IKeyValue): void;
 
     /**
      * 获取上下文，会被传递到所有的子组件
      */
     public getChildContext?(): IKeyValue;
+
+    /**
+     *
+     * @param previousProps
+     * @param previousState
+     * @param previousContext
+     */
+    public getSnapshotBeforeUpdate?(previousProps: PropsType, previousState: StateType, previousContext: IKeyValue): any;
 
     /**
      * 设置state并通过enqueueRender异步更新dom

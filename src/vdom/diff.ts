@@ -231,8 +231,8 @@ function idiff(
         vdom.props = props = {};
         // 把dom中的attributes也就是我们常见的setAttribute的属性，取出
         // 据说ie6-7的property也在attributes，就是style，id，class这种
-        if (out && out.attributes) {
-            for (let a = out.attributes, i = a.length; i-- ; ) {
+        if (out && (out as Element).attributes) {
+            for (let a = (out as Element).attributes, i = a.length; i-- ; ) {
                 const attr = a[i];
                 props[attr.name] = attr.value;
             }

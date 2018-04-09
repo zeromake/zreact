@@ -65,13 +65,13 @@ export function setComponentProps(component: Component<IKeyValue, IKeyValue>, pr
     if (!vdom || mountAll) {
         // 如果没有插入到DOM树或正在被render渲染执行钩子
         if (component.componentWillMount) {
-            console.warn("componentWillMount is deprecated!");
+            // console.warn("componentWillMount is deprecated!");
             component.componentWillMount();
         }
     } else {
         if (!getDerivedStateFromProps && component.componentWillReceiveProps) {
             // 更新的钩子
-            console.warn("componentWillReceiveProps is deprecated!");
+            // console.warn("componentWillReceiveProps is deprecated!");
             component.componentWillReceiveProps(props, context);
         }
     }
@@ -142,6 +142,8 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
     // 略过dom更新标记
     let skip = false;
     let cvdom: IVDom | undefined;
+    let snapshot: any;
+
     if (isUpdate && !component.isFunctionComponent) {
         // 有dom元素在组件上说明是更新操作.
         // 把组件上的props，state，context都返回到更新前
@@ -159,7 +161,7 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
             skip = true;
         } else if (component.componentWillUpdate) {
             // render Component.forceUpdate更新依旧会触发该钩子。
-            console.warn("componentWillUpdate is deprecated!");
+            // console.warn("componentWillUpdate is deprecated!");
             component.componentWillUpdate(props, state, context);
         }
         // 把组件上的props，state，context都设置到新的
@@ -179,7 +181,10 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
         let rendered: childType;
         // 当前组件的render函数返回的VNode
         rendered = component.render(props, state, context);
-        //
+        // getSnapshotBeforeUpdate
+        if (isUpdate && !mountALL && component.getSnapshotBeforeUpdate) {
+            snapshot = component.getSnapshotBeforeUpdate(previousProps, previousProps, previousContext);
+        }
         let inst: Component<IKeyValue, IKeyValue> | undefined;
         if (component.getChildContext) {
             context = extend({}, context, component.getChildContext());
@@ -327,7 +332,7 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
     } else if (!skip) {
         // 没有skip render的话触发component.componentDidUpdate，options.afterUpdate钩子
         if (component.componentDidUpdate) {
-            component.componentDidUpdate(previousProps, previousState, previousContext);
+            component.componentDidUpdate(previousProps, previousState, snapshot, previousContext);
         }
         if (options.afterUpdate) {
             options.afterUpdate(component);
