@@ -1,3 +1,28 @@
+<a name="1.5.0"></a>
+# [1.5.0](https://github.com/zeromake/zreact/compare/v1.4.2...v1.5.0) (2018-04-09)
+
+
+### Features
+
+* add getSnapshotBeforeUpdate life method ([35de329](https://github.com/zeromake/zreact/commit/35de329))
+
+
+
+<a name="1.4.2"></a>
+## [1.4.2](https://github.com/zeromake/zreact/compare/v1.4.1...v1.4.2) (2018-04-02)
+
+
+### Bug Fixes
+
+* getDerivedStateFromProps ([8847533](https://github.com/zeromake/zreact/commit/8847533))
+
+
+### Features
+
+* update test webpack4 ([6c0d967](https://github.com/zeromake/zreact/commit/6c0d967))
+
+
+
 <a name="1.4.1"></a>
 ## [1.4.1](https://github.com/zeromake/zreact/compare/v1.4.0...v1.4.1) (2018-02-27)
 
