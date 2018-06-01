@@ -9,6 +9,8 @@ module.exports = {
     number: check,
     object: check,
     string: check,
+    symbol: check,
+
     any: check,
     arrayOf: check,
     element: check,
@@ -18,4 +20,5 @@ module.exports = {
     oneOf: check,
     oneOfType: check,
     shape: check,
+    exact: check,
 };
