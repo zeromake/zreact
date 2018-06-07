@@ -1,12 +1,9 @@
+import { IUpdater, IBaseObject } from "./type-shared";
 
 export const hasOwnProperty = Object.prototype.hasOwnProperty;
 export const hasSymbol = typeof Symbol === "function" && (Symbol as any).for;
 
 export const REACT_ELEMENT_TYPE = hasSymbol ? (Symbol as any).for("react.element") : 0xeac7;
-
-export interface IBaseObject {
-    [name: string]: any;
-}
 
 export function returnFalse(): boolean {
     return false;
@@ -49,3 +46,8 @@ export function typeNumber(data: any) {
     const a = numberMap[__TYPE.call(data)];
     return a || 8;
 }
+
+export const fakeUpdater: IUpdater = {
+    enqueuSetState: returnFalse,
+    isMounted: returnFalse,
+};

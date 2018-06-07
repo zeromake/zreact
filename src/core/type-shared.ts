@@ -1,34 +1,37 @@
 
-type RefElement = Element | Node;
+export type RefElement = Element | Node;
 
-interface IObjectRef {
-    value: RefElement
+export interface IObjectRef {
+    value: RefElement;
 }
+export type IRefFun = (node: Element | Node | IComponentMinx<any, any>) => void;
 
-interface VNode {
-    vtype: number;
+export type IRefType = IObjectRef | string | IRefFun;
+
+export interface IVNode {
+    tag: number;
     type: string;
     props: IBaseProps;
 }
 
 export type VirtualNode =
-    | VNode
-    | string
+    | IVNode
+    | string;
 
 export interface IBaseObject {
     [name: string]: any;
 }
 
+export type VirtualNodeList = Array<VirtualNode|VirtualNode[]>;
+
 export interface IBaseProps extends IBaseObject {
-    children?: VirtualNode[];
-    ref?: Ref;
+    children?: VirtualNode[]| VirtualNode;
+    ref?: IRefType;
     key?: string | number | undefined;
     className?: string;
 }
 
-export type Ref = string | ((node: RefElement) => void) | IObjectRef;
-
-export interface ComponentLifecycle<P extends IBaseProps, S extends IBaseObject> {
+export interface IComponentLifecycle<P extends IBaseProps, S extends IBaseObject> {
     // new(props?: P, context?: IBaseObject);
     /**
      * 初始化组件渲染到 dom 前
@@ -55,7 +58,7 @@ export interface ComponentLifecycle<P extends IBaseProps, S extends IBaseObject>
     shouldComponentUpdate?(
         nextProps: Readonly<P>,
         nextState: Readonly<S>,
-        nextContext?: IBaseObject
+        nextContext?: IBaseObject,
     ): boolean;
     /**
      * 在新一轮 render 之前，所有的更新操作都会触发。
@@ -66,7 +69,7 @@ export interface ComponentLifecycle<P extends IBaseProps, S extends IBaseObject>
     componentWillUpdate?(
         nextProps: Readonly<P>,
         nextState: Readonly<S>,
-        nextContext?: IBaseObject
+        nextContext?: IBaseObject,
     ): void;
     /**
      * 在一次 render 完成后
@@ -79,7 +82,7 @@ export interface ComponentLifecycle<P extends IBaseProps, S extends IBaseObject>
         prevProps: Readonly<P>,
         prevState: Readonly<S>,
         snapshot?: any,
-        prevContext?: IBaseObject
+        prevContext?: IBaseObject,
     ): void;
     /**
      * 卸载dom前
@@ -98,12 +101,40 @@ export interface ComponentLifecycle<P extends IBaseProps, S extends IBaseObject>
     getSnapshotBeforeUpdate?(prevProps: P, prevState: S): any;
 }
 
-export interface ComponentMinx<P extends IBaseProps, S extends IBaseObject> extends ComponentLifecycle<P, S> {
+export interface IUpdater {
+    enqueuSetState(
+        component: IComponentMinx<any, any>,
+        state: IBaseObject | boolean | ((s: IBaseObject) => IBaseObject|null|undefined),
+        cb: () => void,
+    ): boolean;
+    isMounted(component: IComponentMinx<any, any>): boolean;
+}
+
+export interface IComponentMinx<P extends IBaseProps, S extends IBaseObject> extends IComponentLifecycle<P, S> {
     getChildContext?(): IBaseObject;
-    isReactComponent(): boolean;
+    isReactComponent?(): boolean;
     isMounted(): boolean;
     replaceState(): void;
     setState(state: S | ((s: S) => S | void), cb: () => void): void | S;
     forceUpdate(cb: () => void): void;
-    render(): VNode | null | undefined;
+    render(): IVNode | string | null | undefined;
 }
+
+export interface IComponentClass<P extends IBaseProps, S extends IBaseObject> {
+    defaultProps?: IBaseObject;
+    new(p: P, c: IBaseObject): IComponentMinx<P, S>;
+    getDerivedStateFromProps?(nextProps: P, preState: S): S | null | undefined;
+}
+
+export type IComponentFunction = (props: IBaseProps) => IVNode | string | null | undefined;
+
+export type VNodeType = IComponentClass<any, any> | IComponentFunction | string;
+
+export const enum VType {
+    Text = 1,
+    Node = 1 << 1,
+    Composite = 1 << 2,
+    Stateless = 1 << 3,
+    Void = 1 << 4,
+    Portal = 1 << 5,
+  }

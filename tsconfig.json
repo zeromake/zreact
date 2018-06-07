@@ -1,12 +1,13 @@
 {
     "compilerOptions": {
-      "module": "es2015", // 目标代码模块方式
+      "module": "esnext", // 目标代码模块方式
       "outDir": "dist", // 输出目录
       "sourceMap": true,
       "target": "es5", // 目标代码平台
       "strict": true, // TS严格模式
       "allowSyntheticDefaultImports": true, // 使用 ES2015 默认的 imports 风格
-      "experimentalDecorators": true
+      "experimentalDecorators": true,
+      "declaration": true,
     },
     "exclude": [
       "node_modeles" // 不转换 node_modeles

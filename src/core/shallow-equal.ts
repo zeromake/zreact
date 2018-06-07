@@ -1,7 +1,9 @@
 import { hasOwnProperty, typeNumber } from "./util";
 
+const ObjectIs = (Object as any).is;
+
 export function shallowEqual(objA: any, objB: any): boolean {
-    if (Object.is(objA, objB)) {
+    if (ObjectIs(objA, objB)) {
         return true;
     }
     // 确保objA, objB都是对象
@@ -17,7 +19,7 @@ export function shallowEqual(objA: any, objB: any): boolean {
     for (const item of keysA) {
         if (
             !hasOwnProperty.call(objB, item) ||
-            !Object.is(objA[item], objB[item])
+            !ObjectIs(objA[item], objB[item])
         ) {
             return false;
         }
