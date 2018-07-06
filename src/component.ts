@@ -308,14 +308,13 @@ export function createComponent(
     props: IKeyValue,
     context: IKeyValue,
     component: Component<IKeyValue, IKeyValue> | undefined | void | null,
-    newContext?: IReactContext<any>| IReactProvider<any>,
 ): Component<IKeyValue, IKeyValue> {
     const list = components[Ctor.name];
     let inst: Component<IKeyValue, IKeyValue>;
     // 创建组件实例
     if (Ctor.prototype && Ctor.prototype.render) {
         // if (newContext) {
-        inst = new Ctor(props, context, newContext);
+        inst = new Ctor(props, context);
         // Component.call(inst, props, context);
     } else {
         // 一个方法

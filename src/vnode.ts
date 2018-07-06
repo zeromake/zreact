@@ -39,7 +39,7 @@ export class VNode implements IBaseVNode {
     public zreactCompatUpgraded?: boolean;
     public zreactCompatNormalized?: boolean;
 
-    public context?: IReactContext<any> | IReactProvider<any>;
+    // public context?: IReactContext<any> | IReactProvider<any>;
     constructor(nodeName: NodeName, children: childType[] | childType | null, vtype: any) {
         this.nodeName = nodeName;
         this.type = nodeName;
