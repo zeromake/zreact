@@ -3,10 +3,10 @@ import { renderComponent, enqueueRender } from "./vdom/component";
 import { VNode } from "./vnode";
 // import { enqueueRender } from "./render-queue";
 import { extend } from "./util";
-import { IKeyValue, IRefObject, ComponentContext, IBaseProps, childType, IReactContext, IReactProvider } from "./types";
+import { IKeyValue, IRefObject, ComponentContext, IBaseProps, childType } from "./types";
 import { IVDom } from "./vdom/index";
 // import { h } from "./h";
-import options from "./options";
+// import options from "./options";
 
 enum ComponentChildType {
     COMPONENT = 0,

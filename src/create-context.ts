@@ -30,22 +30,9 @@ function objectIs(x: any, y: any) {
 export function createContext(defaultValue: any, calculateChangedBits?: (a: any, b: any) => number) {
     const context = {};
     class Provider extends Component<any, any> {
-        public emitter = createEventEmitter(this.props.value, context);
-        constructor(p: any, c: any) {
-            super(p, c);
-        }
-        public getChildContext() {
-            const provider = this.emitter;
-            let providers = this.context.providers;
-            if (providers) {
-                providers.push(provider);
-            } else {
-                providers = [provider];
-            }
-            return { providers };
-        }
-        public componentWillReceiveProps(nextProps: any) {
-            const oldValue = this.props.value;
+        public static getDerivedStateFromProps(nextProps: any, previousState: any): null {
+            const self: Provider = previousState.self;
+            const oldValue = self.props.value;
             const newValue = nextProps.value;
             let changedBits: number;
             if (objectIs(oldValue, newValue)) {
@@ -55,10 +42,24 @@ export function createContext(defaultValue: any, calculateChangedBits?: (a: any,
                     ? calculateChangedBits(oldValue, newValue) : 1073741823;
                 changedBits |= 0;
                 if (changedBits) {
-                    this.emitter.set(nextProps.value, changedBits);
+                    self.emitter.set(nextProps.value, changedBits);
                 }
             }
+            return null;
         }
+
+        public emitter = createEventEmitter(this.props.value, context);
+
+        constructor(p: any, c: any) {
+            super(p, c);
+            this.state = {self: this};
+        }
+
+        public getChildContext() {
+            const provider = this.emitter;
+            return { provider };
+        }
+
         public render() {
             return this.props.children;
         }
@@ -69,26 +70,20 @@ export function createContext(defaultValue: any, calculateChangedBits?: (a: any,
         constructor(p: any, c: any) {
             super(p, c);
             this.updateContext = this.updateContext.bind(this);
-            if (c.providers) {
-                for (let i = c.providers.length - 1; i >= 0; i--) {
-                    const provider = c.providers[i];
-                    if (provider.context === context) {
-                        this.emitter = provider;
-                        this.state = {
-                            value: this.getValue(),
-                        };
-                    }
+            if (c && c.provider != null) {
+                if (c.provider.context === context) {
+                    this.emitter = c.provider;
+                    this.state = {
+                        value: this.getValue(),
+                    };
                 }
             }
         }
         public componentDidMount() {
             const c = this.context;
-            if (c.providers && c.providers.length) {
-                for (let i = c.providers.length - 1; i >= 0; i--) {
-                    const provider = c.providers[i];
-                    if (provider.context === context) {
-                        this.emitter = provider;
-                    }
+            if (c && c.provider != null) {
+                if (c.provider.context === context) {
+                    this.emitter = c.provider;
                 }
             }
             if (this.emitter) {
@@ -104,7 +99,7 @@ export function createContext(defaultValue: any, calculateChangedBits?: (a: any,
         public updateContext(val: any, changedBits: number) {
             const observedBits: number = this.observedBits | 0;
             if ((observedBits & changedBits) !== 0) {
-                this.setState({ value: this.getValue() });
+                this.setState({ value: val });
             }
         }
         public componentWillUnmount() {

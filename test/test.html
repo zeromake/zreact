@@ -16,62 +16,28 @@
         var h = zreact.h;
         var render = zreact.render;
         var Component = zreact.Component;
-        class Test extends Component {
-            static getDerivedStateFromProps(nextProps, previousState) {
-                console.log(nextProps, previousState)
-                return null
-            }
-            constructor() {
-                super()
-                this.state = {
-                    count: 1
+        function createComponent(name) {
+            class Init extends Component {
+                render(props) {
+                    return props.children;
                 }
-                this.add = this.add.bind(this)
-            }
-            // componentWillReceiveProps(nextProps) {
-            //     console.log(nextProps)
-            // }
-            add() {
-                this.setState(function(state){
-                    return {count: state.count + 1}
-                })
-            }
-            render() {
-                return h(
-                    "div",
-                    null,
-                    h("h2", null, this.props.title),
-                    h("span", null, this.state.count),
-                    h("button", {onClick: this.add}, "add")
-                )
-            }
-        }
-        function Test1(props) {
-            return h(Test, props)
-        }
-        class App extends Component {
-            constructor() {
-                super()
-                this.state = {
-                    title: "",
+                componentWillMount() {
+                    console.log("------"+name+"------")
                 }
-                this.test = this.test.bind(this)
             }
-            test() {
-                this.setState(function(state) {
-                    return {title: state.title === "" ? "props": ""}
-                })
-            }
-            render() {
-                return h(
-                    "div",
-                    null,
-                    h(Test1, {title: this.state.title}),
-                    h("button", {onClick: this.test}, "test")
-                )
-            }
+            // Init.name = name;
+            return Init;
         }
-        render(h(App), document.getElementById("app"))
+        const A = createComponent("A");
+        const B = createComponent("B");
+        const C = createComponent("C");
+        const root = document.querySelector("#app");
+        let app = null;
+        app = render(h(A, null, h(B, null, h(C, null, "Test"))), root, app);
+        console.log("-------1-------")
+        app = render(h(A, null, h(B, null, "Test")), root, app);
+        console.log("-------2-------")
+        app = render(h(A, null, "Test"), root, app);
     </script>
     <script src="../devtools-run.js"></script>
     <!-- <script src="../node_modules/preact/devtools.js"></script> -->

@@ -1,5 +1,5 @@
 const rollupTypescript = require('rollup-plugin-typescript')
-const uglify = require('rollup-plugin-uglify')
+const { uglify } = require('rollup-plugin-uglify')
 const { minify } = require('uglify-es')
 const replace = require('rollup-plugin-replace')
 const pkg = require('../package.json')

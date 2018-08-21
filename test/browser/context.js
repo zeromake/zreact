@@ -1,4 +1,4 @@
-import { h, render, Component } from 'zreact';
+import { h, render, Component, createContext } from 'zreact';
 /** @jsx h */
 
 const CHILDREN_MATCHER = sinon.match( v => v==null || Array.isArray(v) && !v.length , '[empty children]');
@@ -176,5 +176,81 @@ describe('context', () => {
 
 		// expect(Inner.prototype.render).to.have.been.calledWith({ children: CHILDREN_MATCHER }, {}, { outerContext });
 		// expect(InnerMost.prototype.render).to.have.been.calledWith({ children: CHILDREN_MATCHER }, {}, { outerContext, innerContext });
-	});
+    });
+    it("react 16 context base test", () => {
+        const Theme = createContext("red");
+        const child = (context) => {
+            return context
+        }
+        let change = null;
+        class Test extends Component {
+            constructor(p, c) {
+                super(p, c);
+                this.state = {
+                    theme: "black",
+                }
+                change = this.change.bind(this);
+            }
+            change(value) {
+                this.state.theme = value;
+                this.forceUpdate();
+            }
+            render() {
+                return (
+                    <Theme.Provider value={this.state.theme}>
+                        <Theme.Consumer>
+                            {child}
+                        </Theme.Consumer>
+                    </Theme.Provider>
+                )
+            }
+        }
+        render(<Test/>, scratch)
+        expect(scratch.firstChild.nodeValue).to.equal("black");
+        change("test");
+        expect(scratch.firstChild.nodeValue).to.equal("test");
+    });
+
+    it("react 16 context test deep", () => {
+        const Theme = createContext("red");
+        const child = (context) => {
+            return context
+        }
+        let change = null;
+        class Test extends Component {
+            constructor(p, c) {
+                super(p, c);
+                this.state = {
+                    theme: "black",
+                    theme2: "red",
+                }
+                change = this.change.bind(this);
+            }
+            change(value, value2) {
+                this.state.theme = value;
+                this.state.theme2 = value2;
+                this.forceUpdate();
+            }
+            render() {
+                return (
+                    <Theme.Provider value={this.state.theme}>
+                        <div>
+                            <Theme.Consumer>
+                                {child}
+                            </Theme.Consumer>
+                            <Theme.Provider value={this.state.theme2}>
+                                <Theme.Consumer>
+                                    {child}
+                                </Theme.Consumer>
+                            </Theme.Provider>
+                        </div>
+                    </Theme.Provider>
+                )
+            }
+        }
+        render(<Test/>, scratch)
+        expect(scratch.innerHTML).to.equal("<div>blackred</div>");
+        change("test", "test1");
+        expect(scratch.innerHTML).to.equal("<div>testtest1</div>");
+    });
 });
