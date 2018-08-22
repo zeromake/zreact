@@ -1,3 +1,18 @@
+<a name="1.5.3"></a>
+## [1.5.3](https://github.com/zeromake/zreact/compare/v1.5.2...v1.5.3) (2018-08-22)
+
+
+### Bug Fixes
+
+* PureComponent types ([aa32ba0](https://github.com/zeromake/zreact/commit/aa32ba0))
+
+
+### Features
+
+* add forwardRef api ([2a48c2d](https://github.com/zeromake/zreact/commit/2a48c2d))
+
+
+
 <a name="1.5.2"></a>
 ## [1.5.2](https://github.com/zeromake/zreact/compare/v1.5.0...v1.5.2) (2018-08-22)
 
