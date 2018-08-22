@@ -150,6 +150,8 @@ declare namespace zreact {
 
     interface Component<PropsType, StateType> extends ComponentLifecycle<PropsType, StateType> { }
 
+    interface PureComponent<PropsType, StateType> extends Component<PropsType, StateType> { }
+
     function h<PropsType>(
         node: ComponentConstructor<PropsType, any>|FunctionalComponent<PropsType>,
         params?: PropsType,

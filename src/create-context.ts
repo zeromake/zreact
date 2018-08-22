@@ -27,9 +27,10 @@ function objectIs(x: any, y: any) {
     }
 }
 
-export function createContext(defaultValue: any, calculateChangedBits?: (a: any, b: any) => number) {
+export function createContext(defaultValue: any, calculateChangedBits?: (a: any, b: any) => number, name?: string) {
     const context = {};
     class Provider extends Component<any, any> {
+        public static displayName: string = name ? name + ".Provider" : "Context.Provider";
         public static getDerivedStateFromProps(nextProps: any, previousState: any): null {
             const self: Provider = previousState.self;
             const oldValue = self.props.value;
@@ -65,6 +66,7 @@ export function createContext(defaultValue: any, calculateChangedBits?: (a: any,
         }
     }
     class Consumer extends Component<any, any> {
+        public static displayName: string = name ? name + ".Consumer" : "Context.Consumer";
         public emitter: any;
         public observedBits: number = 0;
         constructor(p: any, c: any) {
