@@ -1,3 +1,22 @@
+<a name="1.5.2"></a>
+## [1.5.2](https://github.com/zeromake/zreact/compare/v1.5.0...v1.5.2) (2018-08-22)
+
+
+### Bug Fixes
+
+* add react 16 context test ([cb78c3a](https://github.com/zeromake/zreact/commit/cb78c3a))
+* ci ([03dddd4](https://github.com/zeromake/zreact/commit/03dddd4))
+* context ([25d7891](https://github.com/zeromake/zreact/commit/25d7891))
+* karma ([33632bf](https://github.com/zeromake/zreact/commit/33632bf))
+* karma ([ed59024](https://github.com/zeromake/zreact/commit/ed59024))
+* karma browser ([2c62561](https://github.com/zeromake/zreact/commit/2c62561))
+* karma browser ([7586872](https://github.com/zeromake/zreact/commit/7586872))
+* karma browser ([281ae8a](https://github.com/zeromake/zreact/commit/281ae8a))
+* prop ([c1487ba](https://github.com/zeromake/zreact/commit/c1487ba))
+* registry ([8abfd41](https://github.com/zeromake/zreact/commit/8abfd41))
+
+
+
 <a name="1.5.0"></a>
 # [1.5.0](https://github.com/zeromake/zreact/compare/v1.4.2...v1.5.0) (2018-04-09)
 
