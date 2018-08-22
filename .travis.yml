@@ -2,8 +2,9 @@ language: node_js
 cache: yarn
 node_js:
     - "9"
-script:
+before_script:
     - yarn config set registry http://registry.npm.taobao.org/
+script:
     - yarn test
 after_script:
     - yarn coverage
