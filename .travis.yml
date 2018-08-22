@@ -1,7 +1,9 @@
 language: node_js
 cache: yarn
-node_js: stable
+node_js:
+    - "9"
 script:
+    - yarn config set registry http://registry.npm.taobao.org/
     - yarn test
 after_script:
     - yarn coverage
