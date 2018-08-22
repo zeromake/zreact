@@ -1,5 +1,15 @@
+<a name="1.5.4"></a>
+## [1.5.4](https://github.com/zeromake/zreact/compare/1.5.3...1.5.4) (2018-08-22)
+
+
+### Bug Fixes
+
+* npm has 1.5.3 ([dd1186a](https://github.com/zeromake/zreact/commit/dd1186a))
+
+
+
 <a name="1.5.3"></a>
-## [1.5.3](https://github.com/zeromake/zreact/compare/v1.5.2...v1.5.3) (2018-08-22)
+## [1.5.3](https://github.com/zeromake/zreact/compare/v1.5.2...1.5.3) (2018-08-22)
 
 
 ### Bug Fixes
