@@ -25,7 +25,7 @@ export type childType = VNode|string|number|boolean|null|undefined|void;
 export type ComponentContext = Component<any, any> | Element | Node | HTMLElement | IVDom;
 
 export interface IRefObject {
-    value: ComponentContext|null;
+    current: ComponentContext|null;
 }
 
 export interface IBaseVNode {

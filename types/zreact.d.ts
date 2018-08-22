@@ -3,6 +3,11 @@ declare type ChildCallbackType = (child?: zreact.VNode, index?: number, arr?: zr
 declare namespace zreact {
     type childType = JSX.Element|string|boolean|null|undefined;
     type childrenType = Array<childType|childType[]>;
+    type refNode = Component<any, any> | Element | Node | IVDom | null;
+    interface objectRef {
+        current: refNode;
+    }
+    type refType = objectRef | ((el: refNode) => void);
     interface IReactProvider<T> {
         $$typeof: any;
         context: IReactContext<T>;
@@ -66,7 +71,7 @@ declare namespace zreact {
     interface ComponentProps<C extends Component<any, any> | FunctionalComponent<any>> {
         children?: JSX.Element[];
         key?: string | number | any;
-        ref?: (el: C) => void;
+        ref?: refType;
     }
 
     interface DangerouslySetInnerHTML {
@@ -77,7 +82,7 @@ declare namespace zreact {
         children?: childType | childrenType;
         dangerouslySetInnerHTML?: DangerouslySetInnerHTML;
         key?: string;
-        ref?: (el?: Element | IVDom) => void;
+        ref?: refType;
     }
 
     interface VNode {
@@ -187,7 +192,8 @@ declare namespace zreact {
     function unmountComponentAtNode(dom: any): boolean;
 
     function createPortal(vnode: any, container: HTMLElement): null
-    function createRef(): { value: Component<any, any> | Element | Node | IVDom | null };
+    function createRef(): { current: Component<any, any> | Element | Node | IVDom | null };
+    function forwardRef(render: (props: ZreactHTMLAttributes, ref: refType) => childType): FunctionalComponent<any>;
     const options: {
         /**
          * render更新后钩子比componentDidUpdate更后面执行
@@ -224,7 +230,7 @@ declare namespace zreact {
         /**
          * ref 默认为vdom,
          */
-        ref?: ((vdom: IVDom) => any) | boolean;
+        ref?: refType;
     };
 }
 

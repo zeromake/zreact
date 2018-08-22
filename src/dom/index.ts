@@ -260,12 +260,15 @@ function removeEventListener(vdom: IVDom, name: string, useCapture: boolean) {
 /**
  * 统一设置ref
  */
-export function setRef(ref: ((c: ComponentContext | null) => void) | IRefObject | undefined, context: ComponentContext | null): void {
+export function setRef(
+    ref: ((c: ComponentContext | null) => void) | IRefObject | undefined,
+    context: ComponentContext | null,
+): void {
     if (ref != null) {
         if (typeof ref === "function") {
             ref(context);
         } else if (typeof ref === "object") {
-            ref.value = context;
+            ref.current = context;
         } else {
             console.warn("not support ref by: ", ref);
         }

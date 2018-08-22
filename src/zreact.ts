@@ -6,11 +6,12 @@ import { render } from "./render";
 import options from "./options";
 import { createClass } from "./create-class";
 // import {  } from "./rerender";
-import { IKeyValue } from "./types";
-import { IVDom } from "./vdom/index";
+// import { IKeyValue } from "./types";
+// import { IVDom } from "./vdom/index";
 import { VNode } from "./vnode";
 import { REACT_ELEMENT_TYPE, REACT_FRAGMENT_TYPE } from "./util";
 import { createRef } from "./create-ref";
+import { forwardRef } from "./forward-ref";
 import { createContext } from "./create-context";
 import {
     findDOMNode,
@@ -70,6 +71,7 @@ export default {
     version,
     Element: REACT_ELEMENT_TYPE,
     Fragment: REACT_FRAGMENT_TYPE,
+    forwardRef,
 };
 
 export {
@@ -93,4 +95,5 @@ export {
     version,
     REACT_ELEMENT_TYPE as Element,
     REACT_FRAGMENT_TYPE as Fragment,
+    forwardRef,
 };

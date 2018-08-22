@@ -4,17 +4,16 @@ import { VNode } from "./vnode";
 import {
     IKeyValue,
     IBaseProps,
-    funComponent,
     childType,
-    IReactContext,
-    IReactProvider,
     NodeName,
 } from "./types";
 import {
     extend,
     REACT_ELEMENT_TYPE,
     REACT_FRAGMENT_TYPE,
+    rest,
 } from "./util";
+import { ForwardRef } from "./forward-ref";
 // import Children from "./children";
 
 function Fragment(props: IBaseProps | undefined) {
@@ -144,6 +143,15 @@ export function createElement(this: Component<IKeyValue, IKeyValue> | undefined 
     //     // 设置原生组件名字或自定义组件class(function)
     //     nodeName,
     // };
+    if (
+        (p.nodeName as typeof ForwardRef).$isForwardRefComponent != null
+        && (p.nodeName as typeof ForwardRef).$isForwardRefComponent
+    ) {
+        const ref = p.attributes!.ref;
+        const deepProps: any = rest(p.attributes, ["ref"]);
+        deepProps.$$forwardedRef = ref;
+        p.attributes = deepProps;
+    }
     // vnode 钩子
     if (children) {
         p.props = extend({}, p.attributes, { children });
