@@ -62,8 +62,8 @@ var localBrowsers = realBrowser ? Object.keys(travisLaunchers) : ['PhantomJS'];
 
 module.exports = function(config) {
 	config.set({
-        browsers: sauceLabs ? Object.keys(sauceLabsLaunchers) : localBrowsers,
-        // browsers: ['Chrome'],
+        // browsers: sauceLabs ? Object.keys(sauceLabsLaunchers) : localBrowsers,
+        browsers: ['Chrome', 'ChromeHeadless'],
 
 		frameworks: ['mocha', 'chai-sinon'],
 
@@ -87,9 +87,6 @@ module.exports = function(config) {
 		// 	tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER || ('local'+require('./package.json').version),
 		// 	startConnect: false
 		// },
-
-		customLaunchers: sauceLabs ? sauceLabsLaunchers : travisLaunchers,
-
 		files: [
 			{ pattern: 'polyfills.js', watched: false },
 			{ pattern: '{browser,shared,compat}/**.js', watched: false }
