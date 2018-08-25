@@ -345,8 +345,8 @@ describe('refs', () => {
 		}
 
         let dom = render(<div><Wrapper ref={ ref } /></div>, scratch, scratch.firstChild);
-		expect(findDOMNode(ref.value)).to.equal(dom.firstChild);
+		expect(findDOMNode(ref.current)).to.equal(dom.firstChild);
         dom = render(<div></div>, scratch, scratch.firstChild);
-		expect(ref.value).to.equal(null);
+		expect(ref.current).to.equal(null);
 	});
 });
