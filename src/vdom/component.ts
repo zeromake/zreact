@@ -416,7 +416,7 @@ export function buildComponentFromVNode(
         // 获取vdom,实际上通过setComponentProps已经有了c.vdom,但是typescript无法识别,直接强制转换
         vdom = findVDom(c) as IVDom;
         if (vdom && childHandle) {
-            childHandle.replaceChild(vdom);
+            childHandle.replaceChild({base: null});
         }
         if (oldVDom && vdom !== oldVDom) {
             // 需要卸载dom
