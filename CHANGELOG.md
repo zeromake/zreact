@@ -1,3 +1,13 @@
+<a name="1.5.6"></a>
+## [1.5.6](https://github.com/zeromake/zreact/compare/v1.5.5...v1.5.6) (2018-08-30)
+
+
+### Bug Fixes
+
+* children diff ([d8c0d76](https://github.com/zeromake/zreact/commit/d8c0d76))
+
+
+
 <a name="1.5.5"></a>
 ## [1.5.5](https://github.com/zeromake/zreact/compare/v1.5.4...v1.5.5) (2018-08-30)
 
