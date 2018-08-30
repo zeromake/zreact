@@ -75,11 +75,11 @@ export function createContext(defaultValue: any, calculateChangedBits?: (a: any,
             if (c && c.provider != null) {
                 if (c.provider.context === context) {
                     this.emitter = c.provider;
-                    this.state = {
-                        value: this.getValue(),
-                    };
                 }
             }
+            this.state = {
+                value: this.getValue(),
+            };
         }
         public componentDidMount() {
             const c = this.context;
