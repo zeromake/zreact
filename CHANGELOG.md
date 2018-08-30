@@ -1,5 +1,16 @@
+<a name="1.5.5"></a>
+## [1.5.5](https://github.com/zeromake/zreact/compare/v1.5.4...v1.5.5) (2018-08-30)
+
+
+### Bug Fixes
+
+* context use default value ([65c81fd](https://github.com/zeromake/zreact/commit/65c81fd))
+* ref value -> current ([6519979](https://github.com/zeromake/zreact/commit/6519979))
+
+
+
 <a name="1.5.4"></a>
-## [1.5.4](https://github.com/zeromake/zreact/compare/1.5.3...1.5.4) (2018-08-22)
+## [1.5.4](https://github.com/zeromake/zreact/compare/1.5.3...v1.5.4) (2018-08-22)
 
 
 ### Bug Fixes
