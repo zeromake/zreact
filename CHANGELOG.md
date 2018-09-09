@@ -1,11 +1,12 @@
-<a name="1.5.7"></a>
-## [1.5.7](https://github.com/zeromake/zreact/compare/v1.5.5...v1.5.7) (2018-08-30)
+<a name="1.5.8"></a>
+## [1.5.8](https://github.com/zeromake/zreact/compare/v1.5.5...v1.5.8) (2018-09-09)
 
 
 ### Bug Fixes
 
 * children diff ([af17346](https://github.com/zeromake/zreact/commit/af17346))
 * children diff ([d8c0d76](https://github.com/zeromake/zreact/commit/d8c0d76))
+* nodes children ([ffe2ae8](https://github.com/zeromake/zreact/commit/ffe2ae8))
 
 
 
