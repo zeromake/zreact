@@ -285,18 +285,30 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
                 if (vdom.base) {
                     // 替换到新dom
                     if (initialVDom.base) {
+                        if (initialVDom.childHandle) {
+                            initialVDom.childHandle.replaceChild(vdom);
+                        }
                         baseParent.replaceChild(vdom.base, initialVDom.base as Element);
                     } else {
+                        if (initialVDom.childHandle) {
+                            initialVDom.childHandle.replaceChild({base: null});
+                        }
                         baseParent.appendChild(vdom.base);
                     }
                     if (!toUnmount) {
                         // 没有
+                        if (initialVDom.childHandle) {
+                            initialVDom.childHandle.replaceChild({base: null});
+                        }
                         initialVDom.component = undefined;
                         recollectNodeTree(initialVDom, false);
                     }
                 } else if (initialVDom.base) {
                     if (!toUnmount) {
                         // 没有
+                        if (initialVDom.childHandle) {
+                            initialVDom.childHandle.replaceChild({base: null});
+                        }
                         initialVDom.component = undefined;
                         recollectNodeTree(initialVDom, false);
                     }
@@ -390,6 +402,9 @@ export function buildComponentFromVNode(
         if (originalComponent && !isDiectOwner) {
             // 存在旧组件卸载它
             unmountComponent(originalComponent);
+            if (childHandle) {
+                childHandle.replaceChild({base: null});
+            }
             vdom = oldVDom = null;
         }
         // 通过缓存组件的方式创建组件实例
@@ -415,11 +430,11 @@ export function buildComponentFromVNode(
         );
         // 获取vdom,实际上通过setComponentProps已经有了c.vdom,但是typescript无法识别,直接强制转换
         vdom = findVDom(c) as IVDom;
-        if (vdom && childHandle) {
-            childHandle.replaceChild({base: null});
-        }
         if (oldVDom && vdom !== oldVDom) {
             // 需要卸载dom
+            if (vdom && childHandle) {
+                childHandle.replaceChild({base: null});
+            }
             oldVDom.component = undefined;
             recollectNodeTree(oldVDom, false);
         }

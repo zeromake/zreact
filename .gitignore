@@ -66,4 +66,5 @@ typings/
 /devtools-run.js.map
 /docs/
 *error.log
+.DS_Store
 

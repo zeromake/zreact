@@ -1,6 +1,6 @@
 {
   "name": "zreact",
-  "version": "1.5.7",
+  "version": "1.5.8",
   "description": "React like,copy by preact",
   "main": "dist/zreact.js",
   "module": "dist/zreact.esm.js",
