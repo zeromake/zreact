@@ -1,6 +1,18 @@
 import { Component } from "./component";
 
-function createEventEmitter(value: any, context: any) {
+const key = "__global_context_unique_id__";
+let g: any = {};
+if (typeof global !== "undefined") {
+    g = global;
+} else if (typeof window !== "undefined") {
+    g = window;
+}
+
+function gud() {
+  return g[key] = (g[key] || 0) + 1;
+}
+
+function createEventEmitter(value: any) {
     let handlers: any[] = [];
     return {
         on(handler: any) {
@@ -16,7 +28,6 @@ function createEventEmitter(value: any, context: any) {
             value = newValue;
             handlers.forEach((handler: any) => handler(value, changedBits));
         },
-        context,
     };
 }
 function objectIs(x: any, y: any) {
@@ -28,7 +39,8 @@ function objectIs(x: any, y: any) {
 }
 
 export function createContext(defaultValue: any, calculateChangedBits?: (a: any, b: any) => number, name?: string) {
-    const context = {};
+    // const context = {};
+    const contextProp = "__create-react-context-" + gud() + "__";
     class Provider extends Component<any, any> {
         public static displayName: string = name ? name + ".Provider" : "Context.Provider";
         public static getDerivedStateFromProps(nextProps: any, previousState: any): null {
@@ -49,7 +61,7 @@ export function createContext(defaultValue: any, calculateChangedBits?: (a: any,
             return null;
         }
 
-        public emitter = createEventEmitter(this.props.value, context);
+        public emitter = createEventEmitter(this.props.value);
 
         constructor(p: any, c: any) {
             super(p, c);
@@ -58,7 +70,7 @@ export function createContext(defaultValue: any, calculateChangedBits?: (a: any,
 
         public getChildContext() {
             const provider = this.emitter;
-            return { provider };
+            return { [contextProp]: provider };
         }
 
         public render() {
@@ -72,10 +84,8 @@ export function createContext(defaultValue: any, calculateChangedBits?: (a: any,
         constructor(p: any, c: any) {
             super(p, c);
             this.updateContext = this.updateContext.bind(this);
-            if (c && c.provider != null) {
-                if (c.provider.context === context) {
-                    this.emitter = c.provider;
-                }
+            if (c && c[contextProp] != null) {
+                this.emitter = c[contextProp];
             }
             this.state = {
                 value: this.getValue(),
@@ -83,10 +93,8 @@ export function createContext(defaultValue: any, calculateChangedBits?: (a: any,
         }
         public componentDidMount() {
             const c = this.context;
-            if (c && c.provider != null) {
-                if (c.provider.context === context) {
-                    this.emitter = c.provider;
-                }
+            if (c && c[contextProp] != null) {
+                this.emitter = c[contextProp];
             }
             if (this.emitter) {
                 this.emitter.on(this.updateContext);
