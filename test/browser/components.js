@@ -55,14 +55,14 @@ describe('Components', () => {
 		expect(C1.prototype.render)
 			.to.have.been.calledOnce
 			.and.to.have.been.calledWithMatch({}, {})
-			.and.to.have.returned(sinon.match({ nodeName:'div' }));
+			.and.to.have.returned(sinon.match({ type:'div' }));
 
 		expect(scratch.innerHTML).to.equal('<div>C1</div>');
 	});
 
 
 	it('should render functional components', () => {
-		const PROPS = { foo:'bar', onBaz:()=>{}};
+		const PROPS = { foo:'bar', onBaz:()=>{}, children: null};
 
         const C3 = sinon.spy( props => <div {...props} /> );
 
@@ -72,8 +72,8 @@ describe('Components', () => {
 			.to.have.been.calledOnce
 			.and.to.have.been.calledWithMatch(PROPS)
 			.and.to.have.returned(sinon.match({
-				nodeName: 'div',
-				attributes: PROPS
+				type: 'div',
+				props: PROPS
 			}));
 
 		expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
@@ -102,8 +102,8 @@ describe('Components', () => {
 			.to.have.been.calledOnce
 			.and.to.have.been.calledWithMatch(PROPS, {})
 			.and.to.have.returned(sinon.match({
-				nodeName: 'div',
-				attributes: PROPS
+				type: 'div',
+				props: PROPS
 			}));
 
 		expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
@@ -277,7 +277,7 @@ describe('Components', () => {
 
 	describe('High-Order Components', () => {
 		it('should render nested functional components', () => {
-			const PROPS = { foo:'bar', onBaz:()=>{} };
+			const PROPS = { foo:'bar', onBaz:()=>{}, children: null };
 
 			const Outer = sinon.spy(
 				props => <Inner {...props} />
@@ -293,17 +293,16 @@ describe('Components', () => {
 				.to.have.been.calledOnce
 				.and.to.have.been.calledWithMatch(PROPS)
 				.and.to.have.returned(sinon.match({
-					nodeName: Inner,
-					attributes: PROPS
+					type: Inner,
+					props: PROPS
 				}));
 
 			expect(Inner)
 				.to.have.been.calledOnce
-				.and.to.have.been.calledWithMatch(PROPS)
+				.and.to.have.been.calledWithMatch({...PROPS, children: 'inner'})
 				.and.to.have.returned(sinon.match({
-					nodeName: 'div',
-					attributes: PROPS,
-					children: 'inner'
+					type: 'div',
+					props: {...PROPS, children: 'inner'},
 				}));
 
 			expect(scratch.innerHTML).to.equal('<div foo="bar">inner</div>');
@@ -343,7 +342,7 @@ describe('Components', () => {
 			expect(Inner.secondCall)
 				.to.have.been.calledWithMatch({ foo:'bar', i:2 })
 				.and.to.have.returned(sinon.match({
-					attributes: {
+					props: {
 						j: 2,
 						i: 2,
 						foo: 'bar'
@@ -365,7 +364,7 @@ describe('Components', () => {
 			expect(Inner.thirdCall)
 				.to.have.been.calledWithMatch({ foo:'bar', i:3 })
 				.and.to.have.returned(sinon.match({
-					attributes: {
+					props: {
 						j: 3,
 						i: 3,
 						foo: 'bar'
@@ -437,7 +436,7 @@ describe('Components', () => {
 			expect(Inner.prototype.render.secondCall)
 				.to.have.been.calledWithMatch({ foo:'bar', i:2 })
 				.and.to.have.returned(sinon.match({
-					attributes: {
+					props: {
 						j: 2,
 						i: 2,
 						foo: 'bar'
@@ -464,7 +463,7 @@ describe('Components', () => {
 			expect(Inner.prototype.render.thirdCall)
 				.to.have.been.calledWithMatch({ foo:'bar', i:3 })
 				.and.to.have.returned(sinon.match({
-					attributes: {
+					props: {
 						j: 3,
 						i: 3,
 						foo: 'bar'

@@ -1,7 +1,7 @@
 /* eslint-disable */
-var renderToString = dep(require('preact-render-to-string'));
+var renderToString = require('../server-render').renderToString;
 
-function dep(obj) { return obj['default'] || obj; }
+// function dep(obj) { return obj['default'] || obj; }
 
 module.exports = {
 	renderToString: renderToString,

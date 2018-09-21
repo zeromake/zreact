@@ -86,9 +86,8 @@ declare namespace zreact {
     }
 
     interface VNode {
-        nodeName: ComponentConstructor<any, any>|string;
-        attributes: {[name: string]: any};
-        children: (childType[]) | undefined;
+        type: ComponentConstructor<any, any>|string;
+        props: {[name: string]: any};
         key?: string;
     }
 
@@ -224,13 +223,9 @@ declare namespace zreact {
          */
         event?: (event: Event) => any;
         /**
-         * 是否自动对事件方法绑定this为组件，默认为true(preact没有)
-         */
-        eventBind?: boolean;
-        /**
          * ref 默认为vdom,
          */
-        ref?: refType;
+        ref?: boolean | ((vdom) => any);
     };
 }
 

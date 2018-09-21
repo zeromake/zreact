@@ -67,7 +67,7 @@ export function setAccessor(
         }
         if (value) {
             // 给新方法设置vdom
-            let context: Element | Node | IVDom | null = null;
+            let context: ComponentContext | null = null;
             if (options.ref) {
                 if (typeof options.ref === "function") {
                     context = options.ref(vdom);

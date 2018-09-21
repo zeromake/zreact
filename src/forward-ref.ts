@@ -1,13 +1,16 @@
 import { Component } from "./component";
-import { rest } from "./util";
+import { IBaseProps, IKeyValue, RefType } from "./types";
 
-export class ForwardRef extends Component<any, any> {
+interface IForwardRefProps extends IBaseProps {
+    "$$forwardedRef"?: RefType;
+}
+
+export class ForwardRef extends Component<IForwardRefProps, IKeyValue> {
     public static displayName = "ForwardRef";
     public static $isForwardRefComponent: boolean = true;
     public $$render?: (props: any, ref: any) => any;
     public render() {
-        const { $$forwardedRef } = this.props;
-        const props = rest(this.props, ["$$forwardedRef"]);
+        const { $$forwardedRef, ...props } = this.props;
         if (this.$$render) {
             return this.$$render(props, $$forwardedRef);
         }

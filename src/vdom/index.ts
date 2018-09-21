@@ -19,11 +19,11 @@ export function isSameNodeType(node: IVDom, vnode: childType, hydrating: boolean
         // vnode是文本节点,判断dom是否为文本节点
         return isTextNode(node.base);
     }
-    if (typeof vnode.nodeName === "string") {
+    if (typeof vnode.type === "string") {
         // vnode是原生组件,判断dom非组件的根节点且标签名相同
-        return !node.componentConstructor && isNamedNode(node, vnode.nodeName);
+        return !node.componentConstructor && isNamedNode(node, vnode.type);
     }
-    return hydrating || node.componentConstructor === vnode.nodeName;
+    return hydrating || node.componentConstructor === vnode.type;
 }
 
 /** 判断标签名是否相同.
@@ -47,10 +47,10 @@ export function isNamedNode(
  */
 export function getNodeProps(vnode: VNode) {
     // jsx上的属性
-    const props = extend({}, vnode.attributes);
-    props.children = vnode.children;
+    const props = extend({}, vnode.props);
+    // props.children = vnode.children;
     // 组件类
-    const nodeName: any = vnode.nodeName;
+    const nodeName: any = vnode.type;
     // 组件默认props
     const defaultProps = nodeName.defaultProps;
     if (defaultProps !== undefined) {

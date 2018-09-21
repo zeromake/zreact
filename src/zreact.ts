@@ -50,29 +50,29 @@ function createPortal(vnode: any, container: HTMLElement): null {
     return null;
 }
 
-export default {
-    Children,
-    Component,
-    createRef,
-    PureComponent,
-    createElement,
-    cloneElement,
-    createClass,
-    createPortal,
-    createContext,
-    findDOMNode,
-    findVDom,
-    isValidElement,
-    h,
-    options,
-    render,
-    rerender,
-    unmountComponentAtNode,
-    version,
-    Element: REACT_ELEMENT_TYPE,
-    Fragment: REACT_FRAGMENT_TYPE,
-    forwardRef,
-};
+// export default {
+//     Children,
+//     Component,
+//     createRef,
+//     PureComponent,
+//     createElement,
+//     cloneElement,
+//     createClass,
+//     createPortal,
+//     createContext,
+//     findDOMNode,
+//     findVDom,
+//     isValidElement,
+//     h,
+//     options,
+//     render,
+//     rerender,
+//     unmountComponentAtNode,
+//     version,
+//     Element: REACT_ELEMENT_TYPE,
+//     Fragment: REACT_FRAGMENT_TYPE,
+//     forwardRef,
+// };
 
 export {
     Component,

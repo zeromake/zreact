@@ -1,11 +1,11 @@
 import { Component } from "./component";
-import { IKeyValue } from "./types";
+import { IBaseProps, IKeyValue } from "./types";
 
 /**
  * 简单组件state,props对象只有一层改变使用，超过一层改变就会无法更新
  * @constructor
  */
-export class PureComponent<PropsType extends IKeyValue, StateType extends IKeyValue> extends Component<PropsType, StateType> {
+export class PureComponent<PropsType extends IBaseProps, StateType extends IKeyValue> extends Component<PropsType, StateType> {
     public isPureReactComponent: boolean = true;
     public shouldComponentUpdate(props: PropsType, state: StateType): boolean {
         // props,state只要一个不同就返回true

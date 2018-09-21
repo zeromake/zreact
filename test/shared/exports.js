@@ -1,4 +1,5 @@
-import preact, { h, Component, render, rerender, options } from '../../build/zreact';
+import { h, Component, render, rerender, options } from '../../build/zreact';
+import * as preact from "../../build/zreact";
 import { expect } from 'chai';
 
 describe('preact', () => {

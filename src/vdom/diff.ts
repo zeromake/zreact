@@ -2,8 +2,8 @@ import options from "../options";
 // import { ATTR_KEY } from "../constants";
 import { isSameNodeType, isNamedNode } from "./index";
 import { VNode } from "../vnode";
-import { Component } from "../component";
-import { IKeyValue, childType, IBaseVNode, IReactContext, IReactProvider } from "../types";
+// import { Component } from "../component";
+import { IKeyValue, childType } from "../types";
 import { IVDom, buildVDom } from "./index";
 import {
     buildComponentFromVNode,
@@ -13,8 +13,8 @@ import {
     setAccessor,
     createNode,
     removeNode,
-    getPreviousSibling,
-    getLastChild,
+    // getPreviousSibling,
+    // getLastChild,
     setRef,
 } from "../dom/index";
 import { findVDom, setVDom, findVoidNode, setVoidNode } from "../find";
@@ -181,7 +181,7 @@ function idiff(
         vdom.props = true;
         return vdom;
     }
-    let vnodeName = (vnode as VNode).nodeName;
+    let vnodeName = (vnode as VNode).type;
     if (typeof vnodeName === "function") {
         // 是一个组件,创建或复用组件实例，返回dom
         return buildComponentFromVNode(vdom, (vnode as VNode), context, mountAll); // , (vnode as VNode).component);
@@ -225,7 +225,7 @@ function idiff(
     // 取出上次存放的props
     let props = vdom.props;
     // 获取虚拟的子节点
-    const vchildren = (vnode as VNode).children;
+    const vchildren = (vnode as VNode).props.children;
     if (props == null || typeof props === "boolean") {
         // 上回的props不存在说明，这次一般为新建（preact有可能通过原生dom操作删除）
         vdom.props = props = {};
@@ -574,7 +574,7 @@ export function removeChildren(node: IVDom) {
 }
 
 function diffAttributes(vdom: IVDom, vnode: VNode, old: IKeyValue) {
-    const attrs: IKeyValue | undefined = vnode.attributes;
+    const attrs: IKeyValue = vnode.props;
     const component = vnode.component;
     const dom = vdom.base;
     let name: string;

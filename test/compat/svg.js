@@ -1,6 +1,6 @@
 import React from 'zreact-compat';
-import assertJsx from 'preact-jsx-chai';
-chai.use(assertJsx);
+// import assertJsx from 'preact-jsx-chai';
+// chai.use(assertJsx);
 
 const h = React.createElement;
 
@@ -21,15 +21,15 @@ describe('svg', () => {
 		scratch = null;
 	});
 
-	it('should render SVG to string', () => {
-		let svg = (
-			<svg viewBox="0 0 360 360">
-				<path stroke="white" fill="black" d="M347.1 357.9L183.3 256.5 13 357.9V1.7h334.1v356.2zM58.5 47.2v231.4l124.8-74.1 118.3 72.8V47.2H58.5z" />
-			</svg>
-		);
-		// string -> parse
-		expect(svg).to.eql(svg);
-	});
+	// it('should render SVG to string', () => {
+	// 	let svg = (
+	// 		<svg viewBox="0 0 360 360">
+	// 			<path stroke="white" fill="black" d="M347.1 357.9L183.3 256.5 13 357.9V1.7h334.1v356.2zM58.5 47.2v231.4l124.8-74.1 118.3 72.8V47.2H58.5z" />
+	// 		</svg>
+	// 	);
+	// 	// string -> parse
+	// 	expect(svg).to.eql(svg);
+	// });
 
 	it('should render SVG to DOM', () => {
 		const Demo = () => (

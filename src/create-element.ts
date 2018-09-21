@@ -8,16 +8,13 @@ import {
     NodeName,
 } from "./types";
 import {
-    extend,
-    REACT_ELEMENT_TYPE,
     REACT_FRAGMENT_TYPE,
-    rest,
 } from "./util";
 import { ForwardRef } from "./forward-ref";
 // import Children from "./children";
 
-function Fragment(props: IBaseProps | undefined) {
-    return props && props.children;
+function Fragment(props: IBaseProps | undefined): childType {
+    return (props && props.children) as childType;
 }
 
 // const EMPTY_CHILDREN: any[] = [];
@@ -31,9 +28,9 @@ function Fragment(props: IBaseProps | undefined) {
  * @see http://jasonformat.com/wtf-is-jsx
  * @public
  */
-export function createElement(this: Component<IKeyValue, IKeyValue> | undefined | void | null, nodeName: NodeName, attributes: IKeyValue | null, ...args: childType[]) {
+export function createElement(this: Component<IKeyValue, IKeyValue> | undefined | void | null, nodeName: NodeName, attributes: IKeyValue | null, ...args: Array<childType|childType[]>) {
     // 初始化子元素列表
-    const stack: childType[] = [];
+    const stack: Array<childType|childType[]> = [];
     let children: childType[] | childType | null = [];
     // let i: number;
     // let child: any;
@@ -114,15 +111,27 @@ export function createElement(this: Component<IKeyValue, IKeyValue> | undefined 
     } else if (nodeName === REACT_FRAGMENT_TYPE) {
         nodeName = Fragment;
     }
+    let props = attributes == null ? {} : attributes;
+    if (
+        (nodeName as typeof ForwardRef).$isForwardRefComponent != null
+        && (nodeName as typeof ForwardRef).$isForwardRefComponent
+    ) {
+        const { ref = null, ...deepProps} = attributes || {};
+        deepProps.$$forwardedRef = ref;
+        props = deepProps;
+    }
+    // vnode 钩子
+    if (children) {
+        props.children = children;
+    } else {
+        props.children = null;
+    }
     const p = new VNode(
         // 设置原生组件名字或自定义组件class(function)
         nodeName,
-        // 设置子元素
-        children,
-        REACT_ELEMENT_TYPE,
+        props,
     );
     // 设置属性
-    p.attributes = attributes == null ? undefined : attributes;
     // if (options.eventBind) {
     //     const self = this;
     //     const component: Component<IKeyValue, IKeyValue> | undefined = self && self.setState ? self : undefined;
@@ -130,7 +139,7 @@ export function createElement(this: Component<IKeyValue, IKeyValue> | undefined 
     //     p.component = component;
     // }
     // 设置key
-    p.key = attributes == null ? undefined : attributes.key;
+    p.key = props.key;
     // const p: VNode = {
     //     // 设置属性
     //     attributes: attributes == null ? undefined : attributes,
@@ -143,21 +152,6 @@ export function createElement(this: Component<IKeyValue, IKeyValue> | undefined 
     //     // 设置原生组件名字或自定义组件class(function)
     //     nodeName,
     // };
-    if (
-        (p.nodeName as typeof ForwardRef).$isForwardRefComponent != null
-        && (p.nodeName as typeof ForwardRef).$isForwardRefComponent
-    ) {
-        const ref = p.attributes!.ref;
-        const deepProps: any = rest(p.attributes, ["ref"]);
-        deepProps.$$forwardedRef = ref;
-        p.attributes = deepProps;
-    }
-    // vnode 钩子
-    if (children) {
-        p.props = extend({}, p.attributes, { children });
-    } else {
-        p.props = p.attributes;
-    }
     // p.$$typeof = REACT_ELEMENT_TYPE;
     if (options.vnode != null) {
         options.vnode(p);

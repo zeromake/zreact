@@ -1,6 +1,6 @@
 import { VNode } from "./vnode";
 import { Component } from "./component";
-import { IKeyValue } from "./types";
+import { IKeyValue, ComponentContext } from "./types";
 import { IVDom } from "./vdom/index";
 
 const options: {
@@ -39,7 +39,7 @@ const options: {
     /**
      * ref 默认为vdom.base,
      */
-    ref?: ((vdom: IVDom) => any) | boolean;
+    ref?: ((vdom: IVDom) => ComponentContext) | boolean;
 } = {
     eventBind: true,
 };

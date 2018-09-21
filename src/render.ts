@@ -1,7 +1,7 @@
 import { diff } from "./vdom/diff";
 import { VNode } from "./vnode";
 import { IVDom, buildVDom } from "./vdom/index";
-import { defer } from "./util";
+// import { defer } from "./util";
 import { findVDom } from "./find";
 import { Component } from "./component";
 

@@ -8,11 +8,12 @@ import { extend } from "./util";
  * @param props 新的props
  * @param children 新的子组件
  */
-export function cloneElement(vnode: VNode, props: any, ...children: any[]) {
-    const child: any = children.length > 0 ? children : vnode.children;
+export function cloneElement(vnode: VNode, props: any, ...newChildren: any[]) {
+    const { children, ...oldProps } = vnode.props;
+    const child: any = newChildren.length > 0 ? newChildren : children;
     return createElement(
-        vnode.nodeName,
-        extend({}, vnode.attributes, props),
+        vnode.type,
+        {...oldProps, ...props},
         child,
     );
 }

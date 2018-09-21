@@ -5,7 +5,7 @@ import { VNode } from "../vnode";
 import { getNodeProps } from "./index";
 import { removeNode, setRef } from "../dom/index";
 import { extend, defer } from "../util";
-import { IKeyValue, childType, IReactContext, IReactProvider, IBaseProps } from "../types";
+import { IKeyValue, childType, IBaseProps } from "../types";
 import { IVDom } from "./index";
 import { findVDom, setVDom } from "../find";
 import {
@@ -190,7 +190,7 @@ export function renderComponent(component: Component<any, any>, opts?: number, m
             context = extend({}, context, component.getChildContext());
         }
         // 取出VNode的nodeName
-        const childComponent = rendered && typeof rendered === "object" && rendered.nodeName;
+        const childComponent = rendered && typeof rendered === "object" && rendered.type;
         let toUnmount: Component<IKeyValue, IKeyValue> | undefined;
         let vdom: IVDom | undefined;
 
@@ -382,13 +382,13 @@ export function buildComponentFromVNode(
     let c = vdom && vdom.component;
     const originalComponent = c;
     // 判断是否为同一个组件类
-    const isDiectOwner = vdom && vdom.componentConstructor === vnode.nodeName;
+    const isDiectOwner = vdom && vdom.componentConstructor === vnode.type;
     let isOwner = isDiectOwner;
     // 获取jsx上的属性
     const props = getNodeProps(vnode);
     while (c && !isOwner && (c = c._parentComponent)) {
         // 向上查找
-        isOwner = c.constructor === vnode.nodeName;
+        isOwner = c.constructor === vnode.type;
     }
     const tempVDom = findVDom(c);
     if (tempVDom && isOwner && (!mountALL || (c as Component<any, any>)._component)) {
@@ -408,7 +408,7 @@ export function buildComponentFromVNode(
             vdom = oldVDom = null;
         }
         // 通过缓存组件的方式创建组件实例
-        c = createComponent(vnode.nodeName, props, context, vnode.component);
+        c = createComponent(vnode.type, props, context, vnode.component);
         if (vdom && !c._nextVDom) {
             // 上次这个标签为原生组件，把将要卸载的组件dom缓存
             c._nextVDom = vdom;

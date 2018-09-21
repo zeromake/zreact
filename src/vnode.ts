@@ -1,5 +1,9 @@
 import { Component } from "./component";
-import { IKeyValue, childType, funComponent, NodeName, IBaseVNode, IReactContext, IReactProvider } from "./types";
+import { IKeyValue, NodeName, IBaseVNode, IBaseProps } from "./types";
+
+import {
+    REACT_ELEMENT_TYPE,
+} from "./util";
 
 export class VNode implements IBaseVNode {
     public $$typeof: any;
@@ -8,7 +12,7 @@ export class VNode implements IBaseVNode {
      * {string} 为原生组件
      * {Component|function} 为自定义组件
      */
-    public nodeName: NodeName;
+    // public nodeName: NodeName;
     /**
      * 组件名
      * {string} 为原生组件
@@ -18,15 +22,15 @@ export class VNode implements IBaseVNode {
     /**
      * 子组件
      */
-    public children?: childType[] | childType | null;
+    // public children?: childType[] | childType | null;
     /**
      * 组件所属的属性
      */
-    public attributes?: IKeyValue;
+    // public attributes?: IKeyValue;
     /**
      * 组件所属的属性
      */
-    public props?: IKeyValue;
+    public props: IBaseProps;
     /**
      * 属性中的key
      */
@@ -35,15 +39,16 @@ export class VNode implements IBaseVNode {
     /**
      * 绑定的组件实例
      */
-    public component?: Component<IKeyValue, IKeyValue> | undefined | void | null;
+    public component?: Component<IBaseProps, IKeyValue> | undefined | void | null;
     public zreactCompatUpgraded?: boolean;
     public zreactCompatNormalized?: boolean;
 
     // public context?: IReactContext<any> | IReactProvider<any>;
-    constructor(nodeName: NodeName, children: childType[] | childType | null, vtype: any) {
-        this.nodeName = nodeName;
+    constructor(nodeName: NodeName, props: IBaseProps) {
+        // this.nodeName = nodeName;
         this.type = nodeName;
-        this.children = children;
-        this.$$typeof = vtype;
+        this.props = props;
+        // this.children = children;
+        this.$$typeof = REACT_ELEMENT_TYPE;
     }
 }

@@ -6,25 +6,13 @@ import { expect } from 'chai';
 /** @jsx h */
 const REACT_ELEMENT_TYPE = h("div").$$typeof;
 
-const buildVNode = (nodeName, attributes, children) => {
-    let props
-    if (children) {
-		if (children.length === 1) {
-			children = children[0]
-		} 
-        props = {...attributes, children}
-    } else {
-        props = attributes
-    }
+const buildVNode = (nodeName, props={children: null}) => {
     return ({
-        nodeName,
-        children: children ? children : null,
-        attributes,
         props,
         type: nodeName,
         $$typeof: REACT_ELEMENT_TYPE,
         // component,
-        key: attributes && attributes.key
+        key: props && props.key
     });
 }
 
@@ -34,16 +22,15 @@ describe('h(jsx)', () => {
 		expect( () => r = h('foo') ).not.to.throw();
 		expect(r).to.be.an('object');
 		expect(r).to.be.an.instanceof(Object);
-		expect(r).to.have.property('nodeName', 'foo');
-		expect(r).to.have.property('attributes', undefined);
-		expect(r).to.have.property('children').that.eql(null);
+		expect(r).to.have.property('type', 'foo');
+		expect(r).to.have.property('props').that.deep.equals({children: null});
 	});
 
 	it('should perserve raw attributes', () => {
-		let attrs = { foo:'bar', baz:10, func:()=>{} },
+		let attrs = { foo:'bar', baz:10, func:()=>{}, children: null },
 			r = h('foo', attrs);
 		expect(r).to.be.an('object')
-			.with.property('attributes')
+			.with.property('props')
 			.that.deep.equals(attrs);
 	});
 
@@ -57,8 +44,8 @@ describe('h(jsx)', () => {
         const bar = buildVNode('bar');
         const baz = buildVNode('baz');
 
-		expect(r).to.be.an('object')
-			.with.property('children')
+		expect(r).to.be.an('object').with.property('props')
+			.that.with.property('children')
 			.that.deep.equals([bar, baz]);
 	});
 
@@ -70,13 +57,11 @@ describe('h(jsx)', () => {
 			h('baz', null, h('test'))
 		);
 
-		expect(r).to.be.an('object')
-			.with.property('children')
+		expect(r).to.be.an('object').with.property('props')
+			.that.with.property('children')
 			.that.deep.equals([
 				buildVNode('bar'),
-				buildVNode('baz', undefined, [
-					buildVNode('test')
-				])
+				buildVNode('baz', {children: buildVNode('test')})
 			]);
 	});
 
@@ -91,12 +76,10 @@ describe('h(jsx)', () => {
 		);
 
 		expect(r).to.be.an('object')
-			.with.property('children')
+			.with.property('props').that.with.property('children')
 			.that.deep.equals([
 				buildVNode('bar'),
-				buildVNode('baz', undefined, [
-					buildVNode('test')
-				])
+				buildVNode('baz', {children: buildVNode('test')})
 			]);
 	});
 
@@ -110,13 +93,11 @@ describe('h(jsx)', () => {
 			]
 		);
 
-		expect(r).to.be.an('object')
-			.with.property('children')
+		expect(r).to.be.an('object').with.property('props')
+			.that.with.property('children')
 			.that.deep.equals([
 				buildVNode('bar'),
-				buildVNode('baz', undefined, [
-					buildVNode('test')
-				])
+				buildVNode('baz', {children: buildVNode('test')})
 			]);
 	});
 
@@ -124,27 +105,27 @@ describe('h(jsx)', () => {
 		const m = x => h(x);
 		expect(
 			h('foo', null, m('a'), [m('b'), m('c')], m('d'))
-		).to.have.property('children').that.eql(['a', 'b', 'c', 'd'].map(m));
+		).to.have.property('props').that.with.property('children').that.eql(['a', 'b', 'c', 'd'].map(m));
 
 		expect(
 			h('foo', null, [m('a'), [m('b'), m('c')], m('d')])
-		).to.have.property('children').that.eql(['a', 'b', 'c', 'd'].map(m));
+		).to.have.property('props').that.with.property('children').that.eql(['a', 'b', 'c', 'd'].map(m));
 
 		expect(
 			h('foo', { children: [m('a'), [m('b'), m('c')], m('d')] })
-		).to.have.property('children').that.eql(['a', 'b', 'c', 'd'].map(m));
+		).to.have.property('props').that.with.property('children').that.eql(['a', 'b', 'c', 'd'].map(m));
 
 		expect(
 			h('foo', { children: [[m('a'), [m('b'), m('c')], m('d')]] })
-		).to.have.property('children').that.eql(['a', 'b', 'c', 'd'].map(m));
+		).to.have.property('props').that.with.property('children').that.eql(['a', 'b', 'c', 'd'].map(m));
 
 		expect(
 			h('foo', { children: m('a') })
-		).to.have.property('children').that.eql(m('a'));
+		).to.have.property('props').that.with.property('children').that.eql(m('a'));
 
 		expect(
 			h('foo', { children: 'a' })
-		).to.have.property('children').that.eql('a');
+		).to.have.property('props').that.with.property('children').that.eql('a');
 	});
 
 	it('should support text children', () => {
@@ -154,8 +135,8 @@ describe('h(jsx)', () => {
 			'textstuff'
 		);
 
-		expect(r).to.be.an('object')
-			.with.property('children')
+		expect(r).to.be.an('object').with.property('props')
+			.that.with.property('children')
 			.with.length(9)
 			.that.equals('textstuff');
 	});
@@ -176,8 +157,8 @@ describe('h(jsx)', () => {
 			'six'
 		);
 
-		expect(r).to.be.an('object')
-			.with.property('children')
+		expect(r).to.be.an('object').with.property('props')
+			.that.with.property('children')
 			.that.deep.equals([
 				'onetwo',
 				buildVNode('bar'),
@@ -200,8 +181,8 @@ describe('h(jsx)', () => {
 			null
 		);
 
-		expect(r).to.be.an('object')
-			.with.property('children')
+		expect(r).to.be.an('object').with.property('props')
+			.that.with.property('children')
 			.that.deep.equals('onetwothreefourfivesix');
 	});
 	it('should not merge children that are boolean values', () => {
@@ -215,8 +196,8 @@ describe('h(jsx)', () => {
 			'three'
 		);
 
-		expect(r).to.be.an('object')
-			.with.property('children')
+		expect(r).to.be.an('object').with.property('props')
+			.that.with.property('children')
 			.that.deep.equals('onetwothree');
 	});
 
@@ -224,8 +205,8 @@ describe('h(jsx)', () => {
 		let Component = ({children}) => children;
 		let r = h(Component, null, 'x', 'y');
 
-		expect(r).to.be.an('object')
-			.with.property('children')
+		expect(r).to.be.an('object').with.property('props')
+			.that.with.property('children')
 			.that.deep.equals(['x', 'y']);
 	});
 });

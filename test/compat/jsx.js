@@ -1,4 +1,4 @@
-import renderToString from 'preact-render-to-string';
+import { renderToString } from '../../server-render';
 import React from 'zreact-compat';
 
 const h = React.createElement;
@@ -12,7 +12,7 @@ describe('jsx', () => {
 			</div>
 		);
 
-		expect(jsx.attributes).to.have.property('className', 'foo bar');
+		expect(jsx.props).to.have.property('className', 'foo bar');
 
 		let html = renderToString(jsx);
 

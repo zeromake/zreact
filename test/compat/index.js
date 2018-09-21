@@ -210,7 +210,8 @@ describe('preact-compat', () => {
 			let props = { onChange(){} };
 
 			function expectToBeNormalized(vnode, desc) {
-				expect(vnode, desc).to.have.property('props').with.all.keys(['oninput'].concat(vnode.props.type ? 'type' : [])).and.property('oninput').that.is.a('function');
+                console.log('-------------------------------', vnode.props);
+				expect(vnode, desc).to.have.property('props').with.property('oninput').that.is.a('function');
 			}
 
 			function expectToBeUnmodified(vnode, desc) {
@@ -222,6 +223,7 @@ describe('preact-compat', () => {
 			expectToBeUnmodified(<input {...props} type="checkbox" />, '<input type="checkbox">');
 			expectToBeUnmodified(<input {...props} type="file" />, '<input type="file">');
 
+            console.log('--------------------')
 			expectToBeNormalized(<textarea {...props} />, '<textarea>');
 			expectToBeNormalized(<input {...props} />, '<input>');
 			expectToBeNormalized(<input {...props} type="text" />, '<input type="text">');
@@ -262,14 +264,14 @@ describe('preact-compat', () => {
 			let element = <foo children={<span>c</span>}><div>b</div></foo>;
 			let clone = cloneElement(element);
 			expect(clone).to.eql(element);
-			expect(Children.toArray(clone.children)[0].nodeName).to.eql('div');
+			expect(Children.toArray(clone.props.children)[0].type).to.eql('div');
 		});
 
 		it('should support children in prop argument', () => {
 			let element = <foo></foo>;
 			let children = [<span>b</span>];
 			let clone = cloneElement(element, { children });
-			expect(Children.toArray(clone.children)).to.eql(children);
+			expect(Children.toArray(clone.props.children)).to.eql(children);
 		});
 
 		it('children argument takes precedence over props.children', () => {
@@ -277,14 +279,14 @@ describe('preact-compat', () => {
 			let childrenA = [<span>b</span>];
 			let childrenB = [<div>c</div>];
 			let clone = cloneElement(element, { children: childrenA }, ...childrenB);
-			expect(Children.toArray(clone.children)).to.eql(childrenB);
+			expect(Children.toArray(clone.props.children)).to.eql(childrenB);
 		});
 
 		it('children argument takes precedence over props.children even if falsey', () => {
 			let element = <foo></foo>;
 			let childrenA = [<span>b</span>];
             let clone = cloneElement(element, { children: childrenA }, null);
-			expect(clone.children).to.eql(null);
+			expect(clone.props.children).to.eql(null);
 		});
 	});
 

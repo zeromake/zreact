@@ -12,6 +12,7 @@ import {
     PureComponent,
     unmountComponentAtNode,
 } from "zreact";
+import { VNode } from "./vnode";
 
 const version = "16.0.0"; // trick libraries to think we are react
 
@@ -77,10 +78,10 @@ const DEV = typeof process === "undefined" || !process.env || process.env.NODE_E
 function EmptyComponent() { return null; }
 
 // make react think we"re react.
-const VNode = h("a", null).constructor;
-VNode.prototype.$$typeof = REACT_ELEMENT_TYPE;
-VNode.prototype.zreactCompatUpgraded = false;
-VNode.prototype.zreactCompatNormalized = false;
+const VNodeCon = h("a", null).constructor as typeof VNode;
+// VNodeCon.prototype.$$typeof = REACT_ELEMENT_TYPE;
+VNodeCon.prototype.zreactCompatUpgraded = false;
+VNodeCon.prototype.zreactCompatNormalized = false;
 
 // Object.defineProperty(VNode.prototype, "type", {
 //     get() { return this.nodeName; },
@@ -88,11 +89,11 @@ VNode.prototype.zreactCompatNormalized = false;
 //     configurable: true,
 // });
 
-Object.defineProperty(VNode.prototype, "props", {
-    get() { return this.attributes; },
-    set(v) { this.attributes = v; },
-    configurable: true,
-});
+// Object.defineProperty(VNode.prototype, "props", {
+//     get() { return this.attributes; },
+//     set(v) { this.attributes = v; },
+//     configurable: true,
+// });
 
 const oldEventHook = options.event;
 options.event = (e) => {
@@ -105,35 +106,21 @@ options.event = (e) => {
 };
 
 const oldVnodeHook = options.vnode;
-options.vnode = (vnode) => {
+options.vnode = (vnode: VNode) => {
     if (!vnode.zreactCompatUpgraded) {
         vnode.zreactCompatUpgraded = true;
 
-        const tag = vnode.nodeName;
-        const attrs = vnode.attributes = extend({}, vnode.attributes);
+        const tag = vnode.type;
+        const attrs = vnode.props;
 
         if (typeof tag === "function") {
             if ((tag as any)[COMPONENT_WRAPPER_KEY] === true || (tag.prototype && "isReactComponent" in tag.prototype)) {
-                if (vnode.children && String(vnode.children) === "") {
-                    vnode.children = undefined;
-                }
-                if (vnode.children) {
-                    attrs.children = vnode.children;
-                }
-
                 if (!vnode.zreactCompatNormalized) {
                     normalizeVNode(vnode);
                 }
                 handleComponentVNode(vnode);
             }
         } else {
-            if (vnode.children && String(vnode.children) === "") {
-                vnode.children = undefined;
-            }
-            if (vnode.children) {
-                attrs.children = vnode.children;
-            }
-
             if (attrs.defaultValue) {
                 if (!attrs.value && attrs.value !== 0) {
                     attrs.value = attrs.defaultValue;
@@ -150,20 +137,20 @@ options.vnode = (vnode) => {
     }
 };
 
-function handleComponentVNode(vnode: any) {
-    const tag = vnode.nodeName;
-    const a = vnode.attributes;
+function handleComponentVNode(vnode: VNode) {
+    const tag = vnode.type;
+    const a = vnode.props;
 
-    vnode.attributes = {};
-    if (tag.defaultProps) {
-        extend(vnode.attributes, tag.defaultProps);
+    vnode.props = {};
+    if ((tag as any).defaultProps) {
+        extend(vnode.props, (tag as any).defaultProps);
     }
     if (a) {
-        extend(vnode.attributes, a);
+        extend(vnode.props, a);
     }
 }
 
-function handleElementVNode(vnode: any, a: any) {
+function handleElementVNode(vnode: VNode, a: any) {
     let shouldSanitize: boolean = false;
     let attrs: any;
     let i: string;
@@ -174,7 +161,7 @@ function handleElementVNode(vnode: any, a: any) {
             }
         }
         if (shouldSanitize) {
-            attrs = vnode.attributes = {};
+            attrs = vnode.props = {};
             for (i in a) {
                 if (a.hasOwnProperty(i)) {
                     attrs[ CAMEL_PROPS.test(i) ? i.replace(/([A-Z0-9])/, "-$1").toLowerCase() : i ] = a[i];
@@ -257,13 +244,13 @@ for (let i = ELEMENTS.length; i--; ) {
     DOM[ELEMENTS[i]] = createFactory(ELEMENTS[i]);
 }
 
-function upgradeToVNodes(arr: any, offset?: number) {
+function upgradeToVNodes(arr: VNode[], offset?: number) {
     for (let i = offset || 0; i < arr.length; i++) {
         const obj = arr[i];
         if (Array.isArray(obj)) {
             upgradeToVNodes(obj);
-        } else if (obj && typeof obj === "object" && !isValidElement(obj) && ((obj.props && obj.type) || (obj.attributes && obj.nodeName) || obj.children)) {
-            arr[i] = createElement(obj.type || obj.nodeName, obj.props || obj.attributes, obj.children);
+        } else if (obj && typeof obj === "object" && !isValidElement(obj) && ((obj.props && obj.type) || (obj.props && obj.props.children))) {
+            arr[i] = createElement(obj.type, obj.props, obj.props && obj.props.children);
         }
     }
 }
@@ -305,19 +292,19 @@ function createElement(...args: any[]) {
     return normalizeVNode(h.apply(void 0, args));
 }
 
-function normalizeVNode(vnode: any) {
+function normalizeVNode(vnode: VNode) {
     vnode.zreactCompatNormalized = true;
 
     applyClassName(vnode);
 
-    if (isStatelessComponent(vnode.nodeName)) {
-        vnode.nodeName = statelessComponentHook(vnode.nodeName);
+    if (isStatelessComponent(vnode.type)) {
+        vnode.type = statelessComponentHook(vnode.type);
     }
 
-    const ref = vnode.attributes.ref;
+    const ref = vnode.props.ref;
     const type = ref && typeof ref;
     if (currentComponent && (type === "string" || type === "number")) {
-        vnode.attributes.ref = createStringRefProxy(ref, currentComponent);
+        vnode.props.ref = createStringRefProxy(ref, currentComponent);
     }
 
     applyEventNormalization(vnode);
@@ -325,15 +312,15 @@ function normalizeVNode(vnode: any) {
     return vnode;
 }
 
-function cloneElement(element: any, props: any, ...children: any[]) {
+function cloneElement(element: VNode, props: any, ...children: any[]) {
     if (!isValidElement(element)) {
         return element;
     }
-    const elementProps = element.attributes || element.props;
+    const elementProps = element.props;
     const node = h(
-        element.nodeName || element.type,
+        element.type,
         elementProps,
-        element.children || elementProps && elementProps.children,
+        elementProps && elementProps.children,
     );
     // Only provide the 3rd argument if needed.
     // Arguments 3+ overwrite element.children in preactCloneElement
@@ -358,7 +345,9 @@ function createStringRefProxy(name: any, component: any) {
     });
 }
 
-function applyEventNormalization({ nodeName, attributes }: any) {
+function applyEventNormalization(vnode: VNode) {
+    const nodeName = vnode.type;
+    const attributes = vnode.props;
     if (!attributes || typeof nodeName !== "string") {
         return;
     }
@@ -380,8 +369,8 @@ function applyEventNormalization({ nodeName, attributes }: any) {
     }
 }
 
-function applyClassName(vnode: any) {
-    const a = vnode.attributes || (vnode.attributes = {});
+function applyClassName(vnode: VNode) {
+    const a = vnode.props;
     (classNameDescriptor as any).enumerable = "className" in a;
     if (a.className) {
         a.class = a.className;
@@ -408,19 +397,19 @@ function extend(base: any, props: any) {
     return base;
 }
 
-function shallowDiffers(a: any, b: any) {
-    for (const i in a) {
-        if (!(i in b)) {
-            return true;
-        }
-    }
-    for (const i in b) {
-        if (a[i] !== b[i]) {
-            return true;
-        }
-    }
-    return false;
-}
+// function shallowDiffers(a: any, b: any) {
+//     for (const i in a) {
+//         if (!(i in b)) {
+//             return true;
+//         }
+//     }
+//     for (const i in b) {
+//         if (a[i] !== b[i]) {
+//             return true;
+//         }
+//     }
+//     return false;
+// }
 
 function F() {}
 
@@ -536,16 +525,16 @@ function propsHook(this: any, props: any, context: any) {
     }
 
     // React annoyingly special-cases single children, and some react components are ridiculously strict about this.
-    const c = props.children;
-    if (c && Array.isArray(c) && c.length === 1 && (typeof c[0] === "string" || typeof c[0] === "function" || c[0] instanceof VNode)) {
-        props.children = c[0];
+    // const c = props.children;
+    // if (c && Array.isArray(c) && c.length === 1 && (typeof c[0] === "string" || typeof c[0] === "function" || c[0] instanceof VNode)) {
+    //     props.children = c[0];
 
-        // but its totally still going to be an Array.
-        if (props.children && typeof props.children === "object") {
-            props.children.length = 1;
-            props.children[0] = props.children;
-        }
-    }
+    //     // but its totally still going to be an Array.
+    //     if (props.children && typeof props.children === "object") {
+    //         props.children.length = 1;
+    //         props.children[0] = props.children;
+    //     }
+    // }
 
     // add proptype checking
     if (DEV) {
