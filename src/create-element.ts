@@ -11,14 +11,10 @@ import {
     REACT_FRAGMENT_TYPE,
 } from "./util";
 import { ForwardRef } from "./forward-ref";
-// import Children from "./children";
 
 function Fragment(props: IBaseProps | undefined): childType {
     return (props && props.children) as childType;
 }
-
-// const EMPTY_CHILDREN: any[] = [];
-// const REACT_ELEMENT_TYPE = (typeof Symbol !== "undefined" && (Symbol as any).for && (Symbol as any).for("react.element")) || 0xeac7;
 
 /** JSX/hyperscript reviver
  * Benchmarks: https://esbench.com/bench/57ee8f8e330ab09900a1a1a0
@@ -106,7 +102,6 @@ export function createElement(this: Component<IKeyValue, IKeyValue> | undefined 
     } else if (childrenLen === 1) {
         children = children[0];
     }
-    // let context: IReactContext<any> | IReactProvider<any> | null = null;
     if (nodeName == null) {
     } else if (nodeName === REACT_FRAGMENT_TYPE) {
         nodeName = Fragment;
@@ -131,33 +126,8 @@ export function createElement(this: Component<IKeyValue, IKeyValue> | undefined 
         nodeName,
         props,
     );
-    // 设置属性
-    // if (options.eventBind) {
-    //     const self = this;
-    //     const component: Component<IKeyValue, IKeyValue> | undefined = self && self.setState ? self : undefined;
-    //     // 设置组件实例
-    //     p.component = component;
-    // }
-    // 设置key
-    p.key = props.key;
-    // const p: VNode = {
-    //     // 设置属性
-    //     attributes: attributes == null ? undefined : attributes,
-    //     // 设置子元素
-    //     children,
-    //     // 设置组件实例
-    //     component,
-    //     // 设置key
-    //     key: attributes == null ? undefined : attributes.key,
-    //     // 设置原生组件名字或自定义组件class(function)
-    //     nodeName,
-    // };
-    // p.$$typeof = REACT_ELEMENT_TYPE;
     if (options.vnode != null) {
         options.vnode(p);
     }
-    // if (context != null) {
-    //     p.context = context;
-    // }
     return p;
 }

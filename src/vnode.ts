@@ -6,27 +6,13 @@ import {
 } from "./util";
 
 export class VNode implements IBaseVNode {
-    public $$typeof: any;
-    /**
-     * 组件名
-     * {string} 为原生组件
-     * {Component|function} 为自定义组件
-     */
-    // public nodeName: NodeName;
+    public $$typeof: symbol | number;
     /**
      * 组件名
      * {string} 为原生组件
      * {Component|function} 为自定义组件
      */
     public type: NodeName;
-    /**
-     * 子组件
-     */
-    // public children?: childType[] | childType | null;
-    /**
-     * 组件所属的属性
-     */
-    // public attributes?: IKeyValue;
     /**
      * 组件所属的属性
      */
@@ -43,12 +29,10 @@ export class VNode implements IBaseVNode {
     public zreactCompatUpgraded?: boolean;
     public zreactCompatNormalized?: boolean;
 
-    // public context?: IReactContext<any> | IReactProvider<any>;
     constructor(nodeName: NodeName, props: IBaseProps) {
-        // this.nodeName = nodeName;
         this.type = nodeName;
         this.props = props;
-        // this.children = children;
+        this.key = props.key;
         this.$$typeof = REACT_ELEMENT_TYPE;
     }
 }

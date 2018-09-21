@@ -35,7 +35,7 @@ export const extend = Object.assign || /* istanbul ignore next */ function assig
 export const hasSymbol = typeof Symbol === "function" && (Symbol as any).for;
 export const innerHTML = "dangerouslySetInnerHTML";
 // export const hasOwnProperty = Object.prototype.hasOwnProperty;
-export const REACT_ELEMENT_TYPE = hasSymbol ? (Symbol as any).for("react.element") : 0xeac7;
+export const REACT_ELEMENT_TYPE: symbol | number = hasSymbol ? (Symbol as any).for("react.element") : 0xeac7;
 export const REACT_FRAGMENT_TYPE = hasSymbol ? (Symbol as any).for("react.fragment") : 0xeacb;
 export const REACT_PROVIDER_TYPE = hasSymbol ? (Symbol as any).for("react.provider") : 0xeacd;
 export const REACT_CONTEXT_TYPE = hasSymbol ? (Symbol as any).for("react.context") : 0xeace;
