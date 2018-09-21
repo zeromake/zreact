@@ -1,4 +1,4 @@
-import rollupTypescript from 'rollup-plugin-typescript'
+import rollupTypescript from 'rollup-typescript'
 
 // set new typescript
 const rollupTypescriptPlugin = rollupTypescript({typescript: require('typescript')})
