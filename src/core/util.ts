@@ -3,7 +3,9 @@ import { IUpdater, IBaseObject } from "./type-shared";
 export const hasOwnProperty = Object.prototype.hasOwnProperty;
 export const hasSymbol = typeof Symbol === "function" && (Symbol as any).for;
 
-export const REACT_ELEMENT_TYPE = hasSymbol ? (Symbol as any).for("react.element") : 0xeac7;
+export const REACT_ELEMENT_TYPE: number | symbol = hasSymbol ? (Symbol as any).for("react.element") : 0xeac7;
+
+export function noop(...args: any[]): any {}
 
 export function returnFalse(): boolean {
     return false;

@@ -1,22 +1,31 @@
-
-export type RefElement = Element | Node;
-
+/**
+ * createRef
+ */
 export interface IObjectRef {
-    value: RefElement;
+    current: RefElement;
 }
-export type IRefFun = (node: Element | Node | IComponentMinx<any, any>) => void;
+export type RefElement = Element | Node | IComponentMinx<IBaseProps, IBaseObject> | null;
+export type IRefFun = (node: RefElement) => any;
 
 export type IRefType = IObjectRef | string | IRefFun;
 
 export interface IVNode {
+    $$typeof?: symbol | number;
     tag: number;
-    type: string;
-    props: IBaseProps;
+    type: string | VNodeType;
+    props: IBaseProps | string;
+    $owner?: IVNode | null;
+    key?: string;
+    ref?: IRefType;
 }
 
 export type VirtualNode =
     | IVNode
-    | string;
+    | string
+    | undefined
+    | void
+    | null
+    | number;
 
 export interface IBaseObject {
     [name: string]: any;
@@ -117,7 +126,7 @@ export interface IComponentMinx<P extends IBaseProps, S extends IBaseObject> ext
     replaceState(): void;
     setState(state: S | ((s: S) => S | void), cb: () => void): void | S;
     forceUpdate(cb: () => void): void;
-    render(): IVNode | string | null | undefined;
+    render(): VirtualNode[] | VirtualNode;
 }
 
 export interface IComponentClass<P extends IBaseProps, S extends IBaseObject> {
@@ -126,9 +135,9 @@ export interface IComponentClass<P extends IBaseProps, S extends IBaseObject> {
     getDerivedStateFromProps?(nextProps: P, preState: S): S | null | undefined;
 }
 
-export type IComponentFunction = (props: IBaseProps) => IVNode | string | null | undefined;
+export type IComponentFunction = (props: IBaseProps) => VirtualNode[] | VirtualNode;
 
-export type VNodeType = IComponentClass<any, any> | IComponentFunction | string;
+export type VNodeType = IComponentClass<IBaseProps, IBaseObject> | IComponentFunction | string;
 
 export const enum VType {
     Text = 1,
@@ -137,4 +146,23 @@ export const enum VType {
     Stateless = 1 << 3,
     Void = 1 << 4,
     Portal = 1 << 5,
-  }
+}
+
+export interface IMiddleware {
+    begin: () => any;
+    end: () => any;
+}
+
+export interface IRenderer {
+    controlledCbs: any[];
+    mountOrder: number;
+    macrotasks: any[];
+    boundaries: any[];
+    currentOwner: IVNode;
+    onUpdate(): any;
+    onDispose(): any;
+    middleware(middleware: IMiddleware): void;
+    updateControlled(): void;
+    fireMiddlewares(begin?: boolean): void;
+    [name: string]: any;
+}
