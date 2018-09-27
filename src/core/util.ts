@@ -38,7 +38,7 @@ const numberMap: IBaseObject = {
 
 export let __TYPE = Object.prototype.toString;
 
-export function typeNumber(data: any) {
+export function typeNumber(data: any): number {
     if (data === null) {
         return 1;
     }

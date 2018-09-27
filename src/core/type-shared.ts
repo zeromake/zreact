@@ -13,10 +13,12 @@ export interface IVNode {
     $$typeof?: symbol | number;
     tag: number;
     type: string | VNodeType;
-    props: IBaseProps | string;
+    props: IBaseProps;
     $owner?: IVNode | null;
     key?: string;
     ref?: IRefType;
+    text?: string;
+    isPortal?: boolean;
 }
 
 export type VirtualNode =
@@ -33,8 +35,10 @@ export interface IBaseObject {
 
 export type VirtualNodeList = Array<VirtualNode|VirtualNode[]>;
 
+export type ChildrenType = VirtualNode|VirtualNodeList;
+
 export interface IBaseProps extends IBaseObject {
-    children?: VirtualNode[]| VirtualNode;
+    children?: ChildrenType;
     ref?: IRefType;
     key?: string | number | undefined;
     className?: string;
@@ -135,7 +139,7 @@ export interface IComponentClass<P extends IBaseProps, S extends IBaseObject> {
     getDerivedStateFromProps?(nextProps: P, preState: S): S | null | undefined;
 }
 
-export type IComponentFunction = (props: IBaseProps) => VirtualNode[] | VirtualNode;
+export type IComponentFunction = (props: IBaseProps) => ChildrenType;
 
 export type VNodeType = IComponentClass<IBaseProps, IBaseObject> | IComponentFunction | string;
 

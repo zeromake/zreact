@@ -1,6 +1,7 @@
-import { IBaseProps, IBaseObject, IComponentClass, IComponentMinx, VirtualNodeList, VirtualNode, VNodeType, IRefType, IVNode } from "./type-shared";
-import { hasOwnProperty, extend, REACT_ELEMENT_TYPE } from "./util";
+import { IBaseProps, IBaseObject, IComponentClass, IComponentMinx, VirtualNodeList, VirtualNode, VNodeType, IRefType, IVNode, ChildrenType } from "./type-shared";
+import { hasOwnProperty, extend, typeNumber, REACT_ELEMENT_TYPE, hasSymbol } from "./util";
 import { Renderer } from "./create-renderer";
+import { Component } from "./component";
 
 const RESERVED_PROPS = {
     key: true,
@@ -77,7 +78,7 @@ export function cloneElement(element: IVNode, config?: IBaseProps, ...children: 
     return ReactElement(type, tag, props, key, ref, owner);
 }
 
-function ReactElement(type: VNodeType, tag: number, props: IBaseProps | string, key?: string | null, ref?: IRefType | null, owner?: IVNode): IVNode {
+function ReactElement(type: VNodeType, tag: number, props: IBaseProps, key?: string | null, ref?: IRefType | null, owner?: IVNode): IVNode {
     const vnode: IVNode = {
         type,
         tag,
@@ -86,6 +87,7 @@ function ReactElement(type: VNodeType, tag: number, props: IBaseProps | string, 
     if (tag !== 6) {
         vnode.$$typeof = REACT_ELEMENT_TYPE;
         vnode.ref = ref;
+        vnode.key = key || null;
         vnode.$owner = owner;
     }
     return vnode;
@@ -101,6 +103,160 @@ export function createFactory(type: VNodeType) {
     return factory;
 }
 
-export function createVText(text) {
-    return ReactElement("#text", 6, text + "");
+export function createVText(text: any): IVNode {
+    const vnode = ReactElement("#text", 6, {});
+    vnode.text = "" + text;
+    return vnode;
+}
+
+const escapeRegex = /[=:]/g;
+const escaperLookup = {
+    "=": "=0",
+    ":": "=2",
+};
+
+function escape(key: string) {
+    return "$" + ("" + key).replace(escapeRegex, function _(match) {
+        return escaperLookup[match];
+    });
+}
+
+let lastText: IVNode;
+let flattenIndex: number;
+let flattenObject: {
+    [key: string]: ChildrenType;
+};
+
+function flattenCb(_, child: VirtualNode, key: string, childType: number): void {
+    if (child === null) {
+        lastText = null;
+        return;
+    }
+    if (childType === 3 || childType === 4) {
+        if (lastText) {
+            lastText.text += child;
+            return;
+        }
+        lastText = child = createVText(child);
+    } else {
+        lastText = null;
+    }
+    if (!flattenObject[key]) {
+        flattenObject[key] = child;
+    } else {
+        key = "." + flattenIndex;
+        flattenObject[key] = child;
+    }
+    flattenIndex++;
+}
+
+export function fiberizeChildren(children: ChildrenType, fiber) {
+    flattenObject = {};
+    flattenIndex = 0;
+    if (children !== undefined) {
+        lastText = null; // c 为fiber.props.children
+        traverseAllChildren(children, "", flattenCb);
+    }
+    flattenIndex = 0;
+    return (fiber.children = flattenObject);
+}
+
+function getComponentKey(component: VirtualNode, index) {
+    // Do some typechecking here since we call this blindly. We want to ensure
+    // that we don't block potential future ES APIs.
+    if (
+        typeof component === "object" &&
+        component !== null &&
+        component.key != null
+    ) {
+        // Explicit key
+        return escape(component.key);
+    }
+    // Implicit key determined by the index in the set
+    return index.toString(36);
+}
+
+const SEPARATOR = ".";
+const SUBSEPARATOR = ":";
+
+// operateChildren有着复杂的逻辑，如果第一层是可遍历对象，那么
+export function traverseAllChildren(children: ChildrenType, nameSoFar: string, callback: typeof flattenCb, bookKeeping?: object): number {
+    let childType: number = typeNumber(children);
+    let invokeCallback = false;
+    switch (childType) {
+        case 0: // undefined
+        case 1: // null
+        case 2: // boolean
+        case 5: // function
+        case 6: // symbol
+            children = null;
+            invokeCallback = true;
+            break;
+        case 3: // string
+        case 4: // number
+            invokeCallback = true;
+            break;
+        // 7 array
+        case 8: // object
+            if ((children as IVNode).$$typeof || children instanceof Component) {
+                invokeCallback = true;
+            } else if ((children as IVNode).hasOwnProperty("toString")) {
+                children = children + "";
+                invokeCallback = true;
+                childType = 3;
+            }
+            break;
+    }
+
+    if (invokeCallback) {
+        callback(
+            bookKeeping,
+            children as VirtualNode,
+            // If it's the only child, treat the name as if it was wrapped in an array
+            // so that it's consistent if the number of children grows.
+            nameSoFar === "" ? SEPARATOR + getComponentKey((children as VirtualNode), 0) : nameSoFar,
+            childType,
+        );
+        return 1;
+    }
+
+    let subtreeCount = 0; // Count of children found in the current subtree.
+    const nextNamePrefix =
+        nameSoFar === "" ? SEPARATOR : nameSoFar + SUBSEPARATOR;
+    if ((children as VirtualNodeList).forEach) {
+        // 数组，Map, Set
+        (children as VirtualNodeList).forEach(function _(child, i) {
+            const nextName = nextNamePrefix + getComponentKey((child as VirtualNode), i);
+            subtreeCount += traverseAllChildren(
+                child,
+                nextName,
+                callback,
+                bookKeeping,
+            );
+        });
+        return subtreeCount;
+    }
+    const iteratorFn = getIteractor((children as VirtualNodeList));
+    if (iteratorFn) {
+        const iterator: Iterator<VirtualNode|VirtualNode[]> = iteratorFn.call(children);
+        let ii = 0;
+        let step: IteratorResult<VirtualNode|VirtualNode[]>;
+        while (!(step = iterator.next()).done) {
+            const child = step.value;
+            const nextName = nextNamePrefix + getComponentKey((child as VirtualNode), ii++);
+            subtreeCount += traverseAllChildren(child, nextName, callback, bookKeeping);
+        }
+        return subtreeCount;
+    }
+    throw TypeError("children: type is invalid.");
+}
+
+const REAL_SYMBOL = hasSymbol && Symbol.iterator;
+const FAKE_SYMBOL = "@@iterator";
+
+function getIteractor<T>(a: T[]): () => Iterator<T> {
+    const iteratorFn = (REAL_SYMBOL && a[REAL_SYMBOL]) || a[FAKE_SYMBOL];
+    if (iteratorFn && iteratorFn.call) {
+        return iteratorFn;
+    }
 }
