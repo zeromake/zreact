@@ -5,12 +5,19 @@
       "sourceMap": true,
       "target": "es5", // 目标代码平台
       "strict": true, // TS严格模式
+      "jsx": "react",
+      "jsxFactory": "createElement",
       "allowSyntheticDefaultImports": true, // 使用 ES2015 默认的 imports 风格
+      "lib": [
+        "es2015",
+        "dom",
+      ]
     },
     "exclude": [
       "node_modeles" // 不转换 node_modeles
     ],
     "files": [
-       "src/index.ts"
+      "./src/type.d.ts",
+      "./src/index.ts",
     ]
 }

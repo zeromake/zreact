@@ -24,7 +24,7 @@ export const Renderer: IRenderer = {
         const method = begin ? "begin" : "end";
         const delta = begin ? -1 : 1;
         let index = begin ? middlewares.length - 1 : 0;
-        let obj: IMiddleware = null;
+        let obj: IMiddleware | null = null;
         while ((obj = middlewares[index])) {
             obj[method]();
             index += delta;

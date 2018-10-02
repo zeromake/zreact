@@ -1,5 +1,5 @@
-import { IBaseProps, IBaseObject, IComponentClass, IComponentMinx, VirtualNodeList, VirtualNode, VNodeType, IRefType, IVNode, ChildrenType } from "./type-shared";
-import { hasOwnProperty, extend, typeNumber, REACT_ELEMENT_TYPE, hasSymbol } from "./util";
+import { IBaseProps, IBaseObject, VirtualNodeList, VirtualNode, VNodeType, IRefType, IVNode, ChildrenType } from "./type-shared";
+import { hasOwnProperty, typeNumber, REACT_ELEMENT_TYPE, hasSymbol } from "./util";
 import { Renderer } from "./create-renderer";
 import { Component } from "./component";
 
@@ -15,8 +15,8 @@ function makeProps(type: VNodeType, config: IBaseProps, props: IBaseProps, child
             props[propName] = config[propName];
         }
     }
-    if (typeof type === "function" && (type as IComponentClass<IBaseProps, IBaseObject>).defaultProps != null) {
-        const defaultProps: IBaseObject = (type as IComponentClass<IBaseProps, IBaseObject>).defaultProps;
+    if (typeof type === "function" && (type as any).defaultProps != null) {
+        const defaultProps: IBaseObject = (type as any).defaultProps;
         for (const propName in defaultProps) {
             if (!(propName in props)) {
                 props[propName] = defaultProps[propName];
@@ -42,7 +42,7 @@ function hasVaildKey(config: IBaseProps): boolean {
 export function createElement(type: VNodeType, config?: IBaseProps|null, ...children: VirtualNodeList): IVNode {
     let tag: number = 5;
     let key: string|null = null;
-    let ref: IRefType|null = null;
+    let ref: IRefType|undefined;
     const argsLen = children.length;
     if (typeof type === "function") {
         tag = type.prototype.render != null ? 1 : 2;
@@ -61,7 +61,7 @@ export function createElement(type: VNodeType, config?: IBaseProps|null, ...chil
 }
 
 export function cloneElement(element: IVNode, config?: IBaseProps, ...children: VirtualNodeList): IVNode {
-    let props = typeof element.props === "string" ? element.props : {...element.props};
+    let props = {...element.props};
     const { type, tag } = element;
     let { $owner: owner, ref, key } = element;
     const argsLen = children.length;
@@ -78,7 +78,7 @@ export function cloneElement(element: IVNode, config?: IBaseProps, ...children: 
     return ReactElement(type, tag, props, key, ref, owner);
 }
 
-function ReactElement(type: VNodeType, tag: number, props: IBaseProps, key?: string | null, ref?: IRefType | null, owner?: IVNode): IVNode {
+function ReactElement(type: VNodeType, tag: number, props: IBaseProps, key?: string | null, ref?: IRefType, owner?: IVNode|null): IVNode {
     const vnode: IVNode = {
         type,
         tag,
@@ -110,31 +110,35 @@ export function createVText(text: any): IVNode {
 }
 
 const escapeRegex = /[=:]/g;
-const escaperLookup = {
+const escaperLookup: IBaseObject = {
     "=": "=0",
     ":": "=2",
 };
 
 function escape(key: string) {
-    return "$" + ("" + key).replace(escapeRegex, function _(match) {
+    return "$" + ("" + key).replace(escapeRegex, function _(match: string) {
         return escaperLookup[match];
     });
 }
 
-let lastText: IVNode;
+let lastText: IVNode | null = null;
 let flattenIndex: number;
 let flattenObject: {
     [key: string]: ChildrenType;
 };
 
-function flattenCb(_, child: VirtualNode, key: string, childType: number): void {
+function flattenCb(_: object | undefined, child: VirtualNode, key: string, childType: number): void {
     if (child === null) {
         lastText = null;
         return;
     }
     if (childType === 3 || childType === 4) {
-        if (lastText) {
-            lastText.text += child;
+        if (lastText != null) {
+            if (lastText.text) {
+                lastText.text += child;
+            } else {
+                lastText.text = child as string;
+            }
             return;
         }
         lastText = child = createVText(child);
@@ -150,7 +154,7 @@ function flattenCb(_, child: VirtualNode, key: string, childType: number): void 
     flattenIndex++;
 }
 
-export function fiberizeChildren(children: ChildrenType, fiber) {
+export function fiberizeChildren(children: ChildrenType, fiber: any) {
     flattenObject = {};
     flattenIndex = 0;
     if (children !== undefined) {
@@ -161,16 +165,16 @@ export function fiberizeChildren(children: ChildrenType, fiber) {
     return (fiber.children = flattenObject);
 }
 
-function getComponentKey(component: VirtualNode, index) {
+function getComponentKey(component: VirtualNode, index: number) {
     // Do some typechecking here since we call this blindly. We want to ensure
     // that we don't block potential future ES APIs.
     if (
         typeof component === "object" &&
         component !== null &&
-        component.key != null
+        (component as IVNode).key != null
     ) {
         // Explicit key
-        return escape(component.key);
+        return escape((component as IVNode).key as string);
     }
     // Implicit key determined by the index in the set
     return index.toString(36);
@@ -180,7 +184,7 @@ const SEPARATOR = ".";
 const SUBSEPARATOR = ":";
 
 // operateChildren有着复杂的逻辑，如果第一层是可遍历对象，那么
-export function traverseAllChildren(children: ChildrenType, nameSoFar: string, callback: typeof flattenCb, bookKeeping?: object): number {
+export function traverseAllChildren(children: ChildrenType, nameSoFar: string, callback: typeof flattenCb, bookKeeping?: object|undefined): number {
     let childType: number = typeNumber(children);
     let invokeCallback = false;
     switch (childType) {
@@ -251,12 +255,14 @@ export function traverseAllChildren(children: ChildrenType, nameSoFar: string, c
     throw TypeError("children: type is invalid.");
 }
 
-const REAL_SYMBOL = hasSymbol && Symbol.iterator;
-const FAKE_SYMBOL = "@@iterator";
+const REAL_SYMBOL: symbol = hasSymbol && Symbol.iterator;
+const FAKE_SYMBOL: string = "@@iterator";
 
-function getIteractor<T>(a: T[]): () => Iterator<T> {
-    const iteratorFn = (REAL_SYMBOL && a[REAL_SYMBOL]) || a[FAKE_SYMBOL];
+function getIteractor<T>(a: T[]): (() => Iterator<T>) | void {
+    const iter = (REAL_SYMBOL && (a as any)[REAL_SYMBOL]);
+    const iteratorFn = iter || (a as any)[FAKE_SYMBOL];
     if (iteratorFn && iteratorFn.call) {
         return iteratorFn;
     }
+    return;
 }

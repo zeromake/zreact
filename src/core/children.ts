@@ -3,26 +3,26 @@ import { VirtualNode, ChildrenType, IVNode, VirtualNodeList } from "./type-share
 import { noop } from "./util";
 
 export const Children = {
-    only(children: ChildrenType): VirtualNode {
+    only(children: ChildrenType, ...deep: any[]): VirtualNode {
         if (isValidElement(children)) {
             return children as VirtualNode;
         }
         throw new TypeError("expect only one child");
     },
-    const(children: ChildrenType): number {
+    count(children: ChildrenType): number {
         if (children == null) {
             return 0;
         }
         return traverseAllChildren(children, "", noop);
     },
-    map(children: ChildrenType, func: callBackType, context?: object): VirtualNode[] {
-        return proxyIt(children, func, [], context);
+    map(children: ChildrenType, func: callBackType, context?: object|null): VirtualNode[] {
+        return proxyIt(children, func, [], context) as VirtualNode[];
     },
-    forEach(children: ChildrenType, func: callBackType, context?: object): null {
+    forEach(children: ChildrenType, func: callBackType, context?: object|null): null {
         return proxyIt(children, func, null, context) as null;
     },
     toArray(children: ChildrenType): VirtualNode[] {
-        return proxyIt(children, K, []);
+        return proxyIt(children, K, []) as VirtualNode[];
     },
 };
 
@@ -31,7 +31,7 @@ function escapeUserProvidedKey(text: any): string {
     return ("" + text).replace(userProvidedKeyEscapeRegex, "$&/");
 }
 
-function proxyIt(children: ChildrenType, func: callBackType, result?: VirtualNode[], context?: object): (VirtualNode[]|null) {
+function proxyIt(children: ChildrenType, func: callBackType, result?: VirtualNode[]|null, context?: object|null): (VirtualNode[]|null|undefined) {
     if (children == null) {
         return [];
     }
@@ -39,7 +39,7 @@ function proxyIt(children: ChildrenType, func: callBackType, result?: VirtualNod
     return result;
 }
 
-function K(el) {
+function K(el: any) {
     return el;
 }
 
@@ -53,12 +53,12 @@ export interface IBookKeeping {
     count: number;
 }
 
-function mapChildren(children: ChildrenType, prefix: string, func: callBackType, result?: VirtualNode[], context?: object): void {
+function mapChildren(children: ChildrenType, prefix: string|null, func: callBackType, result?: VirtualNode[]|null, context?: object|null): void {
     let keyPrefix = "";
     if (prefix != null) {
         keyPrefix = escapeUserProvidedKey(prefix) + "/";
     }
-    traverseAllChildren(children, "", traverseCallback, {
+    traverseAllChildren(children, "", traverseCallback as any, {
         context,
         keyPrefix,
         func,

@@ -20,16 +20,18 @@ export class Component<P extends IBaseProps, S extends IBaseObject> implements I
      * @param preState
      */
     public static getDerivedStateFromProps?(nextProps: IBaseProps, preState: IBaseObject): IBaseObject | null | undefined;
+
+    public isPureComponent?: boolean;
     public updater: IUpdater;
     public props: P;
-    public state: S|null;
-    public context: IBaseObject;
+    public state: S;
+    public context?: IBaseObject;
 
-    constructor(props: P, context: IBaseObject) {
+    constructor(props: P, context?: IBaseObject) {
         this.context = context;
         this.props = props;
         this.updater = fakeUpdater;
-        this.state = null;
+        this.state = null as any;
     }
 
     public isReactComponent?(): boolean;
@@ -41,7 +43,7 @@ export class Component<P extends IBaseProps, S extends IBaseObject> implements I
 
     }
 
-    public setState(state: S | ((s: S) => S|void), cb: () => void): void {
+    public setState(state: S | ((s: S) => S|void), cb?: () => void): void {
         this.updater.enqueuSetState(this, state, cb);
     }
 

@@ -15,25 +15,34 @@ export interface IVNode {
     type: string | VNodeType;
     props: IBaseProps;
     $owner?: IVNode | null;
-    key?: string;
+    key?: string | null;
     ref?: IRefType;
     text?: string;
     isPortal?: boolean;
 }
 
-export type VirtualNode =
+type VNode =
     | IVNode
     | string
+    | number
+    | boolean
     | undefined
     | void
-    | null
-    | number;
+    | null;
+
+export type VirtualNode = VNode | VirtualNodeFun | VNode[];
+
+export type VirtualNodeFun = (...args: any[]) => ChildrenType;
 
 export interface IBaseObject {
     [name: string]: any;
 }
 
-export type VirtualNodeList = Array<VirtualNode|VirtualNode[]>;
+export type VirtualNodeList = Array<
+    VirtualNode
+    |VirtualNode[]
+    |(VirtualNode[][])
+>;
 
 export type ChildrenType = VirtualNode|VirtualNodeList;
 
@@ -118,7 +127,7 @@ export interface IUpdater {
     enqueuSetState(
         component: IComponentMinx<any, any>,
         state: IBaseObject | boolean | ((s: IBaseObject) => IBaseObject|null|undefined),
-        cb: () => void,
+        cb?: () => void,
     ): boolean;
     isMounted(component: IComponentMinx<any, any>): boolean;
 }
@@ -133,10 +142,19 @@ export interface IComponentMinx<P extends IBaseProps, S extends IBaseObject> ext
     render(): VirtualNode[] | VirtualNode;
 }
 
+export abstract class IComponentMinx<P extends IBaseProps, S extends IBaseObject> {
+    public static displayName?: string;
+    public static defaultProps?: IBaseProps;
+    public static getDerivedStateFromProps?(nextProps: IBaseProps, preState: IBaseObject): IBaseObject | null | undefined;
+    public abstract state: Readonly<S>;
+    public abstract props: Readonly<P>|null;
+    public abstract context?: IBaseObject;
+
+    constructor(p?: P, c?: IBaseObject) {}
+
+}
 export interface IComponentClass<P extends IBaseProps, S extends IBaseObject> {
-    defaultProps?: IBaseObject;
     new(p: P, c: IBaseObject): IComponentMinx<P, S>;
-    getDerivedStateFromProps?(nextProps: P, preState: S): S | null | undefined;
 }
 
 export type IComponentFunction = (props: IBaseProps) => ChildrenType;
@@ -153,8 +171,8 @@ export const enum VType {
 }
 
 export interface IMiddleware {
-    begin: () => any;
-    end: () => any;
+    begin: () => void;
+    end: () => void;
 }
 
 export interface IRenderer {
@@ -162,7 +180,7 @@ export interface IRenderer {
     mountOrder: number;
     macrotasks: any[];
     boundaries: any[];
-    currentOwner: IVNode;
+    currentOwner: IVNode|null;
     onUpdate(): any;
     onDispose(): any;
     middleware(middleware: IMiddleware): void;
