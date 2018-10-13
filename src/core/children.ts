@@ -43,7 +43,7 @@ function K(el: any) {
     return el;
 }
 
-type callBackType = (child: VirtualNode, childKey: string) => ChildrenType;
+type callBackType = (child: VirtualNode, childKey: number) => ChildrenType;
 
 export interface IBookKeeping {
     result: VirtualNode[];
@@ -53,7 +53,7 @@ export interface IBookKeeping {
     count: number;
 }
 
-function mapChildren(children: ChildrenType, prefix: string|null, func: callBackType, result?: VirtualNode[]|null, context?: object|null): void {
+function mapChildren(children: ChildrenType, prefix: number|string|null, func: callBackType, result?: VirtualNode[]|null, context?: object|null): void {
     let keyPrefix = "";
     if (prefix != null) {
         keyPrefix = escapeUserProvidedKey(prefix) + "/";
@@ -67,7 +67,7 @@ function mapChildren(children: ChildrenType, prefix: string|null, func: callBack
     });
 }
 
-function traverseCallback(bookKeeping: IBookKeeping, child: VirtualNode, childKey: string): void {
+function traverseCallback(bookKeeping: IBookKeeping, child: VirtualNode, childKey: string|number): void {
     const { result, keyPrefix, func, context } = bookKeeping;
 
     let mappedChild: ChildrenType = func.call(context, child, bookKeeping.count++);

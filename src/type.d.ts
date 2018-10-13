@@ -1,12 +1,9 @@
-import { IVNode, IComponentClass, IBaseProps, IBaseObject } from "./core/type-shared";
+import { IVNode, IComponentClass, IBaseProps, IBaseObject, ChildrenType } from "./core/type-shared";
 import { createElement } from "./core/create-element";
 
 declare global {
     namespace JSX {
         type Element = IVNode;
-        // interface Element extends IVNode {
-
-        // }
         interface ElementClass extends IComponentClass<IBaseProps, IBaseObject> {
 
         }
@@ -15,7 +12,7 @@ declare global {
         }
 
         interface ElementChildrenAttribute {
-            children: any;
+            children: ChildrenType;
         }
         interface SVGAttributes extends HTMLAttributes {
             accentHeight?: number | string;

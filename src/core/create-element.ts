@@ -127,7 +127,7 @@ let flattenObject: {
     [key: string]: ChildrenType;
 };
 
-function flattenCb(_: object | undefined, child: VirtualNode, key: string, childType: number): void {
+function flattenCb(_: object | undefined, child: VirtualNode, key: string|number, childType: number): void {
     if (child === null) {
         lastText = null;
         return;

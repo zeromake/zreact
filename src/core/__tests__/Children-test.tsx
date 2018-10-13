@@ -402,7 +402,7 @@ describe("Children", () => {
     });
 
     it("should pass key to returned component", () => {
-        const mapFn = function _(kid: any, index: string): IVNode {
+        const mapFn = function _(kid: any, index: number): IVNode {
             return <div>{kid}</div>;
         };
 
@@ -419,7 +419,7 @@ describe("Children", () => {
 
     it("should invoke callback with the right context", () => {
         let lastContext;
-        const callback = function _(this: object, kid: any, index: string): any {
+        const callback = function _(this: object, kid: any, index: number): any {
             lastContext = this;
             return this;
         };
@@ -820,6 +820,22 @@ describe("Children", () => {
         expect(function _() {
             Children.forEach(/abc/ as any, function __() { }, null);
         }).toThrow("children: type is invalid.");
+    });
+
+    it("should map return array", () => {
+        const children = [
+            "**粗体**",
+            "~~删除线~~",
+        ];
+        const child = Children.map(children, (item: any, index: number) => {
+            return [
+                <div key={index}>{item}</div>,
+            ];
+        });
+        expect(child).toEqual([
+            <div key=".0/.$0">**粗体**</div>,
+            <div key=".1/.$1">~~删除线~~</div>,
+        ]);
     });
 
     // it("复杂的孩子转换", () => {
