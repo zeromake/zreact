@@ -60,3 +60,5 @@ typings/
 /docs/
 *.log
 
+.DS_Store
+
