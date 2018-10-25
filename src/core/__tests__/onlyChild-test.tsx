@@ -9,7 +9,7 @@ const WrapComponent = class extends Component<any, any> {
     public render(): any {
         return (
             h("div", null,
-                Children.only(this.props.children, this.props.mapFn, this),
+                Children.only(this.props.children),
             )
         );
     }

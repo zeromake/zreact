@@ -3,7 +3,7 @@ import { VirtualNode, ChildrenType, IVNode, VirtualNodeList } from "./type-share
 import { noop } from "./util";
 
 export const Children = {
-    only(children: ChildrenType, ...deep: any[]): VirtualNode {
+    only(children: ChildrenType): VirtualNode {
         if (isValidElement(children)) {
             return children as VirtualNode;
         }
