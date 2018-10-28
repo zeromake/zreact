@@ -54,10 +54,10 @@
   resolved "http://registry.npm.taobao.org/@types/highlight.js/download/@types/highlight.js-9.12.3.tgz#b672cfaac25cbbc634a0fd92c515f66faa18dbca"
   integrity sha1-tnLPqsJcu8Y0oP2SxRX2b6oY28o=
 
-"@types/jest@^23.3.7":
-  version "23.3.7"
-  resolved "http://registry.npm.taobao.org/@types/jest/download/@types/jest-23.3.7.tgz#77f9a4332ccf8db680a31818ade3ee454c831a79"
-  integrity sha1-d/mkMyzPjbaAoxgYrePuRUyDGnk=
+"@types/jest@^23.3.8":
+  version "23.3.8"
+  resolved "http://registry.npm.taobao.org/@types/jest/download/@types/jest-23.3.8.tgz#56b07c0c3d7c8a6c47abb4f785cab648c6eafd01"
+  integrity sha1-VrB8DD18imxHq7T3hcq2SMbq/QE=
 
 "@types/lodash@^4.14.110":
   version "4.14.117"

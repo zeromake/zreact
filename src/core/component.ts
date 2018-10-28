@@ -11,6 +11,7 @@ import {
     IUpdater,
     IVNode,
 } from "./type-shared";
+import { IFiber } from "../fiber/type-shared";
 
 export class Component<P extends IBaseProps, S extends IBaseObject> implements IComponentMinx<P, S> {
     public static defaultProps?: IBaseObject;
@@ -26,6 +27,7 @@ export class Component<P extends IBaseProps, S extends IBaseObject> implements I
     public props: P;
     public state: S;
     public context?: IBaseObject;
+    public $reactInternalFiber?: IFiber;
 
     constructor(props: P, context?: IBaseObject) {
         this.context = context;

@@ -1,3 +1,5 @@
+import { IFiber } from "../fiber/type-shared";
+
 /**
  * createRef
  */
@@ -9,15 +11,65 @@ export type IRefFun = (node: RefElement) => any;
 
 export type IRefType = IObjectRef | string | IRefFun;
 
+export interface IOwnerAttribute {
+    /**
+     * fiber 实例
+     */
+    $reactInternalFiber?: IFiber;
+    /**
+     * 组件更新器
+     */
+    updater: IUpdater;
+    /**
+     * 获取组件实例或者 dom 对象
+     */
+    ref?: IRefType;
+    /**
+     * render 时传递的属性
+     */
+    props?: Readonly<IBaseProps>|null;
+    /**
+     * 父组件传递的上下文
+     */
+    context?: object;
+    /**
+     * render 生成 vnode
+     */
+    render: () => VirtualNode[] | VirtualNode;
+    /**
+     * 是否为无状态组件
+     */
+    $isStateless?: boolean;
+    /**
+     * 无状态组件是否在初始化
+     */
+    $init?: boolean;
+}
+
 export interface IVNode {
     $$typeof?: symbol | number;
+    /**
+     * vnode 的类型
+     */
     tag: number;
+    /**
+     * dom名或组件class|function
+     */
     type: string | VNodeType;
+    /**
+     * 组件参数
+     */
     props: IBaseProps;
-    $owner?: IVNode | null;
+    $owner?: IOwnerAttribute | IComponentMinx<IBaseProps, IBaseObject> | null;
     key?: string | null;
+    /**
+     * ref 获取组件实例
+     */
     ref?: IRefType;
     text?: string;
+    /**
+     * 是否为传送门
+     */
     isPortal?: boolean;
 }
 
@@ -142,13 +194,16 @@ export interface IComponentMinx<P extends IBaseProps, S extends IBaseObject> ext
     render(): VirtualNode[] | VirtualNode;
 }
 
-export abstract class IComponentMinx<P extends IBaseProps, S extends IBaseObject> {
+export abstract class IComponentMinx<P extends IBaseProps, S extends IBaseObject> implements IOwnerAttribute {
     public static displayName?: string;
     public static defaultProps?: IBaseProps;
     public static getDerivedStateFromProps?(nextProps: IBaseProps, preState: IBaseObject): IBaseObject | null | undefined;
     public abstract state: Readonly<S>;
     public abstract props: Readonly<P>|null;
-    public abstract context?: IBaseObject;
+    public abstract $reactInternalFiber?: IFiber;
+    public abstract updater: IUpdater;
+
+    public abstract $isStateless?: boolean;
 
     constructor(p?: P, c?: IBaseObject) {}
 
@@ -161,14 +216,14 @@ export type IComponentFunction = (props: IBaseProps) => ChildrenType;
 
 export type VNodeType = IComponentClass<IBaseProps, IBaseObject> | IComponentFunction | string;
 
-export const enum VType {
-    Text = 1,
-    Node = 1 << 1,
-    Composite = 1 << 2,
-    Stateless = 1 << 3,
-    Void = 1 << 4,
-    Portal = 1 << 5,
-}
+// export const enum VType {
+//     Text = 1,
+//     Node = 1 << 1,
+//     Composite = 1 << 2,
+//     Stateless = 1 << 3,
+//     Void = 1 << 4,
+//     Portal = 1 << 5,
+// }
 
 export interface IMiddleware {
     begin: () => void;
@@ -180,7 +235,9 @@ export interface IRenderer {
     mountOrder: number;
     macrotasks: any[];
     boundaries: any[];
-    currentOwner: IVNode|null;
+    currentOwner: IComponentMinx<IBaseProps, IBaseObject>|IOwnerAttribute|null;
+    catchError?: any;
+    catchStack?: string;
     onUpdate(): any;
     onDispose(): any;
     middleware(middleware: IMiddleware): void;

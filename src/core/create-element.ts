@@ -1,4 +1,4 @@
-import { IBaseProps, IBaseObject, VirtualNodeList, VirtualNode, VNodeType, IRefType, IVNode, ChildrenType } from "./type-shared";
+import { IBaseProps, IBaseObject, VirtualNodeList, VirtualNode, VNodeType, IRefType, IVNode, ChildrenType, IComponentMinx, IOwnerAttribute } from "./type-shared";
 import { hasOwnProperty, typeNumber, REACT_ELEMENT_TYPE, hasSymbol } from "./util";
 import { Renderer } from "./create-renderer";
 import { Component } from "./component";
@@ -78,7 +78,7 @@ export function cloneElement(element: IVNode, config?: IBaseProps, ...children: 
     return ReactElement(type, tag, props, key, ref, owner);
 }
 
-function ReactElement(type: VNodeType, tag: number, props: IBaseProps, key?: string | null, ref?: IRefType, owner?: IVNode|null): IVNode {
+function ReactElement(type: VNodeType, tag: number, props: IBaseProps, key?: string | null, ref?: IRefType, owner?: IComponentMinx<IBaseProps, IBaseObject>|IOwnerAttribute|null): IVNode {
     const vnode: IVNode = {
         type,
         tag,

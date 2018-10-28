@@ -1,8 +1,11 @@
-import { IUpdater, IBaseObject } from "./type-shared";
+import { IUpdater, IBaseObject, IComponentMinx, IOwnerAttribute } from "./type-shared";
 
 export const hasOwnProperty = Object.prototype.hasOwnProperty;
 export const hasSymbol = typeof Symbol === "function" && (Symbol as any).for;
 
+/**
+ * react 的组件 symbol
+ */
 export const REACT_ELEMENT_TYPE: number | symbol = hasSymbol ? (Symbol as any).for("react.element") : 0xeac7;
 
 export function noop(...args: any[]): any {}
@@ -38,6 +41,10 @@ const numberMap: IBaseObject = {
 
 export let __TYPE = Object.prototype.toString;
 
+/**
+ * 判断数据类型
+ * @param data
+ */
 export function typeNumber(data: any): number {
     if (data === null) {
         return 1;
@@ -53,3 +60,12 @@ export const fakeUpdater: IUpdater = {
     enqueuSetState: returnFalse,
     isMounted: returnFalse,
 };
+
+/**
+ * 组件是否挂载
+ * @param instance 组件对象
+ */
+export function isMounted(instance: IComponentMinx<any, any> | IOwnerAttribute) {
+    const fiber = instance.$reactInternalFiber;
+    return !!(fiber && fiber.hasMounted);
+}
