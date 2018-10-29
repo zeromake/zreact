@@ -19,7 +19,7 @@ export interface IOwnerAttribute {
     /**
      * 组件更新器
      */
-    updater: IUpdater;
+    updater?: IUpdater;
     /**
      * 获取组件实例或者 dom 对象
      */
@@ -35,7 +35,7 @@ export interface IOwnerAttribute {
     /**
      * render 生成 vnode
      */
-    render: () => VirtualNode[] | VirtualNode;
+    render?: () => VirtualNode[] | VirtualNode;
     /**
      * 是否为无状态组件
      */
@@ -44,7 +44,11 @@ export interface IOwnerAttribute {
      * 无状态组件是否在初始化
      */
     $init?: boolean;
+    renderImpl?: VNodeType;
+    $useNewHooks?: boolean;
 }
+
+export type OwnerType = IOwnerAttribute | IComponentMinx<IBaseProps, IBaseObject>;
 
 export interface IVNode {
     $$typeof?: symbol | number;
@@ -60,7 +64,7 @@ export interface IVNode {
      * 组件参数
      */
     props: IBaseProps;
-    $owner?: IOwnerAttribute | IComponentMinx<IBaseProps, IBaseObject> | null;
+    $owner?: OwnerType | null;
     key?: string | null;
     /**
      * ref 获取组件实例
@@ -176,12 +180,22 @@ export interface IComponentLifecycle<P extends IBaseProps, S extends IBaseObject
 }
 
 export interface IUpdater {
-    enqueuSetState(
-        component: IComponentMinx<any, any>,
+    /**
+     * 挂载顺序
+     */
+    mountOrder: number;
+    /**
+     * 触发 state 变化
+     * @param component 组件实例
+     * @param state
+     * @param cb 回调
+     */
+    enqueueSetState(
+        component: OwnerType,
         state: IBaseObject | boolean | ((s: IBaseObject) => IBaseObject|null|undefined),
         cb?: () => void,
     ): boolean;
-    isMounted(component: IComponentMinx<any, any>): boolean;
+    isMounted(component: OwnerType): boolean;
 }
 
 export interface IComponentMinx<P extends IBaseProps, S extends IBaseObject> extends IComponentLifecycle<P, S> {
@@ -200,8 +214,10 @@ export abstract class IComponentMinx<P extends IBaseProps, S extends IBaseObject
     public static getDerivedStateFromProps?(nextProps: IBaseProps, preState: IBaseObject): IBaseObject | null | undefined;
     public abstract state: Readonly<S>;
     public abstract props: Readonly<P>|null;
+    public abstract context?: IBaseObject;
     public abstract $reactInternalFiber?: IFiber;
     public abstract updater: IUpdater;
+    public abstract $useNewHooks?: boolean;
 
     public abstract $isStateless?: boolean;
 
@@ -212,7 +228,7 @@ export interface IComponentClass<P extends IBaseProps, S extends IBaseObject> {
     new(p: P, c: IBaseObject): IComponentMinx<P, S>;
 }
 
-export type IComponentFunction = (props: IBaseProps) => ChildrenType;
+export type IComponentFunction = (props: IBaseProps, ref?: IRefType) => VirtualNode[] | VirtualNode;
 
 export type VNodeType = IComponentClass<IBaseProps, IBaseObject> | IComponentFunction | string;
 
@@ -235,7 +251,7 @@ export interface IRenderer {
     mountOrder: number;
     macrotasks: any[];
     boundaries: any[];
-    currentOwner: IComponentMinx<IBaseProps, IBaseObject>|IOwnerAttribute|null;
+    currentOwner: OwnerType|null;
     catchError?: any;
     catchStack?: string;
     onUpdate(): any;
@@ -243,5 +259,10 @@ export interface IRenderer {
     middleware(middleware: IMiddleware): void;
     updateControlled(): void;
     fireMiddlewares(begin?: boolean): void;
+    updateComponent?(
+        component: OwnerType,
+        state: IBaseObject | boolean | ((s: IBaseObject) => IBaseObject|null|undefined),
+        cb?: () => void,
+    ): boolean;
     [name: string]: any;
 }

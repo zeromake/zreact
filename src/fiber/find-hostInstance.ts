@@ -1,11 +1,11 @@
 import { IFiber } from "./type-shared";
-import { IComponentMinx, IBaseProps, IBaseObject, IOwnerAttribute } from "../core/type-shared";
+import { OwnerType } from "../core/type-shared";
 
 /**
  * 对 fiber 对象或者组件对象查找 dom 对象
  * @param fiber 组件对象，fiber对象
  */
-export function findHostInstance(fiber: IFiber | IComponentMinx<IBaseProps, IBaseObject> | Element | Node): Element | null {
+export function findHostInstance(fiber: IFiber | OwnerType | Element | Node): Element | null {
     if (!fiber) {
         return null;
     } else if ((fiber as Element | Node).nodeType) {
@@ -15,10 +15,10 @@ export function findHostInstance(fiber: IFiber | IComponentMinx<IBaseProps, IBas
         // 如果本身是元素节点
         return (fiber as IFiber).stateNode as Element;
     } else if ((fiber as IFiber).tag < 3) {
-        return findHostInstance((fiber as IFiber).stateNode as IComponentMinx<IBaseProps, IBaseObject>);
-    } else if ((fiber as IOwnerAttribute).render) {
+        return findHostInstance((fiber as IFiber).stateNode as OwnerType);
+    } else if ((fiber as OwnerType).render) {
         // react 组件
-        fiber = (fiber as IOwnerAttribute).$reactInternalFiber;
+        fiber = (fiber as OwnerType).$reactInternalFiber;
         const childrenMap = fiber.children;
         if (childrenMap) {
             for (const i in childrenMap) {

@@ -46,11 +46,11 @@ export class Component<P extends IBaseProps, S extends IBaseObject> implements I
     }
 
     public setState(state: S | ((s: S) => S|void), cb?: () => void): void {
-        this.updater.enqueuSetState(this, state, cb);
+        this.updater.enqueueSetState(this, state, cb);
     }
 
     public forceUpdate(cb: () => void): void {
-        this.updater.enqueuSetState(this, true, cb);
+        this.updater.enqueueSetState(this, true, cb);
     }
 
     public render(): IVNode | string | null | undefined {

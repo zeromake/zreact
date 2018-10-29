@@ -1,12 +1,16 @@
 import { IVNode, IComponentMinx, IBaseProps, IBaseObject, IOwnerAttribute } from "../core/type-shared";
 import { EffectTag } from "./effect-tag";
 
+export interface IUpdateQueue {
+    pendingStates: IBaseObject[];
+    pendingCbs: Array<() => void>;
+}
+
 export interface IFiber extends IVNode {
     /**
      * 组件名
      */
     name: string;
-    nodeType?: any;
     stateNode?: Element|Node|IComponentMinx<IBaseProps, IBaseObject>|IOwnerAttribute;
     /**
      * 多子组件的 map {[key: string]: fiber}
@@ -64,4 +68,5 @@ export interface IFiber extends IVNode {
      * 是否删除 ref
      */
     deleteRef?: boolean;
+    updateQueue?: IUpdateQueue;
 }

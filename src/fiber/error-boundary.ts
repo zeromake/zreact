@@ -2,7 +2,7 @@ import { EffectTag } from "./effect-tag";
 import { IFiber } from "./type-shared";
 import { fakeUpdater, noop } from "../core/util";
 import { Renderer } from "../core/create-renderer";
-import { IComponentMinx } from "../core/type-shared";
+import { OwnerType } from "../core/type-shared";
 
 export function pushError(fiber: IFiber, hook: string, error?: any) {
     const names: string[] = [];
@@ -138,7 +138,7 @@ export function detachFiber(fiber: IFiber, effects: IFiber[]): void {
     }
 }
 
-export function guardCallback(host: IComponentMinx<any, any>, hook: string, args: any[]) {
+export function guardCallback(host: OwnerType, hook: string, args: any[]) {
     try {
         return applyCallback(host, hook, args);
     } catch (error) {
@@ -146,7 +146,7 @@ export function guardCallback(host: IComponentMinx<any, any>, hook: string, args
     }
 }
 
-export function applyCallback(host: IComponentMinx<any, any>, hook: string, args: any[]) {
+export function applyCallback(host: OwnerType, hook: string, args: any[]) {
     const fiber: IFiber = host.$reactInternalFiber;
     fiber.errorHook = hook;
     const fn = host[hook];

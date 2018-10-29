@@ -1,6 +1,6 @@
 import { pushError } from "./error-boundary";
 import { typeNumber } from "../core/util";
-import { IRefFun, RefElement, IObjectRef } from "../core/type-shared";
+import { IRefFun, RefElement, IObjectRef, OwnerType } from "../core/type-shared";
 import { IFiber } from "./type-shared";
 
 export let Refs = {
@@ -22,7 +22,7 @@ export let Refs = {
 };
 
 const refStrategy = {
-    // [4](owner, ref, dom) {
+    // [4](owner: OwnerType, ref: string, dom: RefElement) {
     //     // string
     //     if (dom === null) {
     //         delete owner.refs[ref];
@@ -30,10 +30,10 @@ const refStrategy = {
     //         owner.refs[ref] = dom;
     //     }
     // },
-    [5](_, ref: IRefFun, dom: RefElement) {
+    [5](owner: OwnerType, ref: IRefFun, dom: RefElement) {
         ref(dom);
     },
-    [8](_, ref: IObjectRef, dom: RefElement) {
+    [8](owner: OwnerType, ref: IObjectRef, dom: RefElement) {
         ref.current = dom;
     },
 };

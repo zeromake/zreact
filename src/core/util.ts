@@ -2,6 +2,8 @@ import { IUpdater, IBaseObject, IComponentMinx, IOwnerAttribute } from "./type-s
 
 export const hasOwnProperty = Object.prototype.hasOwnProperty;
 export const hasSymbol = typeof Symbol === "function" && (Symbol as any).for;
+export const gSBU = "getSnapshotBeforeUpdate";
+export const gDSFP = "getDerivedStateFromProps";
 
 /**
  * react 的组件 symbol
@@ -57,7 +59,8 @@ export function typeNumber(data: any): number {
 }
 
 export const fakeUpdater: IUpdater = {
-    enqueuSetState: returnFalse,
+    mountOrder: 0,
+    enqueueSetState: returnFalse,
     isMounted: returnFalse,
 };
 
