@@ -70,3 +70,15 @@ export interface IFiber extends IVNode {
     deleteRef?: boolean;
     updateQueue?: IUpdateQueue;
 }
+
+export interface IIScheduledCallbackParams {
+    didTimeout: boolean;
+    timeRemaining(): number;
+}
+export type scheduledCallbackType = (params: IIScheduledCallbackParams) => () => void;
+export interface IScheduledCallback {
+    scheduledCallback: scheduledCallbackType;
+    timeoutTime: number;
+    next: IScheduledCallback|null;
+    prev: IScheduledCallback|null;
+}

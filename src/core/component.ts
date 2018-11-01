@@ -9,7 +9,7 @@ import {
     IBaseProps,
     IComponentMinx,
     IUpdater,
-    IVNode,
+    VirtualNode,
 } from "./type-shared";
 import { IFiber } from "../fiber/type-shared";
 
@@ -53,7 +53,7 @@ export class Component<P extends IBaseProps, S extends IBaseObject> implements I
         this.updater.enqueueSetState(this, true, cb);
     }
 
-    public render(): IVNode | string | null | undefined {
+    public render(): VirtualNode[] | VirtualNode {
         throw TypeError("must implement render");
     }
 }

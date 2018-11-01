@@ -72,3 +72,23 @@ export function isMounted(instance: IComponentMinx<any, any> | IOwnerAttribute) 
     const fiber = instance.$reactInternalFiber;
     return !!(fiber && fiber.hasMounted);
 }
+const fakeWindow = {};
+export function getWindow(): Window {
+    try {
+        if (window) {
+            return window;
+        }
+    /* istanbul ignore next  */
+    } catch (e) {/*kill*/}
+    try {
+        if (global) {
+            return global as any;
+        }
+    /* istanbul ignore next  */
+    } catch (e) {/*kill*/}
+    return fakeWindow as any;
+}
+export const ObjectToString = Object.prototype.toString;
+export function isFn(obj: any): boolean {
+    return ObjectToString.call(obj) === "[object Function]";
+}
