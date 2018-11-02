@@ -1,7 +1,7 @@
 import { IBaseProps, ChildrenType } from "./type-shared";
 import { createElement } from "./create-element";
 
-export function Portal(props: IBaseProps) {
+export function Portal(props: IBaseProps): any {
     return props.children;
 }
 

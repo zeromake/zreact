@@ -1,4 +1,6 @@
 import { IFiber } from "./type-shared";
+import { EffectTag } from "./effect-tag";
+import { IOwnerAttribute } from "../core/type-shared";
 
 /**
  * 查找它后面的节点
@@ -14,6 +16,32 @@ export function getInsertPoint(fiber: IFiber) {
             return forward;
         }
         fiber = fiber.return;
+    }
+}
+
+export function setInsertPoints(children: {[key: string]: IFiber}) {
+    for (const i in children) {
+        const child = children[i];
+        if (child.disposed) {
+            continue;
+        }
+        if (child.tag > 4) {
+            const p = child.parent;
+            child.effectTag = EffectTag.PLACE;
+            child.forwardFiber = (p as IOwnerAttribute).insertPoint;
+            (p as IOwnerAttribute).insertPoint = child;
+            for (
+                let pp = child.return;
+                pp && pp.effectTag === EffectTag.NOWORK;
+                pp = pp.return
+            ) {
+                pp.effectTag = EffectTag.WORKING;
+            }
+        } else {
+            if (child.child) {
+                setInsertPoints(child.children);
+            }
+        }
     }
 }
 

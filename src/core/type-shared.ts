@@ -46,6 +46,8 @@ export interface IOwnerAttribute {
     $init?: boolean;
     renderImpl?: VNodeType;
     $useNewHooks?: boolean;
+    insertPoint?: IFiber;
+    state?: IBaseObject;
 }
 
 export type OwnerType = IOwnerAttribute | IComponentMinx<IBaseProps, IBaseObject>;
@@ -184,6 +186,9 @@ export interface IUpdater {
      * 挂载顺序
      */
     mountOrder: number;
+    prevProps?: IBaseObject;
+    prevState?: IBaseProps;
+    snapshot?: any;
     /**
      * 触发 state 变化
      * @param component 组件实例
@@ -220,6 +225,7 @@ export abstract class IComponentMinx<P extends IBaseProps, S extends IBaseObject
     public abstract $useNewHooks?: boolean;
 
     public abstract $isStateless?: boolean;
+    public abstract insertPoint?: IFiber;
 
     constructor(p?: P, c?: IBaseObject) {}
 

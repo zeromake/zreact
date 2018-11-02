@@ -11,7 +11,7 @@ export interface IFiber extends IVNode {
      * 组件名
      */
     name: string;
-    stateNode?: Element|Node|IComponentMinx<IBaseProps, IBaseObject>|IOwnerAttribute;
+    stateNode?: IComponentMinx<IBaseProps, IBaseObject>|IOwnerAttribute;
     /**
      * 多子组件的 map {[key: string]: fiber}
      */
@@ -36,7 +36,7 @@ export interface IFiber extends IVNode {
     /**
      * 父级组件实例
      */
-    parent?: Element|Node|IComponentMinx<IBaseProps, IBaseObject>|IOwnerAttribute;
+    parent?: IComponentMinx<IBaseProps, IBaseObject>|IOwnerAttribute;
     // $reactInternalFiber?: IFiber;
     /**
      * 最后一个子组件
@@ -69,16 +69,28 @@ export interface IFiber extends IVNode {
      */
     deleteRef?: boolean;
     updateQueue?: IUpdateQueue;
+    forwardFiber?: IFiber;
+    insertPoint?: IFiber;
+    batching?: any;
+    updateFail?: boolean;
+    shiftContainer?: any;
+    shiftContext?: IBaseObject;
+    memoizedState?: IBaseObject;
+    setout?: boolean;
 }
 
-export interface IIScheduledCallbackParams {
+export interface IScheduledCallbackParams {
     didTimeout: boolean;
     timeRemaining(): number;
 }
-export type scheduledCallbackType = (params: IIScheduledCallbackParams) => () => void;
-export interface IScheduledCallback {
+export type scheduledCallbackType = (params: IScheduledCallbackParams) => () => void;
+export interface IScheduledConfig {
     scheduledCallback: scheduledCallbackType;
     timeoutTime: number;
-    next: IScheduledCallback|null;
-    prev: IScheduledCallback|null;
+    next: IScheduledConfig|null;
+    prev: IScheduledConfig|null;
+}
+
+export interface IScheduledOptions {
+    timeout: number;
 }
