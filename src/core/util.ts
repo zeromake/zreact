@@ -1,9 +1,15 @@
 import { IUpdater, IBaseObject, IComponentMinx, IOwnerAttribute } from "./type-shared";
+import { IFiber } from "../fiber/type-shared";
 
+export const arrayPush = Array.prototype.push;
 export const hasOwnProperty = Object.prototype.hasOwnProperty;
 export const hasSymbol = typeof Symbol === "function" && (Symbol as any).for;
 export const gSBU = "getSnapshotBeforeUpdate";
 export const gDSFP = "getDerivedStateFromProps";
+export const effects: IFiber[] = [];
+export const topFibers: IFiber[] = [];
+export const topNodes = [];
+export const emptyObject = {};
 
 /**
  * react 的组件 symbol
@@ -20,15 +26,25 @@ export function returnTrue(): boolean {
     return true;
 }
 
-export function extend(target: IBaseObject, ...props: IBaseObject[]): IBaseObject {
+export function extend<T, F>(target: T, ...props: F[]): T & F {
     for (const prop of props) {
         for (const key in prop) {
             if (hasOwnProperty.call(prop, key)) {
-                target[key] = prop[key];
+                (target as any)[key] = prop[key];
             }
         }
     }
-    return target;
+    return target as any;
+}
+
+export function resetStack(info: IFiber) {
+    keepLast(info.containerStack as any[]);
+    keepLast(info.contextStack as any[]);
+}
+
+function keepLast(list: any[]) {
+    const len = list.length;
+    list.splice(0, len - 1);
 }
 
 const numberMap: IBaseObject = {

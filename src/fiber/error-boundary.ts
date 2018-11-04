@@ -52,10 +52,10 @@ function describeError(names: string[], hook: string): string {
 }
 
 function findCatchComponent(fiber: IFiber, names: string[], hook: string): IFiber {
-    let instance;
+    let instance: OwnerType;
     let name: string;
     const topFiber = fiber;
-    let retry;
+    let retry: IFiber;
     let boundary: IFiber;
 
     while (fiber) {
@@ -64,7 +64,7 @@ function findCatchComponent(fiber: IFiber, names: string[], hook: string): IFibe
             names.push(name);
             instance = fiber.stateNode || {};
 
-            if (instance.componentDidCatch && !boundary) {
+            if ((instance as any).componentDidCatch && !boundary) {
                 // boundary不能等于出错组件，不能已经处理过错误
                 if (!fiber.caughtError && topFiber !== fiber) {
                     boundary = fiber;

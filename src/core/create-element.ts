@@ -2,6 +2,7 @@ import { IBaseProps, IBaseObject, VirtualNodeList, VirtualNode, VNodeType, IRefT
 import { hasOwnProperty, typeNumber, REACT_ELEMENT_TYPE, hasSymbol } from "./util";
 import { Renderer } from "./create-renderer";
 import { Component } from "./component";
+import { IFiber } from "../fiber/type-shared";
 
 const RESERVED_PROPS = {
     key: true,
@@ -124,7 +125,7 @@ function escape(key: string) {
 let lastText: IVNode | null = null;
 let flattenIndex: number;
 let flattenObject: {
-    [key: string]: ChildrenType;
+    [key: string]: IFiber;
 };
 
 function flattenCb(_: object | undefined, child: VirtualNode, key: string|number, childType: number): void {
@@ -146,15 +147,15 @@ function flattenCb(_: object | undefined, child: VirtualNode, key: string|number
         lastText = null;
     }
     if (!flattenObject[key]) {
-        flattenObject[key] = child;
+        flattenObject[key] = child as IFiber;
     } else {
         key = "." + flattenIndex;
-        flattenObject[key] = child;
+        flattenObject[key] = child as IFiber;
     }
     flattenIndex++;
 }
 
-export function fiberizeChildren(children: ChildrenType, fiber: any) {
+export function fiberizeChildren(children: ChildrenType, fiber: IFiber) {
     flattenObject = {};
     flattenIndex = 0;
     if (children !== undefined) {

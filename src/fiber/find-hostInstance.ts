@@ -5,7 +5,7 @@ import { OwnerType } from "../core/type-shared";
  * 对 fiber 对象或者组件对象查找 dom 对象
  * @param fiber 组件对象，fiber对象
  */
-export function findHostInstance(fiber: IFiber | OwnerType | Element | Node): Element | null {
+export function findHostInstance(fiber: IFiber | OwnerType): Element | null {
     if (!fiber) {
         return null;
     } else if ((fiber as Element | Node).nodeType) {

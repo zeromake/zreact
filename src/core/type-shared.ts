@@ -6,7 +6,7 @@ import { IFiber } from "../fiber/type-shared";
 export interface IObjectRef {
     current: RefElement;
 }
-export type RefElement = Element | Node | IComponentMinx<IBaseProps, IBaseObject> | null;
+export type RefElement = Element | Node | OwnerType | null;
 export type IRefFun = (node: RefElement) => any;
 
 export type IRefType = IObjectRef | string | IRefFun;
@@ -48,9 +48,16 @@ export interface IOwnerAttribute {
     $useNewHooks?: boolean;
     insertPoint?: IFiber;
     state?: IBaseObject;
+    getChildContext?: () => IBaseObject;
+    $unmaskedContext?: IBaseObject;
+    $maskedContext?: IBaseObject;
 }
 
-export type OwnerType = IOwnerAttribute | IComponentMinx<IBaseProps, IBaseObject>;
+export interface IAnuElement extends Element, IOwnerAttribute {
+    $reactInternalFiber?: IFiber;
+}
+
+export type OwnerType = IOwnerAttribute | IComponentMinx<IBaseProps, IBaseObject> | IAnuElement;
 
 export interface IVNode {
     $$typeof?: symbol | number;
@@ -172,7 +179,7 @@ export interface IComponentLifecycle<P extends IBaseProps, S extends IBaseObject
      * 渲染错误回调
      * @param error
      */
-    componentDidCatch?(error?: Error): void;
+    componentDidCatch?(error?: Error, stack?: {componentStack: string}): void;
     /**
      * 渲染后调用，返回的值注入 componentWillUpdate
      * @param prevProps
@@ -227,6 +234,9 @@ export abstract class IComponentMinx<P extends IBaseProps, S extends IBaseObject
     public abstract $isStateless?: boolean;
     public abstract insertPoint?: IFiber;
 
+    public abstract $unmaskedContext?: IBaseObject;
+    public abstract $maskedContext?: IBaseObject;
+
     constructor(p?: P, c?: IBaseObject) {}
 
 }
@@ -255,20 +265,23 @@ export interface IMiddleware {
 export interface IRenderer {
     controlledCbs: any[];
     mountOrder: number;
-    macrotasks: any[];
-    boundaries: any[];
+    macrotasks: IFiber[];
+    boundaries: IFiber[];
     currentOwner: OwnerType|null;
     catchError?: any;
     catchStack?: string;
-    onUpdate(): any;
-    onDispose(): any;
+    batchedUpdates?: (call: () => void, options: object) => void;
+    onUpdate(fiber: IFiber): any;
+    onDispose(fiber: IFiber): void;
     middleware(middleware: IMiddleware): void;
-    updateControlled(): void;
+    updateControlled(fiber: IFiber): void;
     fireMiddlewares(begin?: boolean): void;
     updateComponent?(
         component: OwnerType,
         state: IBaseObject | boolean | ((s: IBaseObject) => IBaseObject|null|undefined),
         cb?: () => void,
-    ): boolean;
+        immediateUpdate?: boolean,
+    ): any;
+    scheduleWork?(): void;
     [name: string]: any;
 }

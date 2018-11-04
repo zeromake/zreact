@@ -1,9 +1,11 @@
-import { IVNode, IComponentMinx, IBaseProps, IBaseObject, IOwnerAttribute } from "../core/type-shared";
+import { IVNode, IComponentMinx, IBaseProps, IBaseObject, IOwnerAttribute, OwnerType } from "../core/type-shared";
 import { EffectTag } from "./effect-tag";
 
 export interface IUpdateQueue {
-    pendingStates: IBaseObject[];
+    pendingStates: Array<IBaseObject|((state: IBaseObject, props: IBaseProps) => IBaseObject)>;
     pendingCbs: Array<() => void>;
+    isForced?: boolean;
+    batching?: any;
 }
 
 export interface IFiber extends IVNode {
@@ -11,11 +13,16 @@ export interface IFiber extends IVNode {
      * 组件名
      */
     name: string;
-    stateNode?: IComponentMinx<IBaseProps, IBaseObject>|IOwnerAttribute;
+    stateNode?: OwnerType;
     /**
      * 多子组件的 map {[key: string]: fiber}
      */
     children: {[key: string]: IFiber};
+    oldChildren?: {[key: string]: IFiber};
+    lastProps?: IBaseProps;
+    /**
+     * 父节点
+     */
     return?: IFiber;
     /**
      * 备用
@@ -36,7 +43,7 @@ export interface IFiber extends IVNode {
     /**
      * 父级组件实例
      */
-    parent?: IComponentMinx<IBaseProps, IBaseObject>|IOwnerAttribute;
+    parent?: OwnerType;
     // $reactInternalFiber?: IFiber;
     /**
      * 最后一个子组件
@@ -59,7 +66,7 @@ export interface IFiber extends IVNode {
     errorHook?: string;
     capturedValues?: any[];
     caughtError?: boolean;
-    effects?: string[];
+    effects?: IFiber[];
     /**
      * 组建是否废弃
      */
@@ -74,9 +81,17 @@ export interface IFiber extends IVNode {
     batching?: any;
     updateFail?: boolean;
     shiftContainer?: any;
-    shiftContext?: IBaseObject;
+    shiftContext?: boolean;
     memoizedState?: IBaseObject;
+    memoizedProps?: IBaseProps;
     setout?: boolean;
+    dirty?: boolean;
+    pendingCbs?: Array<() => void>;
+    hostRoot?: boolean;
+    index?: number;
+    microtasks?: IFiber[];
+    containerStack?: OwnerType[];
+    contextStack?: IBaseObject[];
 }
 
 export interface IScheduledCallbackParams {

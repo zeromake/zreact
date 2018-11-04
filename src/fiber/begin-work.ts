@@ -16,7 +16,12 @@ import {
 } from "./error-boundary";
 import { getInsertPoint, setInsertPoints } from "./insert-point";
 import { IFiber, IScheduledCallbackParams } from "./type-shared";
-import { IOwnerAttribute, OwnerType, IBaseProps, IBaseObject } from "../core/type-shared";
+import {
+    OwnerType,
+    IBaseProps,
+    IBaseObject,
+    ChildrenType,
+} from "../core/type-shared";
 
 /**
  * 基于DFS遍历虚拟DOM树，初始化vnode为fiber,并产出组件实例或DOM节点
@@ -24,7 +29,7 @@ import { IOwnerAttribute, OwnerType, IBaseProps, IBaseObject } from "../core/typ
  * 使用再路过此节点时，再弹出栈
  * 它需要对updateFail的情况进行优化
  */
-export function reconcileDFS(fiber: IFiber, info, deadline: IScheduledCallbackParams, ENOUGH_TIME: number) {
+export function reconcileDFS(fiber: IFiber, info: IFiber, deadline: IScheduledCallbackParams, ENOUGH_TIME: number): void {
     const topWork = fiber;
     outerLoop: while (fiber) {
         if (fiber.disposed || deadline.timeRemaining() <= ENOUGH_TIME) {
@@ -93,7 +98,102 @@ export function reconcileDFS(fiber: IFiber, info, deadline: IScheduledCallbackPa
     }
 }
 
-function updateHostComponent(fiber: IFiber, info) {
+export function updateClassComponent(fiber: IFiber, info: IFiber): void {
+    const { type, props } = fiber;
+    let instance = fiber.stateNode;
+    const { contextStack, containerStack } = info;
+    const newContext = getMaskedContext(
+        instance,
+        (type as any).contextTypes,
+        contextStack,
+    );
+    if (instance == null) {
+        fiber.parent = type === Portal ? props.parent : containerStack[0];
+        instance = createInstance(fiber, newContext);
+        cacheContext(instance, contextStack[0], newContext);
+    }
+
+    instance.$reactInternalFiber = fiber; // 更新rIF
+    const isStateful = !instance.$isStateless;
+    if (isStateful) {
+        // 有狀态组件
+        const updateQueue = fiber.updateQueue;
+
+        delete fiber.updateFail;
+        if (fiber.hasMounted) {
+            applybeforeUpdateHooks(
+                fiber,
+                instance,
+                props,
+                newContext,
+                contextStack,
+            );
+        } else {
+            applybeforeMountHooks(
+                fiber,
+                instance,
+                props,
+            );
+        }
+
+        if (fiber.memoizedState) {
+            instance.state = fiber.memoizedState;
+        }
+        fiber.batching = updateQueue.batching;
+        const cbs = updateQueue.pendingCbs;
+        if (cbs.length) {
+            fiber.pendingCbs = cbs;
+            fiber.effectTag *= EffectTag.CALLBACK;
+        }
+        if (fiber.ref) {
+            fiber.effectTag *= EffectTag.REF;
+        }
+    } else if (type === Portal) {
+        // 无狀态组件中的传送门组件
+        containerStack.unshift(fiber.parent);
+        fiber.shiftContainer = true;
+    }
+    // 存放它上面的所有context的并集
+    // instance.unmaskedContext = contextStack[0];
+    // 设置新context, props, state
+    instance.context = newContext;
+    fiber.memoizedProps = instance.props = props;
+    fiber.memoizedState = instance.state;
+
+    if (instance.getChildContext) {
+        let context = instance.getChildContext();
+        context = Object.assign({}, contextStack[0], context);
+        fiber.shiftContext = true;
+        contextStack.unshift(context);
+    }
+
+    if (isStateful) {
+        if (fiber.parent && fiber.hasMounted && fiber.dirty) {
+            fiber.parent.insertPoint = getInsertPoint(fiber);
+        }
+        if (fiber.updateFail) {
+            cloneChildren(fiber);
+            fiber.$hydrating = false;
+            return;
+        }
+
+        delete fiber.dirty;
+        fiber.effectTag *= EffectTag.HOOK;
+    } else {
+        fiber.effectTag = EffectTag.WORKING;
+    }
+
+    if (fiber.catchError) {
+        return;
+    }
+    Renderer.onUpdate(fiber);
+    fiber.$hydrating = true;
+    Renderer.currentOwner = instance;
+    const rendered = applyCallback(instance, "render", []);
+    diffChildren(fiber, rendered);
+}
+
+function updateHostComponent(fiber: IFiber, info: IFiber): void {
     const { props, tag, alternate: prev } = fiber;
 
     if (!fiber.stateNode) {
@@ -108,7 +208,7 @@ function updateHostComponent(fiber: IFiber, info) {
     fiber.effectTag = EffectTag.PLACE;
     if (tag === 5) {
         // 元素节点
-        (fiber.stateNode as OwnerType).insertPoint = null;
+        fiber.stateNode.insertPoint = null;
         info.containerStack.unshift(fiber.stateNode);
         fiber.shiftContainer = true;
         fiber.effectTag *= EffectTag.ATTR;
@@ -120,7 +220,11 @@ function updateHostComponent(fiber: IFiber, info) {
         fiber.effectTag *= EffectTag.CONTENT;
     }
 }
-
+/**
+ * 合并state
+ * @param fiber
+ * @param nextProps 新的 props
+ */
 function mergeStates(fiber: IFiber, nextProps: IBaseProps) {
     const instance = fiber.stateNode;
     const pendings = fiber.updateQueue.pendingStates;
@@ -155,6 +259,12 @@ function mergeStates(fiber: IFiber, nextProps: IBaseProps) {
     }
 }
 
+/**
+ * 应用挂载前钩子
+ * @param fiber
+ * @param instance 组件实例
+ * @param newProps 传入的 props
+ */
 function applybeforeMountHooks(fiber: IFiber, instance: OwnerType, newProps: IBaseProps): void {
     fiber.setout = true;
     if (instance.$useNewHooks) {
@@ -167,15 +277,94 @@ function applybeforeMountHooks(fiber: IFiber, instance: OwnerType, newProps: IBa
     fiber.updateQueue = UpdateQueue();
 }
 
+function applybeforeUpdateHooks(
+    fiber: IFiber,
+    instance: OwnerType,
+    newProps: IBaseProps,
+    newContext: IBaseObject,
+    contextStack: IBaseObject[],
+) {
+    const oldProps = fiber.memoizedProps;
+    const oldState = fiber.memoizedState;
+    const updater = instance.updater;
+    updater.prevProps = oldProps;
+    updater.prevState = oldState;
+    const propsChanged = oldProps !== newProps;
+    const contextChanged = instance.context !== newContext;
+    fiber.setout = true;
+
+    if (!instance.$useNewHooks) {
+        if (propsChanged || contextChanged) {
+            const prevState = instance.state;
+            callUnsafeHook(instance, "componentWillReceiveProps", [
+                newProps,
+                newContext,
+            ]);
+            if (prevState !== instance.state) {
+                // 模拟replaceState
+                fiber.memoizedState = instance.state;
+            }
+        }
+    }
+    let newState = (instance.state = oldState);
+    const updateQueue = fiber.updateQueue;
+    mergeStates(fiber, newProps);
+    newState = fiber.memoizedState;
+
+    setStateByProps(instance, fiber, newProps, newState);
+    newState = fiber.memoizedState;
+
+    delete fiber.setout;
+    fiber.$hydrating = true;
+    if (
+        !propsChanged &&
+        newState === oldState &&
+        contextStack.length === 1 &&
+        !updateQueue.isForced
+    ) {
+        fiber.updateFail = true;
+    } else {
+        const args = [newProps, newState, newContext];
+        fiber.updateQueue = UpdateQueue();
+
+        if (
+            !updateQueue.isForced &&
+            !applyCallback(instance, "shouldComponentUpdate", args)
+        ) {
+            fiber.updateFail = true;
+        } else if (!instance.$useNewHooks) {
+            callUnsafeHook(instance, "componentWillUpdate", args);
+        }
+    }
+}
+
+/**
+ * 安全的调用组件钩子
+ * @param instance 组件实例
+ * @param hook 钩子方法名
+ * @param params 注入的方法参数
+ */
 function callUnsafeHook(instance: OwnerType, hook: string, params: any[]) {
     applyCallback(instance, hook, params);
     applyCallback(instance, "UNSAFE_" + hook, params);
 }
 
-function isSameNode(a: IFiber, b: IFiber): boolean {
-    return a.type === b.type && a.key === b.key;
+/**
+ * 比较两个 fiber 是否相同
+ * @param target 目标 fiber
+ * @param b 比较 fiber
+ */
+function isSameNode(target: IFiber, b: IFiber): boolean {
+    return target.type === b.type && target.key === b.key;
 }
 
+/**
+ * 调用 getDerivedStateFromProps 钩子
+ * @param instance 组件实例
+ * @param fiber
+ * @param nextProps 新的 props
+ * @param prevState 当前的 state
+ */
 function setStateByProps(
     instance: OwnerType,
     fiber: IFiber,
@@ -189,5 +378,132 @@ function setStateByProps(
         if (typeNumber(partialState) === 8) {
             fiber.memoizedState = Object.assign({}, prevState, partialState);
         }
+    }
+}
+
+function cloneChildren(fiber: IFiber) {
+    const prev = fiber.alternate;
+    if (prev && prev.child) {
+        const pc = prev.children;
+
+        const cc = (fiber.children = {});
+        fiber.child = prev.child;
+        fiber.lastChild = prev.lastChild;
+        for (const i in pc) {
+            const a = pc[i];
+            a.return = fiber; // 只改父引用不复制
+            cc[i] = a;
+        }
+        setInsertPoints(cc);
+    }
+}
+
+function cacheContext(instance: OwnerType, unmaskedContext: IBaseObject, context: IBaseObject) {
+    instance.$unmaskedContext = unmaskedContext;
+    instance.$maskedContext = context;
+}
+
+function getMaskedContext(instance: OwnerType, contextTypes: IBaseObject, contextStack: IBaseObject[]) {
+    if (instance && !contextTypes) {
+        return instance.context;
+    }
+    const context = {};
+    if (!contextTypes) {
+        return context;
+    }
+
+    const unmaskedContext = contextStack[0];
+    if (instance) {
+        const cachedUnmasked = instance.$unmaskedContext;
+        if (cachedUnmasked === unmaskedContext) {
+            return instance.$maskedContext;
+        }
+    }
+
+    for (const key in contextTypes) {
+        if (contextTypes.hasOwnProperty(key)) {
+            context[key] = unmaskedContext[key];
+        }
+    }
+    if (instance) {
+        cacheContext(instance, unmaskedContext, context);
+    }
+    return context;
+}
+
+/**
+ * 把 IVNode 转换为 Fiber
+ * @param parentFiber 父fiber
+ * @param children 子节点列表
+ */
+function diffChildren(parentFiber: IFiber, children: ChildrenType) {
+    let oldFibers = parentFiber.children;
+    if (oldFibers) {
+        parentFiber.oldChildren = oldFibers;
+    } else {
+        oldFibers = {};
+    }
+    const newFibers: {
+        [key: string]: IFiber;
+    } = fiberizeChildren(children, parentFiber);
+    const effects = parentFiber.effects || (parentFiber.effects = []);
+    const matchFibers: {[key: string]: IFiber} = {};
+    delete parentFiber.child;
+    for (const key in oldFibers) {
+        const newFiber = newFibers[key];
+        const oldFiber = oldFibers[key];
+        if (newFiber && newFiber.type === oldFiber.type) {
+            matchFibers[key] = oldFiber;
+            if (newFiber.key != null) {
+                oldFiber.key = newFiber.key;
+            }
+            continue;
+        }
+        detachFiber(oldFiber, effects);
+    }
+    let prevFiber: IFiber;
+    let index = 0;
+    for (const key in newFibers) {
+        let newFiber = newFibers[key];
+        const oldFiber = matchFibers[key];
+        let alternate: IFiber = null;
+        if (oldFiber) {
+            if (isSameNode(oldFiber, newFiber)) {
+                alternate = new Fiber(oldFiber);
+                const oldRef = oldFiber.ref;
+                newFiber = extend(oldFiber, newFiber);
+                delete newFiber.disposed;
+                newFiber.alternate = alternate;
+                if (newFiber.ref && newFiber.deleteRef) {
+                    delete newFiber.ref;
+                    delete newFiber.deleteRef;
+                }
+                if (oldRef && oldRef !== newFiber.ref) {
+                    effects.push(alternate);
+                }
+                if (newFiber.tag === 5) {
+                    newFiber.lastProps = alternate.props;
+                }
+            } else {
+                detachFiber(parentFiber, effects);
+            }
+        } else {
+            newFiber = new Fiber(newFiber);
+        }
+        newFibers[key] = newFiber;
+        (newFibers as any).index = index++;
+        newFiber.return = parentFiber;
+        if (prevFiber) {
+            prevFiber.sibling = newFiber;
+            newFiber.forward = prevFiber;
+        } else {
+            parentFiber.child = newFiber;
+            newFiber.forward = null;
+        }
+        prevFiber = newFiber;
+    }
+    parentFiber.lastChild = prevFiber;
+    if (prevFiber) {
+        prevFiber.sibling = null;
     }
 }
