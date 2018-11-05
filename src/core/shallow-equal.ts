@@ -2,6 +2,11 @@ import { hasOwnProperty, typeNumber } from "./util";
 
 const ObjectIs = (Object as any).is;
 
+/**
+ * 判断两个对象是否相同，不深度比较
+ * @param objA
+ * @param objB
+ */
 export function shallowEqual(objA: any, objB: any): boolean {
     if (ObjectIs(objA, objB)) {
         return true;

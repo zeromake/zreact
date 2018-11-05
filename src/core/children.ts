@@ -3,24 +3,52 @@ import { VirtualNode, ChildrenType, IVNode, VirtualNodeList } from "./type-share
 import { noop } from "./util";
 
 export const Children = {
+    /**
+     * 检查子元素列表是否为一个
+     * @param children
+     */
     only(children: ChildrenType): VirtualNode {
         if (isValidElement(children)) {
             return children as VirtualNode;
         }
         throw new TypeError("expect only one child");
     },
+
+    /**
+     * 遍历子元素获取有多少个子元素
+     * @param children
+     */
     count(children: ChildrenType): number {
         if (children == null) {
             return 0;
         }
         return traverseAllChildren(children, "", noop);
     },
+
+    /**
+     * 和 Array.map 一样的遍历并返回一个数组
+     * @param children
+     * @param func map 标准的回调
+     * @param context this 上下文
+     */
     map(children: ChildrenType, func: callBackType, context?: object|null): VirtualNode[] {
         return proxyIt(children, func, [], context) as VirtualNode[];
     },
+
+    /**
+     * 和 Array.map 一样的遍历并返回一个数组
+     * @param children
+     * @param func map 标准的回调
+     * @param context this 上下文
+     */
     forEach(children: ChildrenType, func: callBackType, context?: object|null): null {
         return proxyIt(children, func, null, context) as null;
     },
+
+    /**
+     * 直接转换为数组
+     * @param children
+     */
     toArray(children: ChildrenType): VirtualNode[] {
         return proxyIt(children, K, []) as VirtualNode[];
     },

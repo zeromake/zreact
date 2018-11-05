@@ -184,7 +184,9 @@ function getComponentKey(component: VirtualNode, index: number) {
 const SEPARATOR = ".";
 const SUBSEPARATOR = ":";
 
-// operateChildren有着复杂的逻辑，如果第一层是可遍历对象，那么
+/**
+ * operateChildren有着复杂的逻辑，如果第一层是可遍历对象，那么
+ */
 export function traverseAllChildren(children: ChildrenType, nameSoFar: string, callback: typeof flattenCb, bookKeeping?: object|undefined): number {
     let childType: number = typeNumber(children);
     let invokeCallback = false;

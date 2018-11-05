@@ -85,7 +85,7 @@ function commitDFSImpl(fiber: IFiber) {
 }
 
 export function commitDFS(effects: IFiber[]) {
-    Renderer.batchedUpdates(function _() {
+    Renderer.batchedUpdates!(function _() {
         let el;
         while ((el = effects.shift())) {
             // 处理retry组件
@@ -95,7 +95,7 @@ export function commitDFS(effects: IFiber[]) {
                 commitDFSImpl(el);
             }
             if (domRemoved.length) {
-                domRemoved.forEach(Renderer.removeElement);
+                domRemoved.forEach(Renderer.removeElement!);
                 domRemoved.length = 0;
             }
         }

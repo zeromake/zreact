@@ -145,7 +145,7 @@ if (!requestAnimationFrameForReact) {
         const timedOutCallbacks = [];
 
         // iterate once to find timed out callbacks and find nextSoonestTimeoutTime
-        let currentCallbackConfig = headOfPendingCallbacksLinkedList;
+        let currentCallbackConfig: IScheduledConfig|null = headOfPendingCallbacksLinkedList;
         while (currentCallbackConfig !== null) {
             const timeoutTime = currentCallbackConfig.timeoutTime;
             if (timeoutTime !== -1 && timeoutTime <= currentTime) {
@@ -176,12 +176,8 @@ if (!requestAnimationFrameForReact) {
     };
 
     // We use the postMessage trick to defer idle work until after the repaint.
-    const messageKey =
-        "__reactIdleCallback$" +
-        Math.random()
-        .toString(36)
-        .slice(2);
-    function idleTick(event) {
+    const messageKey = `__reactIdleCallback$${Math.random().toString(36).slice(2)}`;
+    const idleTick = function _idleTick(event: MessageEvent) {
         if (event.source !== global || event.data !== messageKey) {
             return;
         }
@@ -213,7 +209,7 @@ if (!requestAnimationFrameForReact) {
                 requestAnimationFrameForReact(animationTick);
             }
         }
-    }
+    };
     // Assumes that we have addEventListener in this environment. Might need
     // something better for old IE.
     global.addEventListener("message", idleTick, false);

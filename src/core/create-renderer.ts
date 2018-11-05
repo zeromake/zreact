@@ -6,7 +6,9 @@ export function createRenderer(methods: any): IRenderer {
 }
 
 const middlewares: IMiddleware[] = [];
-
+/**
+ * 声明一个全局 renderer 对象
+ */
 export const Renderer: IRenderer = {
     controlledCbs: [],
     mountOrder: 1,
@@ -31,6 +33,4 @@ export const Renderer: IRenderer = {
         }
     },
     currentOwner: null,
-    batchedUpdates() {},
-    removeElement() {},
 };

@@ -89,6 +89,10 @@ export function isMounted(instance: IComponentMinx<any, any> | IOwnerAttribute) 
     return !!(fiber && fiber.hasMounted);
 }
 const fakeWindow = {};
+
+/**
+ * 获取全局对象
+ */
 export function getWindow(): Window {
     try {
         if (window) {
@@ -105,6 +109,10 @@ export function getWindow(): Window {
     return fakeWindow as any;
 }
 export const ObjectToString = Object.prototype.toString;
+/**
+ * 判断是否为方法
+ * @param obj
+ */
 export function isFn(obj: any): boolean {
     return ObjectToString.call(obj) === "[object Function]";
 }
