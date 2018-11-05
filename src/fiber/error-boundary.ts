@@ -24,8 +24,8 @@ export function pushError(fiber: IFiber, hook: string, error?: any) {
         });
     } else {
         let p = fiber.return;
-        for (const i in p.children) {
-            if (p.children[i] === fiber) {
+        for (const i in (p as IFiber).children) {
+            if ((p as IFiber).children[i] === fiber) {
                 fiber.type = noop;
             }
         }
@@ -51,12 +51,12 @@ function describeError(names: string[], hook: string): string {
     return segments.join("\n\r").trim();
 }
 
-function findCatchComponent(fiber: IFiber, names: string[], hook: string): IFiber {
+function findCatchComponent(fiber: IFiber|undefined, names: string[], hook: string): IFiber|undefined {
     let instance: OwnerType;
     let name: string;
     const topFiber = fiber;
-    let retry: IFiber;
-    let boundary: IFiber;
+    let retry: IFiber|undefined;
+    let boundary: IFiber|undefined;
 
     while (fiber) {
         name = fiber.name;
@@ -88,7 +88,7 @@ function findCatchComponent(fiber: IFiber, names: string[], hook: string): IFibe
                 if (f && !f.catchError) {
                     f.forward = boundary.forward;
                     f.sibling = boundary.sibling;
-                    if (boundary.return.child === boundary) {
+                    if (boundary.return && boundary.return.child === boundary) {
                         boundary.return.child = f;
                     }
                     boundary = f;
@@ -142,16 +142,16 @@ export function guardCallback(host: OwnerType, hook: string, args: any[]) {
     try {
         return applyCallback(host, hook, args);
     } catch (error) {
-        pushError(host.$reactInternalFiber, hook, error);
+        pushError(host.$reactInternalFiber as IFiber, hook, error);
     }
 }
 
 export function applyCallback(host: OwnerType, hook: string, args: any[]) {
-    const fiber: IFiber = host.$reactInternalFiber;
+    const fiber: IFiber = host.$reactInternalFiber as IFiber;
     fiber.errorHook = hook;
-    const fn = host[hook];
+    const fn = (host as any)[hook];
     if (hook === "componentWillUnmount") {
-        host[hook] = noop;
+        (host as any)[hook] = noop;
     }
     if (fn) {
         return fn.apply(host, args);

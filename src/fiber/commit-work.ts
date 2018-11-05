@@ -18,14 +18,15 @@ import { IFiber } from "./type-shared";
 import {
     OwnerType,
     IComponentMinx,
+    IUpdater,
 } from "../core/type-shared";
 
 /**
  * COMMIT阶段也做成深度调先遍历
  */
 const domFns = ["insertElement", "updateContent", "updateAttribute"];
-const domEffects = [EffectTag.PLACE, EffectTag.CONTENT, EffectTag.ATTR];
-const domRemoved = [];
+const domEffects: EffectTag[] = [EffectTag.PLACE, EffectTag.CONTENT, EffectTag.ATTR];
+const domRemoved: IFiber[] = [];
 
 function commitDFSImpl(fiber: IFiber) {
     const topFiber = fiber;
@@ -60,7 +61,7 @@ function commitDFSImpl(fiber: IFiber) {
             continue;
         }
 
-        let f = fiber;
+        let f: IFiber|undefined = fiber;
         while (f) {
             if (f.effectTag === EffectTag.WORKING) {
                 f.effectTag = EffectTag.NOWORK;
@@ -151,7 +152,7 @@ export function commitEffects(fiber: IFiber) {
                     break;
                 case EffectTag.CALLBACK:
                     // ReactDOM.render/forceUpdate/setState callback
-                    const queue = fiber.pendingCbs;
+                    const queue = fiber.pendingCbs as Array<(this: OwnerType) => void>;
                     fiber.$hydrating = true; // setState回调里再执行setState
                     queue.forEach(function _(fn) {
                         fn.call(instance);
@@ -160,7 +161,7 @@ export function commitEffects(fiber: IFiber) {
                     delete fiber.pendingCbs;
                     break;
                 case EffectTag.CAPTURE: // 23
-                    const values = fiber.capturedValues;
+                    const values = fiber.capturedValues as any[];
                     fiber.caughtError = true;
                     const error: Error = values.shift();
                     const stack: {componentStack: string} = values.shift();
@@ -168,7 +169,7 @@ export function commitEffects(fiber: IFiber) {
                         fiber.effectTag = amount;
                         delete fiber.capturedValues;
                     }
-                    (instance as IComponentMinx<any, any>).componentDidCatch(error, stack);
+                    ((instance as IComponentMinx<any, any>).componentDidCatch as any)(error, stack);
                     break;
             }
         }
@@ -210,7 +211,7 @@ function disposeFiber(fiber: IFiber, force?: boolean|number) {
         } else {
             Renderer.onDispose(fiber);
             if (fiber.hasMounted) {
-                stateNode.updater.enqueueSetState = returnFalse;
+                (stateNode.updater as IUpdater).enqueueSetState = returnFalse;
                 guardCallback(stateNode, "componentWillUnmount", []);
                 delete fiber.stateNode;
             }

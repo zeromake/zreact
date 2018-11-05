@@ -11,6 +11,10 @@ export type IRefFun = (node: RefElement) => any;
 
 export type IRefType = IObjectRef | string | IRefFun;
 
+export interface IWorkContext {
+    contextStack: IBaseObject[];
+    containerStack: OwnerType[];
+}
 export interface IOwnerAttribute {
     /**
      * fiber 实例
@@ -35,7 +39,6 @@ export interface IOwnerAttribute {
     /**
      * render 生成 vnode
      */
-    render?: () => VirtualNode[] | VirtualNode;
     /**
      * 是否为无状态组件
      */
@@ -44,13 +47,14 @@ export interface IOwnerAttribute {
      * 无状态组件是否在初始化
      */
     $init?: boolean;
-    renderImpl?: VNodeType;
     $useNewHooks?: boolean;
-    insertPoint?: IFiber;
+    insertPoint?: IFiber|null;
     state?: IBaseObject;
-    getChildContext?: () => IBaseObject;
     $unmaskedContext?: IBaseObject;
     $maskedContext?: IBaseObject;
+    render?(): VirtualNode[] | VirtualNode;
+    renderImpl?(p: IBaseProps): VirtualNode[] | VirtualNode;
+    getChildContext?(): IBaseObject;
 }
 
 export interface IAnuElement extends Element, IOwnerAttribute {
@@ -232,7 +236,7 @@ export abstract class IComponentMinx<P extends IBaseProps, S extends IBaseObject
     public abstract $useNewHooks?: boolean;
 
     public abstract $isStateless?: boolean;
-    public abstract insertPoint?: IFiber;
+    public abstract insertPoint?: IFiber|null;
 
     public abstract $unmaskedContext?: IBaseObject;
     public abstract $maskedContext?: IBaseObject;
@@ -270,7 +274,7 @@ export interface IRenderer {
     currentOwner: OwnerType|null;
     catchError?: any;
     catchStack?: string;
-    batchedUpdates?: (call: () => void, options: object) => void;
+    batchedUpdates: (call: () => void, options: object) => void;
     onUpdate(fiber: IFiber): any;
     onDispose(fiber: IFiber): void;
     middleware(middleware: IMiddleware): void;
@@ -283,5 +287,6 @@ export interface IRenderer {
         immediateUpdate?: boolean,
     ): any;
     scheduleWork?(): void;
+    removeElement(fiber: IFiber): void;
     [name: string]: any;
 }

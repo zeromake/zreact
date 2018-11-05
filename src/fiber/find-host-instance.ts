@@ -18,7 +18,7 @@ export function findHostInstance(fiber: IFiber | OwnerType): Element | null {
         return findHostInstance((fiber as IFiber).stateNode as OwnerType);
     } else if ((fiber as OwnerType).render) {
         // react 组件
-        fiber = (fiber as OwnerType).$reactInternalFiber;
+        fiber = (fiber as OwnerType).$reactInternalFiber as IFiber;
         const childrenMap = (fiber as IFiber).children;
         if (childrenMap) {
             for (const i in childrenMap) {

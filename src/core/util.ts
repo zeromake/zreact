@@ -8,7 +8,7 @@ export const gSBU = "getSnapshotBeforeUpdate";
 export const gDSFP = "getDerivedStateFromProps";
 export const effects: IFiber[] = [];
 export const topFibers: IFiber[] = [];
-export const topNodes = [];
+export const topNodes: any[] = [];
 export const emptyObject = {};
 
 /**

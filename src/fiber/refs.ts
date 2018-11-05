@@ -9,7 +9,7 @@ export let Refs = {
         const owner = fiber.$owner;
         try {
             const refType = typeNumber(ref);
-            const refCall = refStrategy[refType];
+            const refCall = (refStrategy as any)[refType];
             refCall(owner, ref, dom);
             if (owner && owner.$isStateless) {
                 delete fiber.ref;

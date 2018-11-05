@@ -32,9 +32,10 @@ if (hasNativePerformanceNow) {
         return localDate.now();
     };
 }
-
-let scheduleWork: (callback: scheduledCallbackType, options?: IScheduledOptions) => IScheduledConfig = null;
-let cancelScheduledWork: (callbackId: IScheduledConfig) => void = null;
+type cancelScheduledWorkType = (callbackId: IScheduledConfig) => void;
+type scheduleWorkType = (callback: scheduledCallbackType, options?: IScheduledOptions) => IScheduledConfig;
+let scheduleWork: scheduleWorkType|null = null;
+let cancelScheduledWork: cancelScheduledWorkType|null = null;
 
 if (!requestAnimationFrameForReact) {
     const timeoutIds = new Map<scheduledCallbackType, number>();
@@ -64,8 +65,8 @@ if (!requestAnimationFrameForReact) {
         localClearTimeout(timeoutId);
     };
 } else {
-    let headOfPendingCallbacksLinkedList: IScheduledConfig = null;
-    let tailOfPendingCallbacksLinkedList: IScheduledConfig = null;
+    let headOfPendingCallbacksLinkedList: IScheduledConfig|null = null;
+    let tailOfPendingCallbacksLinkedList: IScheduledConfig|null = null;
 
     // We track what the next soonest timeoutTime is, to be able to quickly tell
     // if none of the scheduled callbacks have timed out.
@@ -95,7 +96,7 @@ if (!requestAnimationFrameForReact) {
      * - do start a new postMessage callback, to call any remaining callbacks,
      * - but only if there is an error, so there is not extra overhead.
      */
-    function callUnsafely(callbackConfig: IScheduledConfig, arg: IScheduledCallbackParams) {
+    const callUnsafely = function _callUnsafely(callbackConfig: IScheduledConfig, arg: IScheduledCallbackParams) {
         const callback = callbackConfig.scheduledCallback;
         let finishedCalling = false;
         try {
@@ -103,7 +104,7 @@ if (!requestAnimationFrameForReact) {
             finishedCalling = true;
         } finally {
             // always remove it from linked list
-            cancelScheduledWork(callbackConfig);
+            (cancelScheduledWork as cancelScheduledWorkType)(callbackConfig);
 
             if (!finishedCalling) {
                 // an error must have been thrown
@@ -111,14 +112,14 @@ if (!requestAnimationFrameForReact) {
                 global.postMessage(messageKey, "*");
             }
         }
-    }
+    };
 
     /**
      * Checks for timed out callbacks, runs them, and then checks again to see if
      * any more have timed out.
      * Keeps doing this until there are none which have currently timed out.
      */
-    function callTimedOutCallbacks() {
+    const callTimedOutCallbacks = function _callTimedOutCallbacks() {
         if (headOfPendingCallbacksLinkedList === null) {
             return;
         }
@@ -159,7 +160,7 @@ if (!requestAnimationFrameForReact) {
                     updatedNextSoonestTimeoutTime = timeoutTime;
                 }
             }
-            currentCallbackConfig = currentCallbackConfig.next;
+            currentCallbackConfig = currentCallbackConfig!.next;
         }
 
         if (timedOutCallbacks.length > 0) {
@@ -172,7 +173,7 @@ if (!requestAnimationFrameForReact) {
         // NOTE: we intentionally wait to update the nextSoonestTimeoutTime until
         // after successfully calling any timed out callbacks.
         nextSoonestTimeoutTime = updatedNextSoonestTimeoutTime;
-    }
+    };
 
     // We use the postMessage trick to defer idle work until after the repaint.
     const messageKey =
@@ -217,7 +218,7 @@ if (!requestAnimationFrameForReact) {
     // something better for old IE.
     global.addEventListener("message", idleTick, false);
 
-    function animationTick(rafTime: number): void {
+    const animationTick = function _animationTick(rafTime: number): void {
         isAnimationFrameScheduled = false;
         let nextFrameTime = rafTime - frameDeadline + activeFrameTime;
         if (
@@ -246,9 +247,9 @@ if (!requestAnimationFrameForReact) {
             isIdleScheduled = true;
             global.postMessage(messageKey, "*");
         }
-    }
+    };
 
-    scheduleWork = function _(callback: scheduledCallbackType, options?: IScheduledOptions) {
+    scheduleWork = function _scheduleWork(callback: scheduledCallbackType, options?: IScheduledOptions) {
         let timeoutTime = -1;
         if (options != null && typeof options.timeout === "number") {
             timeoutTime = now() + options.timeout;
@@ -292,7 +293,7 @@ if (!requestAnimationFrameForReact) {
         return scheduledCallbackConfig;
     };
 
-    cancelScheduledWork = function _(callbackConfig: IScheduledConfig) {
+    cancelScheduledWork = function _cancelScheduledWork(callbackConfig: IScheduledConfig) {
         if (
             callbackConfig.prev === null &&
             headOfPendingCallbacksLinkedList !== callbackConfig

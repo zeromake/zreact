@@ -25,7 +25,7 @@ export function createInstance(fiber: IFiber, context: object): OwnerType {
     const { props, type, tag, ref } = fiber;
     const isStateless = tag === EffectTag.NOWORK;
     const lastOwn = Renderer.currentOwner;
-    let instance: OwnerType;
+    let instance: OwnerType|undefined;
     fiber.errorHook = "constructor";
     try {
         if (isStateless) {
@@ -35,15 +35,18 @@ export function createInstance(fiber: IFiber, context: object): OwnerType {
                 props,
                 context,
                 ref,
-                renderImpl: type,
-                render() {
-                    this.renderImpl(this.props);
+                renderImpl: type as any,
+                render(this: IOwnerAttribute) {
+                    if (this.renderImpl) {
+                        return this.renderImpl(this.props as IBaseProps);
+                    }
+                    return null;
                 },
-            };
+            } as IOwnerAttribute;
             Renderer.currentOwner = instance;
             if ((type as any).isForwardComponent) {
                 instance.render = function render(this: IOwnerAttribute) {
-                    return (type as IComponentFunction)(this.props, this.ref);
+                    return (type as IComponentFunction)(this.props as IBaseProps, this.ref);
                 };
             }
             instance.$init = false;
@@ -54,12 +57,12 @@ export function createInstance(fiber: IFiber, context: object): OwnerType {
         Renderer.currentOwner = lastOwn;
         fiber.stateNode = instance;
         fiber.updateQueue = UpdateQueue();
-        instance.$reactInternalFiber = fiber;
-        instance.context = context;
-        updater.enqueueSetState = Renderer.updateComponent;
-        if (type[gDSFP] || (instance as IComponentMinx<IBaseProps, IBaseObject>).getSnapshotBeforeUpdate) {
-            instance.$useNewHooks = true;
+        (instance as OwnerType).$reactInternalFiber = fiber;
+        (instance as OwnerType).context = context;
+        updater.enqueueSetState = Renderer.updateComponent as any;
+        if ((type as any)[gDSFP] || (instance as IComponentMinx<IBaseProps, IBaseObject>).getSnapshotBeforeUpdate) {
+            (instance as OwnerType).$useNewHooks = true;
         }
     }
-    return instance;
+    return (instance as OwnerType);
 }

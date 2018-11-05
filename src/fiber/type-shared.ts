@@ -86,12 +86,13 @@ export interface IFiber extends IVNode {
     memoizedProps?: IBaseProps;
     setout?: boolean;
     dirty?: boolean;
-    pendingCbs?: Array<() => void>;
+    pendingCbs?: Array<(this: OwnerType) => void>;
     hostRoot?: boolean;
     index?: number;
     microtasks?: IFiber[];
     containerStack?: OwnerType[];
     contextStack?: IBaseObject[];
+    disabled?: boolean;
 }
 
 export interface IScheduledCallbackParams {

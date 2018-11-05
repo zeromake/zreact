@@ -31,4 +31,6 @@ export const Renderer: IRenderer = {
         }
     },
     currentOwner: null,
+    batchedUpdates() {},
+    removeElement() {},
 };

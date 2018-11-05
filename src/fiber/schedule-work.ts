@@ -14,19 +14,19 @@ import { Unbatch } from "./unbatch";
 import { Fiber } from "./Fiber";
 
 import { createInstance } from "./create-instance";
-import { IFiber, IScheduledCallbackParams } from "./type-shared";
-import { OwnerType, IVNode, IBaseObject } from "../core/type-shared";
+import { IFiber, IScheduledCallbackParams, IUpdateQueue } from "./type-shared";
+import { OwnerType, IVNode, IBaseObject, IWorkContext, IUpdater } from "../core/type-shared";
 
 const macrotasks = Renderer.macrotasks;
 const boundaries = Renderer.boundaries;
-const batchedtasks = [];
+const batchedtasks: IFiber[] = [];
 
 export function render(vnode: IVNode, root: Element, callback: (this: OwnerType) => void): OwnerType {
     const container = createContainer(root);
     let immediateUpdate = false;
     if (!container.hostRoot) {
         const fiber: IFiber = new Fiber({
-            type: Unbatch,
+            type: Unbatch as any,
             tag: 2,
             props: {},
         });
@@ -53,17 +53,22 @@ export function render(vnode: IVNode, root: Element, callback: (this: OwnerType)
         immediateUpdate,
     );
 
-    return carrier.instance;
+    return carrier.instance as OwnerType;
 }
 
-function wrapCb(fn: (this: OwnerType) => void, carrier) {
+function wrapCb(
+    fn: (this: OwnerType) => void,
+    carrier: {
+        instance?: OwnerType,
+    },
+) {
     return function(this: IFiber) {
         const fiber = this;
         const target = fiber.child ? fiber.child.stateNode : null;
         if (fn) {
             fn.call(target);
         }
-        carrier.instance = target;
+        carrier.instance = target as OwnerType;
     };
 }
 
@@ -79,8 +84,8 @@ function performWork(dl: IScheduledCallbackParams) {
         boundaries.length = 0;
     }
 
-    topFibers.forEach(function _(el) {
-        const microtasks = el.microtasks;
+    topFibers.forEach(function _(el: IFiber|undefined) {
+        const microtasks = (el as IFiber).microtasks as IFiber[];
         while ((el = microtasks.shift())) {
             if (!el.disposed) {
                 macrotasks.push(el);
@@ -99,7 +104,7 @@ const deadline: IScheduledCallbackParams = {
     },
 };
 
-function requestIdleCallback(fn) {
+function requestIdleCallback(fn: (d: IScheduledCallbackParams) => void) {
     fn(deadline);
 }
 
@@ -120,16 +125,16 @@ Renderer.batchedUpdates = function batchedUpdates<T, F>(callback: (e: T) => F, e
     } finally {
         isBatching = keepbook;
         if (!isBatching) {
-            let el;
+            let el: IFiber|undefined;
             while ((el = batchedtasks.shift())) {
-                if (!el.disabled) {
+                if (el && !el.disabled) {
                     macrotasks.push(el);
                 }
             }
             if (event) {
                 Renderer.fireMiddlewares();
             }
-            Renderer.scheduleWork();
+            (Renderer.scheduleWork as any)();
         }
     }
 };
@@ -139,16 +144,16 @@ function workLoop(dl: IScheduledCallbackParams) {
     let info: IFiber;
     if (fiber) {
         if (fiber.type === Unbatch) {
-            info = fiber.return;
+            info = fiber.return as IFiber;
         } else {
             const dom = getContainer(fiber);
             info = {
                 containerStack: [dom],
-                contextStack: [fiber.stateNode.$unmaskedContext],
+                contextStack: [(fiber.stateNode as OwnerType).$unmaskedContext],
             } as IFiber;
         }
 
-        reconcileDFS(fiber, info, dl, ENOUGH_TIME);
+        reconcileDFS(fiber, info as IWorkContext, dl, ENOUGH_TIME);
         updateCommitQueue(fiber);
         resetStack(info);
         if (macrotasks.length && dl.timeRemaining() > ENOUGH_TIME) {
@@ -182,16 +187,16 @@ function updateCommitQueue(fiber: IFiber) {
  * @param topWork
  */
 
-function mergeUpdates(fiber: IFiber, state: IBaseObject|((s: IBaseObject) => IBaseObject|null|undefined)|null, isForced: boolean, callback: () => void): void {
-    const updateQueue = fiber.updateQueue;
+function mergeUpdates(fiber: IFiber, state: IBaseObject|((s: IBaseObject) => IBaseObject|null|undefined)|null, isForced: boolean, callback?: () => void): void {
+    const updateQueue = fiber.updateQueue as IUpdateQueue;
     if (isForced) {
         updateQueue.isForced = true; // 如果是true就变不回false
     }
     if (state) {
         updateQueue.pendingStates.push(state);
     }
-    if (isFn(callback)) {
-        updateQueue.pendingCbs.push(callback);
+    if (isFn(callback as any)) {
+        updateQueue.pendingCbs.push(callback as () => void);
     }
 }
 
@@ -204,7 +209,7 @@ function fiberContains(p: IFiber, son: IFiber) {
     }
 }
 
-function getQueue(fiber: IFiber) {
+function getQueue(fiber: IFiber|undefined) {
     while (fiber) {
         if (fiber.microtasks) {
             return fiber.microtasks;
@@ -226,17 +231,18 @@ function pushChildQueue(fiber: IFiber, queue: IFiber[]): void {
             queue.splice(i, 1);
             continue;
         }
-        maps[el.stateNode.updater.mountOrder] = true;
+        const instance = ((el as IFiber).stateNode as OwnerType);
+        maps[(instance.updater as IUpdater).mountOrder] = true;
     }
     let enqueue = true;
     let p = fiber;
     const hackSCU = [];
     while (p.return) {
         p = p.return;
-        const instance = p.stateNode;
+        const instance = p.stateNode as OwnerType;
         if (!instance.$isStateless && p.type !== Unbatch) {
             hackSCU.push(p);
-            const u = instance.updater;
+            const u = instance.updater as IUpdater;
             if (maps[u.mountOrder]) {
                 // 它是已经在列队的某个组件的孩子
                 enqueue = false;
@@ -246,7 +252,7 @@ function pushChildQueue(fiber: IFiber, queue: IFiber[]): void {
     }
     hackSCU.forEach(function _(el) {
         // 如果是批量更新，必须强制更新，防止进入SCU
-        el.updateQueue.batching = true;
+        (el.updateQueue as IUpdateQueue).batching = true;
     });
     if (enqueue) {
         queue.push(fiber);
@@ -262,14 +268,14 @@ function updateComponent(
     callback?: () => void,
     immediateUpdate?: boolean,
 ) {
-    const fiber = instance.$reactInternalFiber;
+    const fiber = instance.$reactInternalFiber as IFiber;
     fiber.dirty = true;
 
     const sn = typeNumber(state);
     const isForced = state === true;
     const microtasks = getQueue(fiber);
 
-    state = isForced ? null : sn === 5 || sn === 8 ? state : null;
+    state = (isForced ? null : sn === 5 || sn === 8 ? state : null) as any;
     if (fiber.setout) {
         // cWM/cWRP中setState， 不放进列队
         immediateUpdate = false;
@@ -279,11 +285,11 @@ function updateComponent(
     } else {
         // 情况4，在钩子外setState或batchedUpdates中ReactDOM.render一棵新树
         immediateUpdate = immediateUpdate || !fiber.$hydrating;
-        pushChildQueue(fiber, microtasks);
+        pushChildQueue(fiber, microtasks as IFiber[]);
     }
     mergeUpdates(fiber, state as IBaseObject|((s: IBaseObject) => IBaseObject|null|undefined)|null, isForced, callback);
     if (immediateUpdate) {
-        Renderer.scheduleWork();
+        (Renderer.scheduleWork as any)();
     }
 }
 
@@ -308,7 +314,7 @@ export function createContainer(root: Element, onlyGet?: boolean, validate?: (el
             return (root as any).$reactInternalFiber;
         }
     } else {
-        const index = topNodes.indexOf(root);
+        const index = topNodes.indexOf(root as any) as number;
         if (index !== -1) {
             return topFibers[index];
         }
@@ -331,17 +337,17 @@ export function createContainer(root: Element, onlyGet?: boolean, validate?: (el
     if (useProp) {
         (root as any).$reactInternalFiber = container;
     }
-    topNodes.push(root);
+    topNodes.push(root as any);
     topFibers.push(container);
 
     return container;
 }
 
-export function getContainer(p: IFiber): Element {
+export function getContainer(p: IFiber): Element|undefined {
     if (p.parent) {
         return p.parent as Element;
     }
-    while ((p = p.return)) {
+    while ((p = p.return as IFiber)) {
         if (p.tag === 5) {
             return p.stateNode as Element;
         }

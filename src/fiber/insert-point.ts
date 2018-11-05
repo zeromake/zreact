@@ -1,12 +1,12 @@
 import { IFiber } from "./type-shared";
 import { EffectTag } from "./effect-tag";
-import { IOwnerAttribute } from "../core/type-shared";
+import { IOwnerAttribute, OwnerType } from "../core/type-shared";
 
 /**
  * 查找它后面的节点
  */
-export function getInsertPoint(fiber: IFiber) {
-    const parent = fiber.parent;
+export function getInsertPoint(fiber: IFiber): IFiber|null {
+    const parent = fiber.parent as OwnerType;
     while (fiber) {
         if ((fiber.stateNode === parent) || fiber.isPortal) {
             return null;
@@ -15,21 +15,22 @@ export function getInsertPoint(fiber: IFiber) {
         if (forward) {
             return forward;
         }
-        fiber = fiber.return;
+        fiber = fiber.return as IFiber;
     }
+    return null;
 }
 
 export function setInsertPoints(children: {[key: string]: IFiber}) {
     for (const i in children) {
-        const child = children[i];
+        const child = children[i] as IFiber;
         if (child.disposed) {
             continue;
         }
         if (child.tag > 4) {
-            const p = child.parent;
+            const p = child.parent as OwnerType;
             child.effectTag = EffectTag.PLACE;
-            child.forwardFiber = (p as IOwnerAttribute).insertPoint;
-            (p as IOwnerAttribute).insertPoint = child;
+            child.forwardFiber = p.insertPoint as IFiber;
+            p.insertPoint = child;
             for (
                 let pp = child.return;
                 pp && pp.effectTag === EffectTag.NOWORK;
@@ -45,8 +46,8 @@ export function setInsertPoints(children: {[key: string]: IFiber}) {
     }
 }
 
-function findForward(fiber: IFiber): IFiber {
-    let forward: IFiber;
+function findForward(fiber: IFiber): IFiber|undefined {
+    let forward: IFiber|undefined;
     while (fiber.forward) {
         fiber = fiber.forward;
         if (fiber.disposed || fiber.isPortal) {
@@ -65,8 +66,8 @@ function findForward(fiber: IFiber): IFiber {
     return forward;
 }
 
-function downward(fiber: IFiber): IFiber {
-    let found;
+function downward(fiber: IFiber): IFiber|undefined {
+    let found: IFiber|undefined;
     while (fiber.lastChild) {
         fiber = fiber.lastChild;
         if (fiber.disposed || fiber.isPortal) {

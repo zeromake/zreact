@@ -15,5 +15,9 @@ export class Fiber implements IFiber {
         const type = vnode.type || "ProxyComponent(react-hot-loader)";
         this.name = (type as any).displayName || (type as any).name || type;
         this.effectTag = EffectTag.NOWORK;
+        this.children = {};
+        this.tag = vnode.tag;
+        this.props = vnode.props;
+        this.type = vnode.type;
     }
 }

@@ -1,6 +1,6 @@
 {
   "name": "zreact",
-  "version": "1.5.0",
+  "version": "2.0.0",
   "description": "React like,copy by preact",
   "main": "dist/zreact.js",
   "module": "dist/zreact.esm.js",
@@ -17,9 +17,9 @@
   "scripts": {
     "clean": "rimraf dist",
     "build:all": "npm run clean && npm run build:min && npm run build",
-    "build": "cross-env NODE_ENV=dev rollup -c build/rollup.config.js",
-    "build:min": "cross-env NODE_ENV=production rollup -c build/rollup.config.js",
-    "dev": "cross-env NODE_ENV=dev rollup -c build/rollup.config.js -w",
+    "build": "cross-env NODE_ENV=dev rollup -c scripts/rollup.config.js",
+    "build:min": "cross-env NODE_ENV=production rollup -c scripts/rollup.config.js",
+    "dev": "cross-env NODE_ENV=dev rollup -c scripts/rollup.config.js -w",
     "coverage": "cat ./test/coverage/lcov.info | coveralls",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
     "prepublishOnly": "npm run build:all",
