@@ -245,6 +245,7 @@ export abstract class IComponentMinx<P extends IBaseProps, S extends IBaseObject
 
 }
 export interface IComponentClass<P extends IBaseProps, S extends IBaseObject> {
+    prototype: IComponentMinx<P, S>;
     new(p: P, c: IBaseObject): IComponentMinx<P, S>;
 }
 

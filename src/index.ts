@@ -5,6 +5,7 @@ import { createPortal } from "./core/create-portal";
 import { Children } from "./core/children";
 import { createRef, forwardRef } from "./core/create-ref";
 import { findDOMNode } from "./render/dom/find-dom-node";
+import { DOMElement } from "./render/dom/browser";
 
 export {
     Component,
@@ -16,4 +17,5 @@ export {
     createRef,
     forwardRef,
     findDOMNode,
+    DOMElement,
 };

@@ -116,3 +116,34 @@ export const ObjectToString = Object.prototype.toString;
 export function isFn(obj: any): boolean {
     return ObjectToString.call(obj) === "[object Function]";
 }
+
+const rword = /[^, ]+/g;
+
+export function oneObject(array: string| any[], val?: any) {
+    if ((array + "") === array) {
+        // 利用字符串的特征进行优化，字符串加上一个空字符串等于自身
+        array = array.match(rword) || [];
+    }
+    const result: any = {};
+    const value = val !== undefined ? val : 1;
+    for (let i = 0, n = array.length; i < n; i++) {
+        result[array[i]] = value;
+    }
+    return result;
+}
+
+const rcamelize = /[-_][^-_]/g;
+export function camelize(target: string): string {
+    // 提前判断，提高getStyle等的效率
+    if (!target || (target.indexOf("-") < 0 && target.indexOf("_") < 0)) {
+        return target;
+    }
+    // 转换为驼峰风格
+    const str = target.replace(rcamelize, function _(match: string) {
+        return match.charAt(1).toUpperCase();
+    });
+    return firstLetterLower(str);
+}
+export function firstLetterLower(str: string): string {
+    return str.charAt(0).toLowerCase() + str.slice(1);
+}
