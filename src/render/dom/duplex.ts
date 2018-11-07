@@ -1,4 +1,5 @@
 import { typeNumber, emptyObject } from "../../core/util";
+import { IFiber } from "../../fiber/type-shared";
 
 function getSafeValue<T>(value: T): T|string {
     switch (typeNumber(value)) {
@@ -14,18 +15,33 @@ function getSafeValue<T>(value: T): T|string {
     }
 }
 
+type valueType = boolean|string|number|Array<boolean|string|number>;
 interface IDuplexProps {
     type: string;
-    value?: any;
-    defaultValue?: any;
+    value?: valueType;
+    defaultValue?: valueType;
     checked?: boolean;
     defaultChecked?: boolean;
     multiple?: boolean;
+    children?: Array<boolean|string|number>;
 }
+
+interface IDuplexElement extends Element {
+    $anuSetValue?: boolean;
+    $wrapperState?: {
+        initialValue: boolean|string|number|Array<boolean|string|number>;
+        wasMultiple?: boolean;
+    };
+    duplexValue?: boolean|string|number|Array<boolean|string|number>;
+    $events?: {
+        vnode: IFiber;
+    };
+}
+
 function syncValue(dom: Element, name: string, value: string|number|boolean): void {
-    (dom as any).$anuSetValue = true; // 抑制onpropertychange
+    (dom as IDuplexElement).$anuSetValue = true; // 抑制onpropertychange
     dom[name] = value;
-    (dom as any).$anuSetValue = false;
+    (dom as IDuplexElement).$anuSetValue = false;
 }
 
 function setDefaultValue(node: HTMLInputElement, type: string, value: any, isActive?: boolean) {
@@ -35,7 +51,7 @@ function setDefaultValue(node: HTMLInputElement, type: string, value: any, isAct
         !isActive
     ) {
         if (value == null) {
-            node.defaultValue = "" + (node as any)._wrapperState.initialValue;
+            node.defaultValue = "" + (node as IDuplexElement).$wrapperState.initialValue;
         } else if (node.defaultValue !== "" + value) {
             node.defaultValue = "" + value;
         }
@@ -74,7 +90,7 @@ export function updateOptions(
         const _selectedValue = "" + propValue;
         let defaultSelected = null;
         for (const option of options) {
-            if ((option as any).duplexValue === _selectedValue) {
+            if ((option as IDuplexElement).duplexValue === _selectedValue) {
                 option.selected = true;
                 if (setDefaultSelected) {
                     option.defaultSelected = true;
@@ -91,12 +107,16 @@ export function updateOptions(
     }
 }
 
+function textContent(node: HTMLTextAreaElement): string {
+    return node.textContent || node.innerText;
+}
+
 export const duplexMap = {
     input: {
         init(node: HTMLInputElement, props: IDuplexProps) {
             const defaultValue =
                 props.defaultValue == null ? "" : props.defaultValue;
-            return ((node as any)._wrapperState = {
+            return ((node as IDuplexElement).$wrapperState = {
                 // initialChecked: props.checked != null ? props.checked : props.defaultChecked,
                 initialValue: getSafeValue(
                     props.value != null ? props.value : defaultValue,
@@ -164,7 +184,7 @@ export const duplexMap = {
         init(node: HTMLSelectElement, props: IDuplexProps) {
             // selec
             const value = props.value;
-            return ((node as any)._wrapperState = {
+            return ((node as IDuplexElement).$wrapperState = {
                 initialValue: value != null ? value : props.defaultValue,
                 wasMultiple: !!props.multiple,
             });
@@ -173,25 +193,25 @@ export const duplexMap = {
             const multiple = (node.multiple = !!props.multiple);
             const value = props.value;
             if (value != null) {
-                updateOptions(node, multiple, value, false);
+                updateOptions(node, multiple, value as string[], false);
             } else if (props.defaultValue != null) {
-                updateOptions(node, multiple, props.defaultValue, true);
+                updateOptions(node, multiple, props.defaultValue as string[], true);
             }
         },
         update(node: HTMLSelectElement, props: IDuplexProps) {
             // mount后这个属性没用
-            delete (node as any)._wrapperState.initialValue;
-            const state = (node as any)._wrapperState;
+            delete (node as any).$wrapperState.initialValue;
+            const state = (node as any).$wrapperState;
 
             const wasMultiple = state.wasMultiple;
             const multiple = (state.wasMultiple = !!props.multiple);
             const value = props.value;
             if (value != null) {
-                updateOptions(node, multiple, value, false);
+                updateOptions(node, multiple, value as string[], false);
             } else if (wasMultiple !== multiple) {
                 // 切换multiple后，需要重新计算
                 if (props.defaultValue != null) {
-                    updateOptions(node, multiple, props.defaultValue, true);
+                    updateOptions(node, multiple, props.defaultValue as string[], true);
                 } else {
                     // Revert the select back to its default unselected state.
                     updateOptions(node, multiple, multiple ? [] : "", false);
@@ -199,4 +219,142 @@ export const duplexMap = {
             }
         },
     },
+    textarea: {
+        init(node: HTMLTextAreaElement, props: IDuplexProps) {
+            let initialValue = props.value as string;
+            if (initialValue == null) {
+                let defaultValue = props.defaultValue as string;
+                const children = props.children;
+                if (children != null) {
+                    // 移除元素节点
+                    defaultValue = textContent(node);
+                    node.innerHTML = "";
+                }
+                if (defaultValue == null) {
+                    defaultValue = "";
+                }
+                initialValue = defaultValue;
+            }
+            // 优先级：value > children(textContent) > defaultValue > ""
+            return ((node as IDuplexElement).$wrapperState = {
+                initialValue: "" + initialValue,
+            });
+        },
+        mount(node: HTMLTextAreaElement, props: IDuplexProps, state) {
+            const text: string = textContent(node);
+            const stateValue = "" + state.initialValue;
+            if (text !== stateValue) {
+                syncValue(node, "value", stateValue);
+            }
+        },
+        update(node: HTMLTextAreaElement, props: IDuplexProps) {
+            const value = props.value as string;
+            if (value != null) {
+                const newValue = "" + value;
+                if (newValue !== node.value) {
+                    syncValue(node, "value", newValue);
+                }
+                if (props.defaultValue == null) {
+                    node.defaultValue = newValue;
+                }
+            }
+            if (props.defaultValue != null) {
+                node.defaultValue = props.defaultValue as string;
+            }
+        },
+    },
+    option: {
+        init() {
+        },
+        update(node: HTMLOptionElement, props: IDuplexProps) {
+            duplexMap.option.mount(node, props);
+        },
+        mount(node: HTMLOptionElement, props: IDuplexProps) {
+            const elems = node.getElementsByTagName("*");
+            let n = elems.length;
+            let el;
+            if (n) {
+                for (n = n - 1, el; (el = elems[n--]); ) {
+                    node.removeChild(el);
+                }
+            }
+            if ("value" in props) {
+                (node as IDuplexElement).duplexValue = node.value = props.value as string;
+            } else {
+                (node as IDuplexElement).duplexValue = node.text;
+            }
+        },
+    },
 };
+
+export function duplexAction(fiber: IFiber) {
+    const { stateNode: dom, name, props, lastProps } = fiber;
+    const fns = duplexMap[name];
+    if (name !== "option") {
+        enqueueDuplex(dom as Element);
+    }
+    if (!lastProps || lastProps === emptyObject) {
+        const state = fns.init(dom, props);
+        fns.mount(dom, props, state);
+    } else {
+        fns.update(dom, props);
+    }
+}
+
+const duplexNodes: Element[] = [];
+export function enqueueDuplex(dom: Element) {
+    if (duplexNodes.indexOf(dom) === -1) {
+        duplexNodes.push(dom);
+    }
+}
+
+export function fireDuplex() {
+    const radioMap = {};
+    if (duplexNodes.length) {
+        do {
+            const dom = duplexNodes.shift();
+            const e = (dom as IDuplexElement).$events;
+            const fiber = e && e.vnode;
+            if (fiber && !fiber.disposed) {
+                const props = fiber.props;
+                const tag = fiber.name;
+                if (name === "select") {
+                    const value = props.value;
+                    if (value != null) {
+                        updateOptions(dom as HTMLSelectElement, !!props.multiple, value, false);
+                    }
+                } else {
+                    duplexMap[tag].update(dom, props);
+                    const name = props.name;
+                    if (
+                        props.type === "radio" &&
+                        name != null &&
+                        !radioMap[name]
+                    ) {
+                        radioMap[name] = 1;
+                        collectNamedCousins(dom, name);
+                    }
+                }
+            }
+        } while (duplexNodes.length);
+    }
+}
+
+function collectNamedCousins(rootNode: Element|Node, name: string) {
+    let queryRoot = rootNode;
+    while (queryRoot.parentNode) {
+        queryRoot = queryRoot.parentNode;
+    }
+    const group = (queryRoot as Element).getElementsByTagName("input");
+    for (const otherNode of group) {
+        if (
+            otherNode === rootNode ||
+            otherNode.name !== name ||
+            otherNode.type !== "radio" ||
+            otherNode.form !== (rootNode as HTMLInputElement).form
+        ) {
+            continue;
+        }
+        enqueueDuplex(otherNode);
+    }
+}
