@@ -39,7 +39,7 @@ export function render(vnode: IVNode, root: Element, callback: (this: OwnerType)
         const instance = createInstance(fiber, {});
         container.hostRoot = instance;
         immediateUpdate = true;
-        Renderer.emptyElement(container);
+        Renderer.emptyElement!(container);
     }
     const carrier: {
         instance?: OwnerType,

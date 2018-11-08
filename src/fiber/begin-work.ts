@@ -194,11 +194,12 @@ export function updateClassComponent(fiber: IFiber, info: IWorkContext): void {
     if (fiber.catchError) {
         return;
     }
-    Renderer.onUpdate(fiber);
+    Renderer.onBeforeRender!(fiber);
     fiber.$hydrating = true;
     Renderer.currentOwner = instance;
     const rendered = applyCallback(instance, "render", []);
     diffChildren(fiber, rendered);
+    Renderer.onAfterRender!(fiber);
 }
 
 /**

@@ -41,7 +41,7 @@ function commitDFSImpl(fiber: IFiber) {
             // DOM节点插入或移除
             domEffects.forEach(function _(effect, i) {
                 if (fiber.effectTag % effect === 0) {
-                    Renderer[domFns[i]](fiber);
+                    (Renderer as any)[domFns[i]](fiber);
                     fiber.effectTag /= effect;
                 }
             });

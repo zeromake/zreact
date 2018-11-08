@@ -147,3 +147,7 @@ export function camelize(target: string): string {
 export function firstLetterLower(str: string): string {
     return str.charAt(0).toLowerCase() + str.slice(1);
 }
+const lowerCache: {[name: string]: string} = {};
+export function toLowerCase(s: string): string {
+    return lowerCache[s] || (lowerCache[s] = s.toLowerCase());
+}

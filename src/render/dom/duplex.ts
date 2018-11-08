@@ -26,7 +26,7 @@ interface IDuplexProps {
     children?: Array<boolean|string|number>;
 }
 
-interface IDuplexElement extends Element {
+export interface IDuplexElement extends Element {
     $anuSetValue?: boolean;
     $wrapperState?: {
         initialValue: boolean|string|number|Array<boolean|string|number>;
@@ -34,13 +34,14 @@ interface IDuplexElement extends Element {
     };
     duplexValue?: boolean|string|number|Array<boolean|string|number>;
     $events?: {
-        vnode: IFiber;
+        [name: string]: any;
+        vnode?: IFiber;
     };
 }
 
 function syncValue(dom: Element, name: string, value: string|number|boolean): void {
     (dom as IDuplexElement).$anuSetValue = true; // 抑制onpropertychange
-    dom[name] = value;
+    (dom as any)[name] = value;
     (dom as IDuplexElement).$anuSetValue = false;
 }
 
@@ -51,7 +52,7 @@ function setDefaultValue(node: HTMLInputElement, type: string, value: any, isAct
         !isActive
     ) {
         if (value == null) {
-            node.defaultValue = "" + (node as IDuplexElement).$wrapperState.initialValue;
+            node.defaultValue = "" + (node as IDuplexElement).$wrapperState!.initialValue;
         } else if (node.defaultValue !== "" + value) {
             node.defaultValue = "" + value;
         }
@@ -68,12 +69,12 @@ export function updateOptions(
 
     if (multiple) {
         const selectedValues = propValue;
-        const selectedValue = {};
+        const selectedValue: {[name: string]: boolean} = {};
         for (const selected of selectedValues) {
             // Prefix to avoid chaos with special keys.
             selectedValue["$" + selected] = true;
         }
-        for (const option of options) {
+        for (const option of options as any) {
             const selected = selectedValue.hasOwnProperty(
                 "$" + (option as any).duplexValue,
             );
@@ -89,7 +90,7 @@ export function updateOptions(
         // browsers for all cases.
         const _selectedValue = "" + propValue;
         let defaultSelected = null;
-        for (const option of options) {
+        for (const option of options as any) {
             if ((option as IDuplexElement).duplexValue === _selectedValue) {
                 option.selected = true;
                 if (setDefaultSelected) {
@@ -123,7 +124,7 @@ export const duplexMap = {
                 ),
             });
         },
-        mount(node: HTMLInputElement, props: IDuplexProps, state) {
+        mount(node: HTMLInputElement, props: IDuplexProps, state: any) {
             if (
                 props.hasOwnProperty("value") ||
                 props.hasOwnProperty("defaultValue")
@@ -148,7 +149,7 @@ export const duplexMap = {
             if (props.checked != null) {
                 syncValue(node, "checked", !!props.checked);
             }
-            const isActive = node === node.ownerDocument.activeElement;
+            const isActive = node === node.ownerDocument!.activeElement;
             const value = isActive ? node.value : getSafeValue(props.value);
             if (value != null) {
                 if (props.type === "number") {
@@ -183,9 +184,9 @@ export const duplexMap = {
     select: {
         init(node: HTMLSelectElement, props: IDuplexProps) {
             // selec
-            const value = props.value;
+            const value = props.value as string;
             return ((node as IDuplexElement).$wrapperState = {
-                initialValue: value != null ? value : props.defaultValue,
+                initialValue: value != null ? value : props.defaultValue as string,
                 wasMultiple: !!props.multiple,
             });
         },
@@ -240,7 +241,7 @@ export const duplexMap = {
                 initialValue: "" + initialValue,
             });
         },
-        mount(node: HTMLTextAreaElement, props: IDuplexProps, state) {
+        mount(node: HTMLTextAreaElement, props: IDuplexProps, state: any) {
             const text: string = textContent(node);
             const stateValue = "" + state.initialValue;
             if (text !== stateValue) {
@@ -289,7 +290,7 @@ export const duplexMap = {
 
 export function duplexAction(fiber: IFiber) {
     const { stateNode: dom, name, props, lastProps } = fiber;
-    const fns = duplexMap[name];
+    const fns = (duplexMap as any)[name];
     if (name !== "option") {
         enqueueDuplex(dom as Element);
     }
@@ -324,15 +325,15 @@ export function fireDuplex() {
                         updateOptions(dom as HTMLSelectElement, !!props.multiple, value, false);
                     }
                 } else {
-                    duplexMap[tag].update(dom, props);
+                    (duplexMap as any)[tag].update(dom, props);
                     const name = props.name;
                     if (
                         props.type === "radio" &&
                         name != null &&
-                        !radioMap[name]
+                        !(radioMap as any)[name]
                     ) {
-                        radioMap[name] = 1;
-                        collectNamedCousins(dom, name);
+                        (radioMap as any)[name] = 1;
+                        collectNamedCousins(dom as Element, name);
                     }
                 }
             }
@@ -346,7 +347,7 @@ function collectNamedCousins(rootNode: Element|Node, name: string) {
         queryRoot = queryRoot.parentNode;
     }
     const group = (queryRoot as Element).getElementsByTagName("input");
-    for (const otherNode of group) {
+    for (const otherNode of group as any) {
         if (
             otherNode === rootNode ||
             otherNode.name !== name ||

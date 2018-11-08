@@ -1,5 +1,6 @@
 import { noop, extend } from "./util";
-import { IMiddleware, IRenderer } from "./type-shared";
+import { IMiddleware, IRenderer, OwnerType } from "./type-shared";
+import { IFiber } from "../fiber/type-shared";
 
 export function createRenderer(methods: any): IRenderer {
     return extend(Renderer, methods) as IRenderer;
@@ -14,8 +15,8 @@ export const Renderer: IRenderer = {
     mountOrder: 1,
     macrotasks: [],
     boundaries: [],
-    onUpdate: noop,
     onDispose: noop,
+    createElement: noop,
     middleware(middleware: IMiddleware) {
         if (middleware.begin && middleware.end) {
             middlewares.push(middleware);

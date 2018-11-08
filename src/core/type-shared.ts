@@ -276,7 +276,9 @@ export interface IRenderer {
     catchError?: any;
     catchStack?: string;
     batchedUpdates?: (call: () => void, options: object) => void;
-    onUpdate(fiber: IFiber): any;
+    // onUpdate(fiber: IFiber): any;
+    onBeforeRender?(fiber: IFiber): void;
+    onAfterRender?(fiber: IFiber): void;
     onDispose(fiber: IFiber): void;
     middleware(middleware: IMiddleware): void;
     updateControlled(fiber: IFiber): void;
@@ -289,5 +291,7 @@ export interface IRenderer {
     ): any;
     scheduleWork?(): void;
     removeElement?(fiber: IFiber): void;
-    [name: string]: any;
+    createElement(fiber: IFiber): OwnerType;
+    emptyElement?(fiber: IFiber): void;
+    // [name: string]: any;
 }
