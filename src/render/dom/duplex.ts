@@ -37,6 +37,7 @@ export interface IDuplexElement extends Element {
         [name: string]: any;
         vnode?: IFiber;
     };
+    uniqueID?: number;
 }
 
 function syncValue(dom: Element, name: string, value: string|number|boolean): void {

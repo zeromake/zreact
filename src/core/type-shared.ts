@@ -275,6 +275,7 @@ export interface IRenderer {
     currentOwner: OwnerType|null;
     catchError?: any;
     catchStack?: string;
+    inserting?: HTMLOrSVGElement;
     batchedUpdates?: (call: () => void, options: object) => void;
     // onUpdate(fiber: IFiber): any;
     onBeforeRender?(fiber: IFiber): void;
