@@ -58,6 +58,7 @@ typings/
 .env
 /dist/
 /docs/
+/lib/
 *.log
 
 .DS_Store

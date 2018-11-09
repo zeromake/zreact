@@ -1,4 +1,4 @@
-import { IUpdater, IBaseObject, IComponentMinx, IOwnerAttribute } from "./type-shared";
+import { IUpdater, IBaseObject, IComponentMinx, IOwnerAttribute, IBaseProps, VirtualNode } from "./type-shared";
 import { IFiber } from "../fiber/type-shared";
 
 export const arrayPush = Array.prototype.push;
@@ -150,4 +150,8 @@ export function firstLetterLower(str: string): string {
 const lowerCache: {[name: string]: string} = {};
 export function toLowerCase(s: string): string {
     return lowerCache[s] || (lowerCache[s] = s.toLowerCase());
+}
+
+export function Fragment(props: IBaseProps): VirtualNode[] | VirtualNode {
+    return props.children as any;
 }

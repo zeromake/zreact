@@ -46,7 +46,7 @@ export function createElement(type: VNodeType, config?: IBaseProps|null, ...chil
     let ref: IRefType|undefined;
     const argsLen = children.length;
     if (typeof type === "function") {
-        tag = type.prototype.render != null ? 1 : 2;
+        tag = type.prototype.render == null ? 1 : 2;
     }
     if (config != null) {
         if (hasValidRef(config)) {

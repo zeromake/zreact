@@ -24,7 +24,7 @@ const batchedtasks: IFiber[] = [];
 export function render(vnode: IVNode, root: Element, callback: (this: OwnerType) => void): OwnerType {
     const container = createContainer(root);
     let immediateUpdate = false;
-    if (!container.hostRoot) {
+    if (container && !container.hostRoot) {
         const fiber: IFiber = new Fiber({
             type: Unbatch as any,
             tag: 2,
@@ -37,7 +37,7 @@ export function render(vnode: IVNode, root: Element, callback: (this: OwnerType)
         container.child = fiber;
         // 将updateClassComponent部分逻辑放到这里，我们只需要实例化它
         const instance = createInstance(fiber, {});
-        container.hostRoot = instance;
+        container.hostRoot = instance as Element;
         immediateUpdate = true;
         Renderer.emptyElement!(container);
     }
@@ -45,7 +45,7 @@ export function render(vnode: IVNode, root: Element, callback: (this: OwnerType)
         instance?: OwnerType,
     } = {};
     updateComponent(
-        container.hostRoot,
+        container!.hostRoot!,
         {
             child: vnode,
         },
@@ -240,7 +240,7 @@ function pushChildQueue(fiber: IFiber, queue: IFiber[]): void {
     while (p.return) {
         p = p.return;
         const instance = p.stateNode as OwnerType;
-        if (!instance.$isStateless && p.type !== Unbatch) {
+        if (instance.render && !instance.$isStateless && p.type !== Unbatch) {
             hackSCU.push(p);
             const u = instance.updater as IUpdater;
             if (maps[u.mountOrder]) {
@@ -299,7 +299,7 @@ function validateTag(el: Element): boolean {
     return el && !!el.appendChild;
 }
 
-export function createContainer(root: Element, onlyGet?: boolean, validate?: (el: Element) => boolean) {
+export function createContainer(root: Element, onlyGet?: boolean, validate?: (el: Element) => boolean): IFiber|null {
     validate = validate || validateTag;
     if (!validate(root)) {
         throw new TypeError(`container is not a element`); // eslint-disable-line

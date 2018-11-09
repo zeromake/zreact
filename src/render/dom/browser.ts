@@ -53,7 +53,7 @@ export function DOMElement(this: IDOMElement, type: string) {
     DOMElement.prototype[name] = noop;
 });
 
-export const NAMESPACE = {
+export const NAMESPACE: {[name: string]: string} = {
     svg: "http://www.w3.org/2000/svg",
     xmlns: "http://www.w3.org/2000/xmlns/",
     xlink: "http://www.w3.org/1999/xlink",

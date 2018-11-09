@@ -52,9 +52,11 @@ export interface IOwnerAttribute {
     state?: IBaseObject;
     $unmaskedContext?: IBaseObject;
     $maskedContext?: IBaseObject;
+    setState?: any;
     render?(): VirtualNode[] | VirtualNode;
     renderImpl?(p: IBaseProps): VirtualNode[] | VirtualNode;
     getChildContext?(): IBaseObject;
+    forceUpdate?(cb: () => void): void;
 }
 
 export interface IAnuElement extends Element, IOwnerAttribute {
@@ -276,6 +278,7 @@ export interface IRenderer {
     catchError?: any;
     catchStack?: string;
     inserting?: HTMLOrSVGElement;
+    eventSystem?: any;
     batchedUpdates?: (call: () => void, options: object) => void;
     // onUpdate(fiber: IFiber): any;
     onBeforeRender?(fiber: IFiber): void;
@@ -294,5 +297,6 @@ export interface IRenderer {
     removeElement?(fiber: IFiber): void;
     createElement(fiber: IFiber): OwnerType;
     emptyElement?(fiber: IFiber): void;
+    render?(vnode: IVNode, root: Element, callback?: () => void): Element;
     // [name: string]: any;
 }

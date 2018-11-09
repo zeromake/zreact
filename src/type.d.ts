@@ -1,6 +1,14 @@
 import { IVNode, IComponentClass, IBaseProps, IBaseObject, ChildrenType } from "./core/type-shared";
 import { createElement } from "./core/create-element";
+import { findDOMNode } from "./render/dom/find-dom-node";
 
+declare namespace zreact {
+    type findDOMNode = typeof findDOMNode;
+}
+
+declare module "zreact" {
+    export = zreact;
+}
 declare global {
     namespace JSX {
         type Element = IVNode;

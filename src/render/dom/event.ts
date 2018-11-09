@@ -457,3 +457,10 @@ eventHooks.scroll = function _scroll(dom, name) {
 eventHooks.doubleclick = function _doubleclick(dom, name) {
     addEvent(document, "dblclick", specialHandles[name as string]);
 };
+
+Renderer.eventSystem = {
+    eventPropHooks,
+    addEvent,
+    dispatchEvent,
+    SyntheticEvent,
+};

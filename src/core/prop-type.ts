@@ -2,7 +2,7 @@ function check(): any {
     return check;
 }
 (check as any).isRequired = check;
-export default {
+export const PropTypes = {
     array: check,
     bool: check,
     func: check,

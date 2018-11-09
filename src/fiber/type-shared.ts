@@ -87,12 +87,18 @@ export interface IFiber extends IVNode {
     setout?: boolean;
     dirty?: boolean;
     pendingCbs?: Array<(this: OwnerType) => void>;
-    hostRoot?: boolean;
+    hostRoot?: Element;
     index?: number;
     microtasks?: IFiber[];
     containerStack?: OwnerType[];
     contextStack?: IBaseObject[];
     disabled?: boolean;
+    namespaceURI?: string;
+    /**
+     * 命名空间
+     */
+    ns?: string;
+    onDuplex?(dom: Element, fiber: IFiber, nextProps: IBaseProps, lastProps: IBaseProps): void;
 }
 
 export interface IScheduledCallbackParams {

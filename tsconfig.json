@@ -18,6 +18,6 @@
     ],
     "files": [
       "./src/type.d.ts",
-      "./src/index.ts",
+      "./src/index.ts"
     ]
 }

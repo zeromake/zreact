@@ -2,8 +2,8 @@ import { noop, extend } from "./util";
 import { IMiddleware, IRenderer, OwnerType } from "./type-shared";
 import { IFiber } from "../fiber/type-shared";
 
-export function createRenderer(methods: any): IRenderer {
-    return extend(Renderer, methods) as IRenderer;
+export function createRenderer<T>(methods: T): IRenderer&T {
+    return extend(Renderer, methods);
 }
 
 const middlewares: IMiddleware[] = [];
@@ -17,6 +17,8 @@ export const Renderer: IRenderer = {
     boundaries: [],
     onDispose: noop,
     createElement: noop,
+    onBeforeRender: noop,
+    onAfterRender: noop,
     middleware(middleware: IMiddleware) {
         if (middleware.begin && middleware.end) {
             middlewares.push(middleware);
