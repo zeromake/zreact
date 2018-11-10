@@ -83,8 +83,10 @@ function updateReactComponent(vnode: IFiber, parentDom?: Element): IReactVNode|n
     }
     let newInstance: IReactVNode|null = null;
 
-    if (vnode.tag < 3) {
-        newInstance = createReactCompositeComponent(vnode);
+    if (vnode.tag === 5 && vnode.hostRoot) {
+        newInstance = createReactBaseComponent(vnode, vnode.hostRoot);
+    } else if (vnode.tag < 3) {
+        newInstance = createReactBaseComponent(vnode, vnode.stateNode);
     } else {
         newInstance = createReactDOMComponent(vnode, parentDom);
     }
@@ -102,13 +104,11 @@ function updateReactComponent(vnode: IFiber, parentDom?: Element): IReactVNode|n
     }
     return newInstance;
 }
-
-function createReactCompositeComponent(vnode: IFiber): IReactVNode {
+function createReactBaseComponent(vnode: IFiber, instance: OwnerType): IReactVNode {
     const type = vnode.type;
     const typeName = (type as any).displayName || (type as any).name;
-    const instance = vnode.stateNode as OwnerType;
     const dom: Element = findDOMNode(instance);
-    return {
+    const data: IReactVNode = {
         getName() {
             return typeName;
         },
@@ -121,13 +121,18 @@ function createReactCompositeComponent(vnode: IFiber): IReactVNode {
             type,
             key: normalizeKey(vnode.key as string),
             props: vnode.props,
-            ref: null,
+            ref: vnode.ref,
         },
-        // _renderedComponent: updateReactComponent(instance.updater.rendered, dom),
-        _renderedComponent: updateReactComponent(vnode.child!, dom),
         forceUpdate: instance.forceUpdate && instance.forceUpdate.bind(instance),
         setState: instance.setState && instance.setState.bind(instance),
     };
+    const renderedChildren: IReactVNode[] = normalizeChildren(vnode, dom);
+    if (renderedChildren.length === 1) {
+        data._renderedComponent = renderedChildren[0];
+    } else if (renderedChildren.length > 0) {
+        data._renderedChildren = renderedChildren;
+    }
+    return data;
 }
 
 function createReactDOMComponent(vnode: IFiber, parentDom?: Element): IReactVNode|null {
@@ -146,25 +151,29 @@ function createReactDOMComponent(vnode: IFiber, parentDom?: Element): IReactVNod
 
     const isText = typeof vnode !== "object" || type === "#text";
 
-    return {
+    const data: IReactVNode =  {
         _currentElement: isText
             ? vnode.text + ""
             : {
                 type,
                 props,
+                key: normalizeKey(vnode.key as string),
             },
         _inDevTools: false,
         _renderedChildren: !isText && normalizeChildren(vnode, dom as Element),
         _stringText: isText ? vnode.text + "" : null,
         node: dom as Element || parentDom,
     };
+    return data;
 }
 
-function normalizeKey(key: string): null|undefined {
+function normalizeKey(key: string): string {
     if (key && key[0] === ".") {
-        return null;
+        return key.substr(1);
     }
+    return key;
 }
+
 function nextRootKey(rootItems: any): string {
     return "." + Object.keys(rootItems).length;
 }
@@ -377,6 +386,9 @@ function createDevToolsBridge() {
         ComponentTree,
         Mount,
         Reconciler,
+        version: "16.5.0",
+        bundleType: 1,
+        rendererPackageName: "react-dom",
     };
 }
 

@@ -9,9 +9,8 @@ export function pushError(fiber: IFiber, hook: string, error?: any) {
     const boundary = findCatchComponent(fiber, names, hook);
     const stack: string = describeError(names, hook);
     if (boundary) {
-        if (fiber.hasMounted) {
-            // 已经插入
-        } else {
+        if (!fiber.hasMounted) {
+            // 未插入
             fiber.stateNode = {
                 updater: fakeUpdater,
             } as any;
