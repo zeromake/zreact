@@ -3,27 +3,21 @@
 
 # zreact
 
-copy to [preact](https://github.com/developit/preact)
+copy to [anu](https://github.com/RubyLouvre/anu)
 
-## Differ from preact
+## Differ from anu
 
 - source is typescript
-- render return (null | undefined | boolean) not is a empty text and not render dom but devtools has vnode
-- props.children is empty not is `[]` is a `null`
-- add react api:
-    - PureComponent
-    - createClass
-    - createFactory
-    - createPortal
-    - findDOMNode
-    - isValidElement
-    - unmountComponentAtNode
-    - unstable_renderSubtreeIntoContainer
-    - Children
-- add react 16 api:
-    - createRef
-    - Component.getDerivedStateFromProps
-- deprecated:
-    - Component.prototype.componentWillMount
-    - Component.prototype.componentWillReceiveProps
-    - Component.prototype.componentWillUpdate
+
+## react 官方组件分割思想
+**有状态的组件没有渲染：**
+
+包含实际业务状态的组件不应该进行视图的渲染，而是应该将实际业务状态传递给子孙组件，让子孙组件来进行视图渲染；
+
+**有渲染的组件没有状态：**
+
+能够进行视图渲染的组件，不要包含实际的业务状态，而是通过接受父辈的参数来进行渲染；
+
+**好处：**
+
+这样的话，有渲染的组件没有实际的业务状态，就与实际的业务解耦了，能够更好的服务于其他的有状态的组件，实现组件的复用。
