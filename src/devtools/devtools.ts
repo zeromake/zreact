@@ -1,11 +1,12 @@
 import { IFiber } from "../fiber/type-shared";
 import { OwnerType, VNodeType, IBaseObject, IBaseProps, IAnuElement } from "../core/type-shared";
 
-import { findDOMNode } from "zreact";
+import { findDOMNode, options } from "zreact";
 
-const options = {
-    roots: {},
-};
+if (!options.roots) {
+    options.roots = {};
+}
+
 const roots: {[name: string]: IReactVNode} = options.roots;
 const instanceMap = new Map<Element, IReactVNode>();
 
@@ -104,6 +105,7 @@ function updateReactComponent(vnode: IFiber, parentDom?: Element): IReactVNode|n
     }
     return newInstance;
 }
+
 function createReactBaseComponent(vnode: IFiber, instance: OwnerType): IReactVNode {
     const type = vnode.type;
     const typeName = (type as any).displayName || (type as any).name;
@@ -120,6 +122,7 @@ function createReactBaseComponent(vnode: IFiber, instance: OwnerType): IReactVNo
         _currentElement: {
             type,
             key: normalizeKey(vnode.key as string),
+            state: instance.state,
             props: vnode.props,
             ref: vnode.ref,
         },
@@ -386,7 +389,7 @@ function createDevToolsBridge() {
         ComponentTree,
         Mount,
         Reconciler,
-        version: "16.5.0",
+        version: "16.6.0",
         bundleType: 1,
         rendererPackageName: "react-dom",
     };
@@ -394,27 +397,27 @@ function createDevToolsBridge() {
 
 export function initDevTools() {
     /* tslint:disable */
-    console.log("初始chrome react 调试工具");
-    const bridge = createDevToolsBridge();
-    const Methods = {
-        afterMount: "componentAdded",
-        afterUpdate: "componentUpdated",
-        beforeUnmount: "componentRemoved"
-    };
-    for (const name in Methods) {
-        (function _(key, alias) {
-            const oldMethod = options[key];
-            //重写anujs原有的方法
-            options[key] = function(instance) {
-                const updater = instance.updater;//1.2.8
-                const vnode = updater.$reactInternalFiber;
-                bridge[alias](vnode);
-                if (oldMethod) {
-                    oldMethod(vnode);
-                }
-            };
-        })(name, Methods[name]);
+    const hook = window["__REACT_DEVTOOLS_GLOBAL_HOOK__"];
+    if (hook) {
+        const bridge = createDevToolsBridge();
+        const Methods = {
+            afterMount: "componentAdded",
+            afterUpdate: "componentUpdated",
+            beforeUnmount: "componentRemoved"
+        };
+        for (const name in Methods) {
+            (function _(key, alias) {
+                const oldMethod = options[key];
+                //重写anujs原有的方法
+                options[key] = function(instance: OwnerType) {
+                    const vnode = instance.$reactInternalFiber;
+                    bridge[alias](vnode);
+                    if (oldMethod) {
+                        oldMethod(vnode);
+                    }
+                };
+            })(name, Methods[name]);
+        }
+        hook.inject(bridge);
     }
-
-    window["__REACT_DEVTOOLS_GLOBAL_HOOK__"].inject(bridge);
 }

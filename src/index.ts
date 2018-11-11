@@ -15,6 +15,7 @@ import { Fragment } from "./core/util";
 
 import { findDOMNode } from "./render/dom/find-dom-node";
 import { DOMRenderer } from "./render/dom/dom-renderer";
+import { options } from "./fiber/options";
 const {
     render,
     eventSystem,
@@ -26,6 +27,7 @@ const {
 const version = "VERSION";
 
 export {
+    options,
     eventSystem,
     findDOMNode,
     unmountComponentAtNode,

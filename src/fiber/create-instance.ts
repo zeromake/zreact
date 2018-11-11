@@ -57,8 +57,9 @@ export function createInstance(fiber: IFiber, context: object): OwnerType {
         Renderer.currentOwner = lastOwn;
         fiber.stateNode = instance;
         fiber.updateQueue = UpdateQueue();
-        (instance as OwnerType).$reactInternalFiber = fiber;
-        (instance as OwnerType).context = context;
+        instance!.$reactInternalFiber = fiber;
+        instance!.context = context;
+        instance!.updater = updater;
         updater.enqueueSetState = Renderer.updateComponent as any;
         if ((type as any)[gDSFP] || (instance as IComponentMinx<IBaseProps, IBaseObject>).getSnapshotBeforeUpdate) {
             (instance as OwnerType).$useNewHooks = true;

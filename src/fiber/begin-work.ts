@@ -470,6 +470,9 @@ function diffChildren(parentFiber: IFiber, children: ChildrenType) {
     const matchFibers: {[key: string]: IFiber} = {};
     delete parentFiber.child;
     for (const key in oldFibers) {
+        if (key === "index") {
+            continue;
+        }
         const newFiber = newFibers[key];
         const oldFiber = oldFibers[key];
         if (newFiber && newFiber.type === oldFiber.type) {
@@ -484,6 +487,9 @@ function diffChildren(parentFiber: IFiber, children: ChildrenType) {
     let prevFiber: IFiber|undefined;
     let index = 0;
     for (const key in newFibers) {
+        if (key === "index") {
+            continue;
+        }
         let newFiber = newFibers[key];
         const oldFiber = matchFibers[key];
         let alternate: IFiber|null = null;

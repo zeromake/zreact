@@ -21,6 +21,8 @@ import {
     IUpdater,
 } from "../core/type-shared";
 
+import { options } from "./options";
+
 /**
  * COMMIT阶段也做成深度调先遍历
  */
@@ -136,8 +138,14 @@ export function commitEffects(fiber: IFiber) {
                             updater.prevState,
                             updater.snapshot,
                         ]);
+                        if (options.afterUpdate) {
+                            options.afterUpdate(instance);
+                        }
                     } else {
                         fiber.hasMounted = true;
+                        if (options.afterMount) {
+                            options.afterMount(instance);
+                        }
                         guardCallback(instance, "componentDidMount", []);
                     }
                     delete fiber.$hydrating;
@@ -212,6 +220,9 @@ function disposeFiber(fiber: IFiber, force?: boolean|number) {
             Renderer.onDispose(fiber);
             if (fiber.hasMounted) {
                 (stateNode.updater as IUpdater).enqueueSetState = returnFalse;
+                if (options.beforeUnmount) {
+                    options.beforeUnmount(stateNode);
+                }
                 guardCallback(stateNode, "componentWillUnmount", []);
                 delete fiber.stateNode;
             }
