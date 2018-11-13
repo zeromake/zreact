@@ -25,6 +25,7 @@ import {
     IUpdater,
     IWorkContext,
 } from "../core/type-shared";
+import { resetHook } from "./hook";
 
 /**
  * 基于DFS遍历虚拟DOM树，初始化vnode为fiber,并产出组件实例或DOM节点
@@ -189,6 +190,7 @@ export function updateClassComponent(fiber: IFiber, info: IWorkContext): void {
         fiber.effectTag *= EffectTag.HOOK;
     } else {
         fiber.effectTag = EffectTag.WORKING;
+        fiber.effectTag *= EffectTag.HOOK;
     }
 
     if (fiber.catchError) {
@@ -198,6 +200,7 @@ export function updateClassComponent(fiber: IFiber, info: IWorkContext): void {
     fiber.$hydrating = true;
     Renderer.currentOwner = instance;
     const rendered = applyCallback(instance, "render", []);
+    resetHook(instance);
     diffChildren(fiber, rendered);
     Renderer.onAfterRender!(fiber);
 }

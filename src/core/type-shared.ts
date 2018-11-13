@@ -52,6 +52,12 @@ export interface IOwnerAttribute {
     state?: IBaseObject;
     $unmaskedContext?: IBaseObject;
     $maskedContext?: IBaseObject;
+    $$useHook?: {
+        index: number;
+        length: number;
+        states: any[];
+        calls: Array<(state: any) => void>;
+    };
     setState?: any;
     render?(): VirtualNode[] | VirtualNode;
     renderImpl?(p: IBaseProps): VirtualNode[] | VirtualNode;

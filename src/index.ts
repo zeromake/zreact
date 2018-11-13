@@ -16,6 +16,7 @@ import { Fragment } from "./core/util";
 import { findDOMNode } from "./render/dom/find-dom-node";
 import { DOMRenderer } from "./render/dom/dom-renderer";
 import { options } from "./fiber/options";
+import { useState } from "./fiber/hook";
 const {
     render,
     eventSystem,
@@ -24,7 +25,7 @@ const {
     batchedUpdates,
 } = DOMRenderer;
 
-const version = "VERSION";
+const version = "16.6.0";
 
 export {
     options,
@@ -49,4 +50,5 @@ export {
     PureComponent,
     isValidElement,
     createFactory,
+    useState,
 };

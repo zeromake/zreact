@@ -1,7 +1,7 @@
 import { IFiber } from "../fiber/type-shared";
 import { OwnerType, VNodeType, IBaseObject, IBaseProps, IAnuElement } from "../core/type-shared";
 
-import { findDOMNode, options } from "zreact";
+import { findDOMNode, options, version } from "zreact";
 
 if (!options.roots) {
     options.roots = {};
@@ -389,7 +389,7 @@ function createDevToolsBridge() {
         ComponentTree,
         Mount,
         Reconciler,
-        version: "16.6.0",
+        version,
         bundleType: 1,
         rendererPackageName: "react-dom",
     };
