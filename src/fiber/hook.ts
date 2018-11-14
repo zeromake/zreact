@@ -24,6 +24,23 @@ export function useState<T>(state: T): [T, (s: T) => void] {
     return [state, update];
 }
 
+export function useRef<T>(state: T): {current: T} {
+    const owner = Renderer.currentOwner as IOwnerAttribute;
+    if (!owner) {
+        return { current: state };
+    }
+    let ref;
+    const hooks = initHook(owner);
+    const index = hooks.index;
+    if (index >= hooks.length) {
+        hooks.length++;
+        ref = hooks.states[index] = { current: state };
+    } else {
+        ref = hooks.states[index];
+    }
+    return ref;
+}
+
 function initHook(owner: IOwnerAttribute) {
     if (!owner.$$useHook) {
         owner.$$useHook = {
