@@ -1,6 +1,7 @@
 const rollupTypescript = require('rollup-typescript');
-const { uglify } = require('rollup-plugin-uglify');
-const { minify } = require('uglify-es');
+const { terser } = require('rollup-plugin-terser')
+// const { uglify } = require('rollup-plugin-uglify');
+// const { minify } = require('uglify-es');
 const replace = require('rollup-plugin-re');
 const license = require("rollup-plugin-license");
 const filesize = require("rollup-plugin-filesize");
@@ -9,11 +10,12 @@ const pkg = require('../package.json');
 const isProduction = process.env.NODE_ENV === 'production';
 
 const rollupTypescriptPlugin = rollupTypescript({typescript: require('typescript')});
+const replaceOptions = {};
+if(isProduction) {
+    replaceOptions['process.env.NODE_ENV'] = JSON.stringify(process.env.NODE_ENV)
+}
 const replacePlugin = replace({
-    replaces: {
-        $version: JSON.stringify(pkg.version),
-        $env: JSON.stringify(process.env.NODE_ENV)
-    }
+    replaces: replaceOptions
 });
 
 const licensePlugin = license({
@@ -35,7 +37,9 @@ module.exports = {
         filesizePlugin,
     ] : [
         rollupTypescriptPlugin,
-        uglify({}, minify),
+        terser({
+            module: true,
+        }),
         replacePlugin,
         licensePlugin,
         filesizePlugin,

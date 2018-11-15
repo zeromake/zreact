@@ -26,6 +26,7 @@ const {
 } = DOMRenderer;
 
 const version = "16.6.0";
+const hydrate = render;
 
 export {
     options,
@@ -35,7 +36,7 @@ export {
     unstable_renderSubtreeIntoContainer,
     version,
     render,
-    render as hydrate,
+    hydrate,
     batchedUpdates as unstable_batchedUpdates,
     Fragment,
     PropTypes,

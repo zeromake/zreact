@@ -826,11 +826,6 @@ commander@^2.12.1:
   resolved "http://registry.npm.taobao.org/commander/download/commander-2.19.0.tgz#f6198aa84e5b83c46054b94ddedbfed5ee9ff12a"
   integrity sha1-9hmKqE5bg8RgVLlN3tv+1e6f8So=
 
-commander@~2.13.0:
-  version "2.13.0"
-  resolved "http://registry.npm.taobao.org/commander/download/commander-2.13.0.tgz#6964bca67685df7c1f1430c584f07d7597885b9c"
-  integrity sha1-aWS8pnaF33wfFDDFhPB9dZeIW5w=
-
 commander@~2.17.1:
   version "2.17.1"
   resolved "http://registry.npm.taobao.org/commander/download/commander-2.17.1.tgz#bd77ab7de6de94205ceacc72f1716d29f20a77bf"
@@ -3973,15 +3968,15 @@ rollup-plugin-re@^1.0.7:
     magic-string "^0.16.0"
     rollup-pluginutils "^2.0.1"
 
-rollup-plugin-uglify@^6.0.0:
-  version "6.0.0"
-  resolved "http://registry.npm.taobao.org/rollup-plugin-uglify/download/rollup-plugin-uglify-6.0.0.tgz#15aa8919e5cdc63b7cfc9319c781788b40084ce4"
-  integrity sha1-FaqJGeXNxjt8/JMZx4F4i0AITOQ=
+rollup-plugin-terser@^3.0.0:
+  version "3.0.0"
+  resolved "http://registry.npm.taobao.org/rollup-plugin-terser/download/rollup-plugin-terser-3.0.0.tgz#045bd7cf625ee1affcfe6971dab6fffe6fb48c65"
+  integrity sha1-BFvXz2Je4a/8/mlx2rb//m+0jGU=
   dependencies:
     "@babel/code-frame" "^7.0.0"
     jest-worker "^23.2.0"
     serialize-javascript "^1.5.0"
-    uglify-js "^3.4.9"
+    terser "^3.8.2"
 
 rollup-pluginutils@^2.0.1, rollup-pluginutils@^2.3.0:
   version "2.3.3"
@@ -4008,10 +4003,10 @@ rollup-watch@^4.3.1:
     require-relative "0.8.7"
     rollup-pluginutils "^2.0.1"
 
-rollup@^0.67.0:
-  version "0.67.0"
-  resolved "http://registry.npm.taobao.org/rollup/download/rollup-0.67.0.tgz#16d4f259c55224dded6408e7666b7731500797a3"
-  integrity sha1-FtTyWcVSJN3tZAjnZmt3MVAHl6M=
+rollup@^0.67.1:
+  version "0.67.1"
+  resolved "http://registry.npm.taobao.org/rollup/download/rollup-0.67.1.tgz#4094110c944d3c9e25b5bf196771b51132ec3adb"
+  integrity sha1-QJQRDJRNPJ4ltb8ZZ3G1ETLsOts=
   dependencies:
     "@types/estree" "0.0.39"
     "@types/node" "*"
@@ -4474,6 +4469,15 @@ terser@^3.10.0:
     source-map "~0.6.1"
     source-map-support "~0.5.6"
 
+terser@^3.8.2:
+  version "3.10.11"
+  resolved "http://registry.npm.taobao.org/terser/download/terser-3.10.11.tgz#e063da74b194dde9faf0a561f3a438c549d2da3f"
+  integrity sha1-4GPadLGU3en68KVh86Q4xUnS2j8=
+  dependencies:
+    commander "~2.17.1"
+    source-map "~0.6.1"
+    source-map-support "~0.5.6"
+
 test-exclude@^4.2.1:
   version "4.2.3"
   resolved "http://registry.npm.taobao.org/test-exclude/download/test-exclude-4.2.3.tgz#a9a5e64474e4398339245a0a769ad7c2f4a97c20"
@@ -4684,15 +4688,7 @@ typescript@^3.1.6:
   resolved "http://registry.npm.taobao.org/typescript/download/typescript-3.1.6.tgz#b6543a83cfc8c2befb3f4c8fba6896f5b0c9be68"
   integrity sha1-tlQ6g8/Iwr77P0yPumiW9bDJvmg=
 
-uglify-es@^3.3.9:
-  version "3.3.9"
-  resolved "http://registry.npm.taobao.org/uglify-es/download/uglify-es-3.3.9.tgz#0c1c4f0700bed8dbc124cdb304d2592ca203e677"
-  integrity sha1-DBxPBwC+2NvBJM2zBNJZLKID5nc=
-  dependencies:
-    commander "~2.13.0"
-    source-map "~0.6.1"
-
-uglify-js@^3.1.4, uglify-js@^3.4.9:
+uglify-js@^3.1.4:
   version "3.4.9"
   resolved "http://registry.npm.taobao.org/uglify-js/download/uglify-js-3.4.9.tgz#af02f180c1207d76432e473ed24a28f4a782bae3"
   integrity sha1-rwLxgMEgfXZDLkc+0koo9KeCuuM=

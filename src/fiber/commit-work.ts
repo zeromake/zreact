@@ -138,13 +138,18 @@ export function commitEffects(fiber: IFiber) {
                             updater.prevState,
                             updater.snapshot,
                         ]);
-                        if (options.afterUpdate) {
-                            options.afterUpdate(instance);
+                        if (process.env.NODE_ENV !== "production") {
+                            if (options.afterUpdate) {
+                                options.afterUpdate(instance);
+                            }
                         }
                     } else {
                         fiber.hasMounted = true;
-                        if (options.afterMount) {
-                            options.afterMount(instance);
+
+                        if (process.env.NODE_ENV !== "production") {
+                            if (options.afterMount) {
+                                options.afterMount(instance);
+                            }
                         }
                         guardCallback(instance, "componentDidMount", []);
                     }
@@ -220,8 +225,10 @@ function disposeFiber(fiber: IFiber, force?: boolean|number) {
             Renderer.onDispose(fiber);
             if (fiber.hasMounted) {
                 (stateNode.updater as IUpdater).enqueueSetState = returnFalse;
-                if (options.beforeUnmount) {
-                    options.beforeUnmount(stateNode);
+                if (process.env.NODE_ENV !== "production") {
+                    if (options.beforeUnmount) {
+                        options.beforeUnmount(stateNode);
+                    }
                 }
                 guardCallback(stateNode, "componentWillUnmount", []);
                 delete fiber.stateNode;

@@ -176,6 +176,7 @@ interface ISyntheticEvent extends Event {
     nativeEvent: Event;
     $stopPropagation?: boolean;
     stopImmediate?: boolean;
+    defaultPrevented: boolean;
     deltaX?: number;
     deltaY?: number;
     wheelDeltaX?: number;
@@ -215,6 +216,7 @@ const eventProto = (SyntheticEvent.prototype = {
         e.returnValue = this.returnValue = false;
         if (e.preventDefault) {
             e.preventDefault();
+            this.defaultPrevented = e.defaultPrevented;
         }
     },
     stopPropagation(this: ISyntheticEvent): void {
