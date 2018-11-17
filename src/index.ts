@@ -16,7 +16,7 @@ import { Fragment } from "./core/util";
 import { findDOMNode } from "./render/dom/find-dom-node";
 import { DOMRenderer } from "./render/dom/dom-renderer";
 import { options } from "./fiber/options";
-import { useState } from "./fiber/hook";
+import { useState, useEffect, useRef } from "./fiber/hook";
 const {
     render,
     eventSystem,
@@ -52,4 +52,6 @@ export {
     isValidElement,
     createFactory,
     useState,
+    useEffect,
+    useRef,
 };

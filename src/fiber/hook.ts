@@ -1,8 +1,11 @@
 import { Renderer } from "../core/create-renderer";
-import { IOwnerAttribute } from "../core/type-shared";
+import { IOwnerAttribute, IComponentMinx, IBaseObject, IBaseProps } from "../core/type-shared";
 
 export function useState<T>(state: T): [T, (s: T) => void] {
     const owner = Renderer.currentOwner as IOwnerAttribute;
+    if (typeof state === "function") {
+        state = state.call(owner);
+    }
     if (!owner) {
         return [state, () => {}];
     }
@@ -12,6 +15,10 @@ export function useState<T>(state: T): [T, (s: T) => void] {
     if (index >= hooks.length) {
         hooks.length++;
         update = (s: T) => {
+            const old = hooks.states[index];
+            if (typeof s === "function") {
+                s = s.call(owner, old);
+            }
             hooks.states[index] = s;
             owner.updater!.enqueueSetState(owner, false);
         };
@@ -58,4 +65,19 @@ export function resetHook(owner: IOwnerAttribute) {
     if (owner.$$useHook) {
         owner.$$useHook.index = -1;
     }
+}
+
+export function useEffect(didUpdate: () => void|(() => void)) {
+    const owner = Renderer.currentOwner as IComponentMinx<IBaseProps, IBaseObject>;
+    if (!owner || !didUpdate) {
+        return;
+    }
+    const ownerDidUpdate = function _ownerDidUpdate() {
+        const willUnmount = didUpdate();
+        if (willUnmount) {
+            owner.componentWillUnmount = willUnmount;
+        }
+    };
+    owner.componentDidMount = ownerDidUpdate;
+    owner.componentDidUpdate = ownerDidUpdate;
 }

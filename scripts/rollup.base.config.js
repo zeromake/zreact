@@ -11,9 +11,9 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 const rollupTypescriptPlugin = rollupTypescript({typescript: require('typescript')});
 const replaceOptions = {};
-if(isProduction) {
-    replaceOptions['process.env.NODE_ENV'] = JSON.stringify(process.env.NODE_ENV)
-}
+// if(isProduction) {
+replaceOptions['process.env.NODE_ENV'] = JSON.stringify(process.env.NODE_ENV)
+// }
 const replacePlugin = replace({
     replaces: replaceOptions
 });
