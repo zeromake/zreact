@@ -9,6 +9,7 @@ import {
     topNodes,
     typeNumber,
     topFibers,
+    getWindow,
 } from "../core/util";
 import { Unbatch } from "./unbatch";
 import { Fiber } from "./Fiber";
@@ -104,8 +105,14 @@ const deadline: IScheduledCallbackParams = {
     },
 };
 
-function requestIdleCallback(fn: (d: IScheduledCallbackParams) => void) {
-    fn(deadline);
+const win = getWindow();
+
+export function requestIdleCallback(fn: (d: IScheduledCallbackParams) => void) {
+    if (typeof (win as any).requestIdleCallback === "function") {
+        (win as any).requestIdleCallback(fn);
+    } else {
+        fn(deadline);
+    }
 }
 
 Renderer.scheduleWork = function scheduleWork() {

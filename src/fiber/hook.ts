@@ -67,7 +67,7 @@ export function resetHook(owner: IOwnerAttribute) {
     }
 }
 
-export function useEffect(didUpdate: () => void|(() => void)) {
+export function useLayoutEffect(didUpdate: () => void|(() => void)) {
     const owner = Renderer.currentOwner as IComponentMinx<IBaseProps, IBaseObject>;
     if (!owner || !didUpdate) {
         return;
@@ -80,4 +80,18 @@ export function useEffect(didUpdate: () => void|(() => void)) {
     };
     owner.componentDidMount = ownerDidUpdate;
     owner.componentDidUpdate = ownerDidUpdate;
+}
+
+export function useEffect(didUpdate: () => void|(() => void)) {
+    const owner = Renderer.currentOwner as IOwnerAttribute;
+    if (!owner || !didUpdate) {
+        return;
+    }
+    const ownerDidUpdate = function _ownerDidUpdate() {
+        const willUnmount = didUpdate();
+        if (willUnmount) {
+            owner.willUnmount = willUnmount;
+        }
+    };
+    owner.didUpdate = ownerDidUpdate;
 }

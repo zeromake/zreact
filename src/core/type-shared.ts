@@ -63,6 +63,8 @@ export interface IOwnerAttribute {
     renderImpl?(p: IBaseProps): VirtualNode[] | VirtualNode;
     getChildContext?(): IBaseObject;
     forceUpdate?(cb: () => void): void;
+    willUnmount?(): void;
+    didUpdate?(): void;
 }
 
 export interface IAnuElement extends Element, IOwnerAttribute {

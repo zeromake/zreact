@@ -19,9 +19,11 @@ import {
     OwnerType,
     IComponentMinx,
     IUpdater,
+    IOwnerAttribute,
 } from "../core/type-shared";
 
 import { options } from "./options";
+import { requestIdleCallback } from "./schedule-work";
 
 /**
  * COMMIT阶段也做成深度调先遍历
@@ -133,6 +135,9 @@ export function commitEffects(fiber: IFiber) {
                     break;
                 case EffectTag.HOOK:
                     if (fiber.hasMounted) {
+                        if (instance.$isStateless && instance.didUpdate) {
+                            requestIdleCallback(instance.didUpdate);
+                        }
                         guardCallback(instance, "componentDidUpdate", [
                             updater.prevProps,
                             updater.prevState,
@@ -150,6 +155,9 @@ export function commitEffects(fiber: IFiber) {
                             if (options.afterMount) {
                                 options.afterMount(instance);
                             }
+                        }
+                        if (instance.$isStateless && instance.didUpdate) {
+                            requestIdleCallback(instance.didUpdate);
                         }
                         guardCallback(instance, "componentDidMount", []);
                     }
@@ -229,6 +237,10 @@ function disposeFiber(fiber: IFiber, force?: boolean|number) {
                     if (options.beforeUnmount) {
                         options.beforeUnmount(stateNode);
                     }
+                }
+                const instance = stateNode as IOwnerAttribute;
+                if (instance.$isStateless && instance.willUnmount) {
+                    requestIdleCallback(instance.willUnmount);
                 }
                 guardCallback(stateNode, "componentWillUnmount", []);
                 delete fiber.stateNode;
