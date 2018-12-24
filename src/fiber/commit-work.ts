@@ -2,6 +2,7 @@ import {
     fakeUpdater,
     returnFalse,
     emptyObject,
+    defer,
 } from "../core/util";
 import {
     EffectTag,
@@ -23,7 +24,6 @@ import {
 } from "../core/type-shared";
 
 import { options } from "./options";
-import { requestIdleCallback } from "./schedule-work";
 
 /**
  * COMMIT阶段也做成深度调先遍历
@@ -136,7 +136,7 @@ export function commitEffects(fiber: IFiber) {
                 case EffectTag.HOOK:
                     if (fiber.hasMounted) {
                         if (instance.$isStateless && instance.didUpdate) {
-                            requestIdleCallback(instance.didUpdate);
+                            defer(instance.didUpdate);
                         }
                         guardCallback(instance, "componentDidUpdate", [
                             updater.prevProps,
@@ -157,7 +157,7 @@ export function commitEffects(fiber: IFiber) {
                             }
                         }
                         if (instance.$isStateless && instance.didUpdate) {
-                            requestIdleCallback(instance.didUpdate);
+                            defer(instance.didUpdate);
                         }
                         guardCallback(instance, "componentDidMount", []);
                     }
@@ -240,7 +240,7 @@ function disposeFiber(fiber: IFiber, force?: boolean|number) {
                 }
                 const instance = stateNode as IOwnerAttribute;
                 if (instance.$isStateless && instance.willUnmount) {
-                    requestIdleCallback(instance.willUnmount);
+                    defer(instance.willUnmount);
                 }
                 guardCallback(stateNode, "componentWillUnmount", []);
                 delete fiber.stateNode;
