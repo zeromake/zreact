@@ -1,0 +1,67 @@
+{
+  "name": "zreact",
+  "version": "1.5.0",
+  "description": "React like,copy by preact",
+  "main": "dist/zreact.js",
+  "module": "dist/zreact.esm.js",
+  "jsnext:main": "dist/zreact.esm.js",
+  "minified:main": "dist/zreact.min.js",
+  "typings": "types/zreact.d.ts",
+  "repository": "https://github.com/zeromake/zreact",
+  "author": "zeromake <a390720046@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zeromake/zreact/issues"
+  },
+  "homepage": "https://github.com/zeromake/zreact",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build:all": "npm run clean && npm run build:min && npm run build",
+    "build": "cross-env NODE_ENV=dev rollup -c build/rollup.config.js",
+    "build:min": "cross-env NODE_ENV=production rollup -c build/rollup.config.js",
+    "dev": "cross-env NODE_ENV=dev rollup -c build/rollup.config.js -w",
+    "coverage": "cat ./test/coverage/lcov.info | coveralls",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
+    "prepublishOnly": "npm run build:all",
+    "docs": "rimraf docs && typedoc --out docs src",
+    "fix": "sed -i '' 's/const /var /g' dist/*.js"
+  },
+  "keywords": [
+    "zreact",
+    "react",
+    "virtual dom",
+    "vdom",
+    "components",
+    "virtual",
+    "dom"
+  ],
+  "files": [
+    "src",
+    "dist",
+    "types",
+    "lib",
+    "typings.json",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "devDependencies": {
+    "conventional-changelog-cli": "^2.0.0",
+    "coveralls": "^3.0.0",
+    "cross-env": "^5.1.4",
+    "gzip-size-cli": "^2.1.0",
+    "rimraf": "^2.6.2",
+    "rollup": "^0.59.4",
+    "rollup-plugin-alias": "^1.4.0",
+    "rollup-plugin-filesize": "^1.5.0",
+    "rollup-plugin-license": "0.6.0",
+    "rollup-plugin-re": "^1.0.7",
+    "rollup-plugin-typescript": "^0.8.1",
+    "rollup-plugin-uglify": "^4.0.0",
+    "rollup-watch": "^4.3.1",
+    "tslint": "^5.9.1",
+    "typedoc": "^0.11.1",
+    "typescript": "^2.8.1",
+    "uglify-es": "^3.3.9"
+  }
+}
