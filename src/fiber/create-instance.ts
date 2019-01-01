@@ -8,6 +8,11 @@ export function UpdateQueue(): IUpdateQueue {
     return {
         pendingStates: [],
         pendingCbs: [],
+        layout: null,
+        unlayout: null,
+        passive: null,
+        unpassive: null,
+        hook: {},
     };
 }
 
@@ -26,44 +31,47 @@ export function createInstance(fiber: IFiber, context: object): OwnerType {
     const isStateless = tag === EffectTag.NOWORK;
     const lastOwn = Renderer.currentOwner;
     let instance: OwnerType|undefined;
-    fiber.errorHook = "constructor";
-    try {
-        if (isStateless) {
-            instance = {
-                $init: true,
-                $isStateless: true,
-                props,
-                context,
-                ref,
-                renderImpl: type as any,
-                render(this: IOwnerAttribute) {
-                    if (this.renderImpl) {
-                        return this.renderImpl(this.props as IBaseProps);
-                    }
-                    return null;
-                },
-            } as IOwnerAttribute;
-            Renderer.currentOwner = instance;
-            if ((type as any).isForwardComponent) {
-                instance.render = function render(this: IOwnerAttribute) {
-                    return (type as IComponentFunction)(this.props as IBaseProps, this.ref);
-                };
-            }
-            instance.$init = false;
-        } else {
-            instance = new (type as IComponentClass<IBaseProps, IBaseObject>)(props, context);
+    // 移动设置属性到最前面
+    fiber.updateQueue = UpdateQueue();
+    fiber.errorHook = 'constructor';
+    // 去掉 try 让 constructor 触发 error hook
+    // try {
+    if (isStateless) {
+        instance = {
+            $init: true,
+            $isStateless: true,
+            props,
+            context,
+            ref,
+            renderImpl: type as any,
+            render(this: IOwnerAttribute) {
+                if (this.renderImpl) {
+                    return this.renderImpl(this.props as IBaseProps);
+                }
+                return null;
+            },
+        } as IOwnerAttribute;
+        Renderer.currentOwner = instance;
+        if ((type as any).isForwardComponent) {
+            instance.render = function render(this: IOwnerAttribute) {
+                return (type as IComponentFunction)(this.props as IBaseProps, this.ref);
+            };
         }
-    } finally {
-        Renderer.currentOwner = lastOwn;
-        fiber.stateNode = instance;
-        fiber.updateQueue = UpdateQueue();
-        instance!.$reactInternalFiber = fiber;
-        instance!.context = context;
-        instance!.updater = updater;
-        updater.enqueueSetState = Renderer.updateComponent as any;
-        if ((type as any)[gDSFP] || (instance as IComponentMinx<IBaseProps, IBaseObject>).getSnapshotBeforeUpdate) {
-            (instance as OwnerType).$useNewHooks = true;
-        }
+        instance.$init = false;
+    } else {
+        instance = new (type as IComponentClass<IBaseProps, IBaseObject>)(props, context);
     }
+    // } finally {
+    Renderer.currentOwner = lastOwn;
+    fiber.stateNode = instance;
+    // fiber.updateQueue = UpdateQueue();
+    instance!.$reactInternalFiber = fiber;
+    instance!.context = context;
+    instance!.updater = updater;
+    updater.enqueueSetState = Renderer.updateComponent as any;
+    if ((type as any)[gDSFP] || (instance as IComponentMinx<IBaseProps, IBaseObject>).getSnapshotBeforeUpdate) {
+        (instance as OwnerType).$useNewHooks = true;
+    }
+    // }
     return (instance as OwnerType);
 }

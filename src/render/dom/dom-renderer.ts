@@ -175,10 +175,10 @@ export let DOMRenderer = createRenderer({
     // [Top API] ReactDOM.unmountComponentAtNode
     unmountComponentAtNode(root: Element) {
         const container = createContainer(root, true);
-        const instance = container && container.hostRoot;
-        if (instance) {
+        const fiber = container && container.child;
+        if (fiber) {
             Renderer.updateComponent!(
-                instance,
+                fiber,
                 {
                     child: null,
                 },

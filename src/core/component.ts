@@ -10,6 +10,7 @@ import {
     IComponentMinx,
     IUpdater,
     VirtualNode,
+    ChildrenType,
 } from "./type-shared";
 import { IFiber } from "../fiber/type-shared";
 
@@ -20,7 +21,7 @@ export class Component<P extends IBaseProps, S extends IBaseObject> implements I
      * @param nextProps
      * @param preState
      */
-    public static getDerivedStateFromProps?(nextProps: IBaseProps, preState: IBaseObject): IBaseObject | null | undefined;
+    public static getDerivedStateFromProps?<T extends IBaseProps, F extends IBaseObject>(nextProps: T, preState: F): F | null | undefined | void;
 
     public isPureComponent?: boolean;
     public updater: IUpdater;
@@ -46,14 +47,14 @@ export class Component<P extends IBaseProps, S extends IBaseObject> implements I
     }
 
     public setState(state: S | ((s: S) => S|void), cb?: () => void): void {
-        this.updater.enqueueSetState(this, state, cb);
+        this.updater.enqueueSetState(this.$reactInternalFiber!, state, cb);
     }
 
     public forceUpdate(cb: () => void): void {
-        this.updater.enqueueSetState(this, true, cb);
+        this.updater.enqueueSetState(this.$reactInternalFiber!, true, cb);
     }
 
-    public render(): VirtualNode[] | VirtualNode {
+    public render(): VirtualNode[] | VirtualNode | ChildrenType {
         throw TypeError("must implement render");
     }
 }

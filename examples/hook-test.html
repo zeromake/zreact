@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>hook test</title>
+    <script src="/dist/zreact.js"></script>
+</head>
+<body>
+    <div id="app"></div>
+    <script>
+        const {
+            useState,
+            useEffect,
+            createElement,
+            hydrate,
+        } = zreact;
+
+        function Test(props) {
+            const [count, updateCount] = useState(0);
+            useEffect(() => {
+                console.log('create');
+                return () => {
+                    console.log('umount');
+                };
+            });
+            return createElement("div", {onClick: () => updateCount(count + 1)}, count);
+        }
+        function App() {
+            const [has, update] = useState(true);
+            return createElement('div', null, [
+                has ? createElement(Test) : null,
+                createElement('button', {onClick: () => update(!has)}, "切换"),
+            ]);
+        }
+        hydrate(createElement(App), document.getElementById('app'));
+    </script>
+    <script src="/lib/devtools.js"></script>
+</body>
+</html>

@@ -155,5 +155,5 @@ export function toLowerCase(s: string): string {
 export function Fragment(props: IBaseProps): VirtualNode[] | VirtualNode {
     return props.children as any;
 }
-
-export const defer: (fun: () => void) => any = Promise.resolve().then;
+const promiseDefer = Promise.resolve();
+export const defer: (fn: () => void) => void = promiseDefer.then.bind(promiseDefer) as any;

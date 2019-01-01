@@ -59,7 +59,8 @@ export interface IOwnerAttribute {
         calls: Array<(state: any) => void>;
     };
     setState?: any;
-    render?(): VirtualNode[] | VirtualNode;
+    contextType?: typeof IProvider;
+    render?(): VirtualNode[] | VirtualNode | ChildrenType;
     renderImpl?(p: IBaseProps): VirtualNode[] | VirtualNode;
     getChildContext?(): IBaseObject;
     forceUpdate?(cb: () => void): void;
@@ -217,7 +218,7 @@ export interface IUpdater {
      * @param cb 回调
      */
     enqueueSetState(
-        component: OwnerType,
+        fiber: IFiber,
         state: IBaseObject | boolean | ((s: IBaseObject) => IBaseObject|null|undefined),
         cb?: () => void,
     ): boolean;
@@ -231,13 +232,14 @@ export interface IComponentMinx<P extends IBaseProps, S extends IBaseObject> ext
     replaceState(): void;
     setState(state: S | ((s: S) => S | void), cb: () => void): void | S;
     forceUpdate(cb: () => void): void;
-    render(): VirtualNode[] | VirtualNode;
+    render(): VirtualNode[] | VirtualNode | ChildrenType;
 }
 
 export abstract class IComponentMinx<P extends IBaseProps, S extends IBaseObject> implements IOwnerAttribute {
     public static displayName?: string;
     public static defaultProps?: IBaseProps;
-    public static getDerivedStateFromProps?(nextProps: IBaseProps, preState: IBaseObject): IBaseObject | null | undefined;
+    public static contextType?: any;
+    public static getDerivedStateFromProps?<T extends IBaseProps, F extends IBaseObject>(nextProps: T, preState: F): F | null | undefined | void;
     public abstract state: Readonly<S>;
     public abstract props: Readonly<P>|null;
     public abstract context?: IBaseObject;
@@ -250,6 +252,7 @@ export abstract class IComponentMinx<P extends IBaseProps, S extends IBaseObject
 
     public abstract $unmaskedContext?: IBaseObject;
     public abstract $maskedContext?: IBaseObject;
+    public abstract contextType?: typeof IProvider;
 
     constructor(p?: P, c?: IBaseObject) {}
 
@@ -296,7 +299,7 @@ export interface IRenderer {
     updateControlled(fiber: IFiber): void;
     fireMiddlewares(begin?: boolean): void;
     updateComponent?(
-        component: OwnerType,
+        fiber: IFiber,
         state: IBaseObject | boolean | ((s: IBaseObject) => IBaseObject|null|undefined),
         cb?: () => void,
         immediateUpdate?: boolean,
@@ -307,4 +310,33 @@ export interface IRenderer {
     emptyElement?(fiber: IFiber): void;
     render?(vnode: IVNode, root: Element, callback?: () => void): Element;
     // [name: string]: any;
+}
+
+
+export interface IConsumerState<T> {
+    value: T;
+}
+export abstract class IConsumer<T> extends IComponentMinx<IBaseProps, IConsumerState<T>> {
+    public abstract observedBits: number;
+    public abstract subscribers: Array<OwnerType | IFiber> | null;
+}
+
+export interface IProviderProps<T> extends IBaseProps {
+    value: T;
+}
+
+export interface IProviderState<T> extends IBaseObject {
+    self: IProvider<T>;
+}
+
+export abstract class IProvider<T> extends IComponentMinx<IProviderProps<T>, IProviderState<T>> {
+    public static Provider: typeof IProvider;
+    public static Consumer: IConsumer<any>;
+    public static defaultValue: any;
+    public static getContext(fiber: IFiber): IFiber | null {
+        return null;
+    };
+    // public static providers: IProvider<any>[];
+    public abstract value: T;
+    public abstract subscribers: Array<OwnerType | IFiber>;
 }

@@ -24,8 +24,9 @@ import {
     IComponentMinx,
     IUpdater,
     IWorkContext,
+    IProvider,
 } from "../core/type-shared";
-import { resetHook } from "./hook";
+import { resetCursor } from './dispatcher';
 
 /**
  * 基于DFS遍历虚拟DOM树，初始化vnode为fiber,并产出组件实例或DOM节点
@@ -37,7 +38,7 @@ export function reconcileDFS(fiber: IFiber, info: IWorkContext, deadline: ISched
     const topWork = fiber;
     outerLoop: while (fiber) {
         if (fiber.disposed || deadline.timeRemaining() <= ENOUGH_TIME) {
-            break outerLoop;
+            break;
         }
         let occurError: boolean = false;
         if (fiber.tag < 3) {
@@ -111,19 +112,36 @@ export function updateClassComponent(fiber: IFiber, info: IWorkContext): void {
     const { type, props } = fiber;
     let instance = fiber.stateNode;
     const { contextStack, containerStack } = info;
-    const newContext = getMaskedContext(
-        instance,
-        (type as any).contextTypes,
-        contextStack,
-    );
+    const providerClass = (type as OwnerType).contextType;
+    const unmaskedContext = contextStack[0];
+    const isStaticContextType = isFn(providerClass);
+    let newContext: IBaseObject|null = null;
+    if(isStaticContextType) {
+        const provider = providerClass!.getContext(fiber);
+        if(provider) {
+            const providerInstance = provider.stateNode! as IProvider<any>;
+            providerInstance.subscribers.push(fiber);
+            newContext = providerInstance.value;
+        } else {
+            newContext = providerClass!.defaultValue;
+        }
+    } else {
+        newContext = getMaskedContext(
+            instance,
+            (type as any).contextTypes,
+            unmaskedContext,
+        );
+    }
     if (instance == null) {
         fiber.parent = type === Portal ? props.parent : containerStack[0];
-        instance = createInstance(fiber, newContext);
-        cacheContext(instance as OwnerType, contextStack[0], newContext);
+        instance = createInstance(fiber, newContext!);
+    }
+    if(!isStaticContextType) {
+        cacheContext(instance as OwnerType, unmaskedContext, newContext!);
     }
 
-    instance.$reactInternalFiber = fiber; // 更新rIF
     const isStateful = !instance.$isStateless;
+    instance.$reactInternalFiber = fiber; // 更新rIF
     if (isStateful) {
         // 有狀态组件
         const updateQueue = fiber.updateQueue as IUpdateQueue;
@@ -134,7 +152,7 @@ export function updateClassComponent(fiber: IFiber, info: IWorkContext): void {
                 fiber,
                 instance,
                 props,
-                newContext,
+                newContext!,
                 contextStack,
             );
         } else {
@@ -165,21 +183,22 @@ export function updateClassComponent(fiber: IFiber, info: IWorkContext): void {
     // 存放它上面的所有context的并集
     // instance.unmaskedContext = contextStack[0];
     // 设置新context, props, state
-    instance.context = newContext;
+    instance.context = newContext!;
     fiber.memoizedProps = instance.props = props;
     fiber.memoizedState = instance.state;
 
     if (instance.getChildContext) {
         let context = instance.getChildContext();
-        context = Object.assign({}, contextStack[0], context);
+        context = Object.assign({}, unmaskedContext, context);
         fiber.shiftContext = true;
         contextStack.unshift(context);
     }
-
+    if (fiber.parent && fiber.hasMounted && fiber.dirty) {
+        (fiber.parent as OwnerType).insertPoint = getInsertPoint(fiber);
+    }
+    // devtool
+    fiber.effectTag *= EffectTag.DEVTOOL;
     if (isStateful) {
-        if (fiber.parent && fiber.hasMounted && fiber.dirty) {
-            (fiber.parent as OwnerType).insertPoint = getInsertPoint(fiber);
-        }
         if (fiber.updateFail) {
             cloneChildren(fiber);
             fiber.$hydrating = false;
@@ -188,9 +207,9 @@ export function updateClassComponent(fiber: IFiber, info: IWorkContext): void {
 
         delete fiber.dirty;
         fiber.effectTag *= EffectTag.HOOK;
-    } else {
+    } else if(fiber.effectTag === EffectTag.NOWORK){
         fiber.effectTag = EffectTag.WORKING;
-        fiber.effectTag *= EffectTag.HOOK;
+        // fiber.effectTag *= EffectTag.HOOK;
     }
 
     if (fiber.catchError) {
@@ -200,7 +219,8 @@ export function updateClassComponent(fiber: IFiber, info: IWorkContext): void {
     fiber.$hydrating = true;
     Renderer.currentOwner = instance;
     const rendered = applyCallback(instance, "render", []);
-    resetHook(instance);
+    // 每次结束 render 函数时重置 hook 计数
+    resetCursor();
     diffChildren(fiber, rendered);
     Renderer.onAfterRender!(fiber);
 }
@@ -285,7 +305,7 @@ function mergeStates(fiber: IFiber, nextProps: IBaseProps) {
 function applybeforeMountHooks(fiber: IFiber, instance: OwnerType, newProps: IBaseProps): void {
     fiber.setout = true;
     if (instance.$useNewHooks) {
-        setStateByProps(instance, fiber, newProps, instance.state as IBaseObject);
+        setStateByProps(fiber, newProps, instance.state as IBaseObject);
     } else {
         callUnsafeHook(instance, "componentWillMount", []);
     }
@@ -328,7 +348,7 @@ function applybeforeUpdateHooks(
     mergeStates(fiber, newProps as IBaseProps);
     newState = fiber.memoizedState;
 
-    setStateByProps(instance, fiber, newProps as IBaseProps, newState as IBaseObject);
+    setStateByProps(fiber, newProps as IBaseProps, newState as IBaseObject);
     newState = fiber.memoizedState;
 
     delete fiber.setout;
@@ -383,7 +403,6 @@ function isSameNode(target: IFiber, b: IFiber): boolean {
  * @param prevState 当前的 state
  */
 function setStateByProps(
-    instance: OwnerType,
     fiber: IFiber,
     nextProps: IBaseProps,
     prevState: IBaseObject,
@@ -426,30 +445,29 @@ function cacheContext(instance: OwnerType, unmaskedContext: IBaseObject, context
     instance.$maskedContext = context;
 }
 
-function getMaskedContext(instance: OwnerType|undefined, contextTypes: IBaseObject, contextStack: IBaseObject[]): IBaseObject {
-    if (instance && !contextTypes) {
-        return instance.context as IBaseObject;
-    }
-    const context: IBaseObject = {};
-    if (!contextTypes) {
-        return context;
-    }
-
-    const unmaskedContext = contextStack[0];
-    if (instance) {
+function getMaskedContext(instance: OwnerType|undefined, contextTypes: IBaseObject, unmaskedContext: IBaseObject): IBaseObject {
+    const noContext = !contextTypes;
+    if (instance && noContext) {
+        if(noContext) {
+            return instance.context as IBaseObject;
+        }
         const cachedUnmasked = instance.$unmaskedContext;
         if (cachedUnmasked === unmaskedContext) {
             return instance.$maskedContext as IBaseObject;
         }
     }
-
-    for (const key in contextTypes) {
-        if (contextTypes.hasOwnProperty(key)) {
-            context[key] = unmaskedContext[key];
-        }
+    let context: IBaseObject = {};
+    if (noContext) {
+        return context;
     }
-    if (instance) {
-        cacheContext(instance, unmaskedContext, context);
+
+    for (let key in contextTypes) {
+        // 第一代context
+        for (let key in contextTypes) {
+            if (contextTypes.hasOwnProperty(key)) {
+                context[key] = unmaskedContext[key];
+            }
+        }
     }
     return context;
 }

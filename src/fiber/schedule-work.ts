@@ -46,7 +46,7 @@ export function render(vnode: IVNode, root: Element, callback: (this: OwnerType)
         instance?: OwnerType,
     } = {};
     updateComponent(
-        container!.hostRoot!,
+        container!.child!,
         {
             child: vnode,
         },
@@ -66,7 +66,7 @@ function wrapCb(
     return function(this: IFiber) {
         const fiber = this;
         const target = fiber.child ? fiber.child.stateNode : null;
-        if (fn) {
+        if (fn && target) {
             fn.call(target);
         }
         carrier.instance = target as OwnerType;
@@ -270,12 +270,12 @@ function pushChildQueue(fiber: IFiber, queue: IFiber[]): void {
  * setState的实现
  */
 function updateComponent(
-    instance: OwnerType,
+    fiber: IFiber,
     state: IBaseObject | boolean | ((s: IBaseObject) => IBaseObject|null|undefined),
     callback?: () => void,
     immediateUpdate?: boolean,
 ) {
-    const fiber = instance.$reactInternalFiber as IFiber;
+    // const fiber = instance.$reactInternalFiber as IFiber;
     fiber.dirty = true;
 
     const sn = typeNumber(state);

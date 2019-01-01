@@ -15,7 +15,12 @@ import {
 } from "./error-boundary";
 import { Renderer } from "../core/create-renderer";
 import { Refs } from "./Refs";
-import { IFiber } from "./type-shared";
+import {
+    IFiber,
+    unEffectType,
+    effectType,
+    IUpdateQueue,
+} from "./type-shared";
 import {
     OwnerType,
     IComponentMinx,
@@ -31,6 +36,7 @@ import { options } from "./options";
 const domFns = ["insertElement", "updateContent", "updateAttribute"];
 const domEffects: EffectTag[] = [EffectTag.PLACE, EffectTag.CONTENT, EffectTag.ATTR];
 const domRemoved: IFiber[] = [];
+const passiveFibers: IFiber[] = [];
 
 function commitDFSImpl(fiber: IFiber) {
     const topFiber = fiber;
@@ -69,6 +75,8 @@ function commitDFSImpl(fiber: IFiber) {
         while (f) {
             if (f.effectTag === EffectTag.WORKING) {
                 f.effectTag = EffectTag.NOWORK;
+                // 做react hooks 时新加的
+                f.hasMounted = true;
             } else if (f.effectTag > EffectTag.WORKING) {
                 commitEffects(f);
                 if (f.capturedValues) {
@@ -102,6 +110,15 @@ export function commitDFS(effects: IFiber[]) {
                 domRemoved.forEach(Renderer.removeElement!);
                 domRemoved.length = 0;
             }
+            if (passiveFibers.length) {
+                passiveFibers.forEach((fiber: IFiber) => {
+                    if(!fiber.hasMounted) {
+                        fiber.hasMounted = true;
+                    }
+                    safeInvokeHooks(fiber.updateQueue!, 'passive', true);
+                });
+                passiveFibers.length = 0;
+            }
         }
     }, {});
     const error = Renderer.catchError;
@@ -109,6 +126,62 @@ export function commitDFS(effects: IFiber[]) {
         delete Renderer.catchError;
         throw error;
     }
+}
+
+function safeInvokeHooks(upateQueue: IUpdateQueue, name: "layout" | "passive" | "unlayout" | "unpassive", isCreate?: boolean) {
+    const isDefer = name === "passive" || "unpassive";
+    const destory = (isCreate ? "un" + name: name) as "unlayout" | "unpassive"; 
+    const uneffects = upateQueue[destory];
+    if (!uneffects){
+        return;
+    }
+    if(isCreate) {
+        const create = name as "layout" | "passive";
+        const effects = upateQueue[create];
+        if (!effects){
+            return;
+        }
+        let effect: effectType | undefined;
+        // effects
+        while (effects && (effect = effects.shift())) {
+            if(isDefer) {
+                ((effect: effectType, uneffects: unEffectType[]) => {
+                    defer(() => {
+                        const uneffect = effect!();
+                        if (uneffect && typeof uneffect === 'function') {
+                            uneffects.push(uneffect);
+                        }
+                    });
+                })(effect, uneffects);
+                
+            } else {
+                try {
+                    const uneffect = effect();
+                    if (uneffect && typeof uneffect === 'function') {
+                        uneffects.push(uneffect);
+                    }
+                } catch (e) {
+                    console.warn(e);
+                }
+            }
+        }
+    } else {
+        let uneffect: unEffectType | undefined;
+        // uneffects
+        while (uneffects && (uneffect = uneffects.shift())) {
+            if(isDefer) {
+                defer(uneffect);
+            } else {
+                try {
+                    uneffect();
+                } catch (e) {
+                    console.warn(e);
+                }
+            }
+        }
+
+    }
+    
 }
 
 /**
@@ -134,31 +207,20 @@ export function commitEffects(fiber: IFiber) {
                     Renderer.updateControlled(fiber);
                     break;
                 case EffectTag.HOOK:
-                    if (fiber.hasMounted) {
-                        if (instance.$isStateless && instance.didUpdate) {
-                            defer(instance.didUpdate);
+                    if (instance.$isStateless) {
+                        // stateless did hook
+                        if(!fiber.hasMounted) {
+                            fiber.hasMounted = true;
                         }
+                        safeInvokeHooks(fiber.updateQueue!, "layout", true);
+                    } else if (fiber.hasMounted) {
                         guardCallback(instance, "componentDidUpdate", [
                             updater.prevProps,
                             updater.prevState,
                             updater.snapshot,
                         ]);
-                        if (process.env.NODE_ENV !== "production") {
-                            if (options.afterUpdate) {
-                                options.afterUpdate(instance);
-                            }
-                        }
                     } else {
                         fiber.hasMounted = true;
-
-                        if (process.env.NODE_ENV !== "production") {
-                            if (options.afterMount) {
-                                options.afterMount(instance);
-                            }
-                        }
-                        if (instance.$isStateless && instance.didUpdate) {
-                            defer(instance.didUpdate);
-                        }
                         guardCallback(instance, "componentDidMount", []);
                     }
                     delete fiber.$hydrating;
@@ -166,6 +228,20 @@ export function commitEffects(fiber: IFiber) {
                     if (fiber.catchError) {
                         fiber.effectTag = amount;
                         return;
+                    }
+                    break;
+                case EffectTag.PASSIVE:
+                    // hook defer did
+                    passiveFibers.push(fiber);
+                    break;
+                case EffectTag.DEVTOOL:
+                    if (fiber.hasMounted) {
+                        options.afterUpdate && (options.afterUpdate(instance));
+                    } else {
+                        if(!fiber.hasMounted) {
+                            fiber.hasMounted = true;
+                        }
+                        options.afterMount && (options.afterMount(instance));
                     }
                     break;
                 case EffectTag.REF:
@@ -233,21 +309,20 @@ function disposeFiber(fiber: IFiber, force?: boolean|number) {
             Renderer.onDispose(fiber);
             if (fiber.hasMounted) {
                 (stateNode.updater as IUpdater).enqueueSetState = returnFalse;
-                if (process.env.NODE_ENV !== "production") {
-                    if (options.beforeUnmount) {
-                        options.beforeUnmount(stateNode);
-                    }
-                }
                 const instance = stateNode as IOwnerAttribute;
-                if (instance.$isStateless && instance.willUnmount) {
-                    defer(instance.willUnmount);
+                if (instance.$isStateless) {
+                    safeInvokeHooks(fiber.updateQueue!, 'unlayout');
+                    safeInvokeHooks(fiber.updateQueue!, 'unpassive');
                 }
                 guardCallback(stateNode, "componentWillUnmount", []);
+                if(options.beforeUnmount) {
+                    options.beforeUnmount(stateNode);
+                }
                 delete fiber.stateNode;
             }
         }
         delete fiber.alternate;
-        delete fiber.hasMounted;
+        fiber.hasMounted = false;
         fiber.disposed = true;
     }
     fiber.effectTag = EffectTag.NOWORK;

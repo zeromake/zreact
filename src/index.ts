@@ -16,7 +16,16 @@ import { Fragment } from "./core/util";
 import { findDOMNode } from "./render/dom/find-dom-node";
 import { DOMRenderer } from "./render/dom/dom-renderer";
 import { options } from "./fiber/options";
-import { useState, useEffect, useRef } from "./fiber/hook";
+import {
+    useState,
+    useEffect,
+    useReducer,
+    useCallback,
+    useContext,
+    useRef,
+    useMeno,
+    useImperativeMethods,
+} from "./core/hook";
 const {
     render,
     eventSystem,
@@ -53,5 +62,10 @@ export {
     createFactory,
     useState,
     useEffect,
+    useReducer,
+    useCallback,
+    useContext,
     useRef,
+    useMeno,
+    useImperativeMethods,
 };

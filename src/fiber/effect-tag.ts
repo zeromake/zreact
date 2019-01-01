@@ -43,9 +43,17 @@ export enum EffectTag {
      */
     CALLBACK = 23,
     /**
+     * hook
+     */
+    PASSIVE = 29,
+    /**
+     * DEVTOOL
+     */
+    DEVTOOL = 31,
+    /**
      * 出错
      */
-    CAPTURE = 29,
+    CAPTURE = 33,
 }
 
 // 上面的副作用的功能与位置可能变化频繁，我们需确保它们从小到大排列
@@ -56,6 +64,8 @@ export const effectNames = [
     EffectTag.HOOK,
     EffectTag.REF,
     EffectTag.CALLBACK,
+    EffectTag.PASSIVE,
+    EffectTag.DEVTOOL,
     EffectTag.CAPTURE,
 ];
 

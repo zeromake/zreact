@@ -6,6 +6,11 @@ export interface IUpdateQueue {
     pendingCbs: Array<() => void>;
     isForced?: boolean;
     batching?: any;
+    hook: {[cursor: string]: any};
+    unlayout: unEffectType[] | null;
+    layout: effectType[] | null;
+    unpassive: unEffectType[] | null;
+    passive: effectType[] | null;
 }
 
 export interface IFiber extends IVNode {
@@ -116,3 +121,7 @@ export interface IScheduledConfig {
 export interface IScheduledOptions {
     timeout: number;
 }
+
+export type unEffectType = () => void;
+
+export type effectType = () => void | (() => void)
