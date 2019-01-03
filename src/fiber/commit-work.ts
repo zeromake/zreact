@@ -188,6 +188,7 @@ function safeInvokeHooks(upateQueue: IUpdateQueue, name: "layout" | "passive" | 
 export function commitEffects(fiber: IFiber) {
     const instance: OwnerType = fiber.stateNode || emptyObject;
     let amount = fiber.effectTag;
+    let hasMounted = fiber.hasMounted;
     const updater = instance.updater || fakeUpdater;
     for (let i = 0; i < effectLength; i++) {
         const effectNo = effectNames[i];
@@ -206,9 +207,6 @@ export function commitEffects(fiber: IFiber) {
                 case EffectTag.HOOK:
                     if (instance.$isStateless) {
                         // stateless did hook
-                        if (!fiber.hasMounted) {
-                            fiber.hasMounted = true;
-                        }
                         safeInvokeHooks(fiber.updateQueue!, "layout", true);
                     } else if (fiber.hasMounted) {
                         guardCallback(instance, "componentDidUpdate", [
@@ -217,8 +215,10 @@ export function commitEffects(fiber: IFiber) {
                             updater.snapshot,
                         ]);
                     } else {
-                        fiber.hasMounted = true;
                         guardCallback(instance, "componentDidMount", []);
+                    }
+                    if (!fiber.hasMounted) {
+                        hasMounted = true;
                     }
                     delete fiber.$hydrating;
                     // 这里发现错误，说明它的下方组件出现错误，不能延迟到下一个生命周期
@@ -237,9 +237,7 @@ export function commitEffects(fiber: IFiber) {
                             options.afterUpdate(instance);
                         }
                     } else {
-                        if (!fiber.hasMounted) {
-                            fiber.hasMounted = true;
-                        }
+                        hasMounted = true;
                         if (options.afterMount) {
                             options.afterMount(instance);
                         }
@@ -271,6 +269,9 @@ export function commitEffects(fiber: IFiber) {
                     break;
             }
         }
+    }
+    if (fiber.hasMounted !== hasMounted) {
+        fiber.hasMounted = true;
     }
     fiber.effectTag = EffectTag.NOWORK;
 }
