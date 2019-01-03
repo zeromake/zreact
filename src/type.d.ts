@@ -2,13 +2,13 @@ import { IVNode, IComponentClass, IBaseProps, IBaseObject, ChildrenType } from "
 import { createElement } from "./core/create-element";
 import { findDOMNode } from "./render/dom/find-dom-node";
 
+declare module "zreact" {
+    export = zreact;
+}
 declare namespace zreact {
     type findDOMNode = typeof findDOMNode;
 }
 
-declare module "zreact" {
-    export = zreact;
-}
 declare global {
     namespace JSX {
         type Element = IVNode;
@@ -721,7 +721,7 @@ declare global {
             video: HTMLAttributes;
             wbr: HTMLAttributes;
 
-            //SVG
+            // SVG
             svg: SVGAttributes;
             animate: SVGAttributes;
             circle: SVGAttributes;

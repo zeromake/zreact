@@ -26,7 +26,7 @@ import {
     IWorkContext,
     IProvider,
 } from "../core/type-shared";
-import { resetCursor } from './dispatcher';
+import { resetCursor } from "./dispatcher";
 
 /**
  * 基于DFS遍历虚拟DOM树，初始化vnode为fiber,并产出组件实例或DOM节点
@@ -116,9 +116,9 @@ export function updateClassComponent(fiber: IFiber, info: IWorkContext): void {
     const unmaskedContext = contextStack[0];
     const isStaticContextType = isFn(providerClass);
     let newContext: IBaseObject|null = null;
-    if(isStaticContextType) {
+    if (isStaticContextType) {
         const provider = providerClass!.getContext(fiber);
-        if(provider) {
+        if (provider) {
             const providerInstance = provider.stateNode! as IProvider<any>;
             providerInstance.subscribers.push(fiber);
             newContext = providerInstance.value;
@@ -136,7 +136,7 @@ export function updateClassComponent(fiber: IFiber, info: IWorkContext): void {
         fiber.parent = type === Portal ? props.parent : containerStack[0];
         instance = createInstance(fiber, newContext!);
     }
-    if(!isStaticContextType) {
+    if (!isStaticContextType) {
         cacheContext(instance as OwnerType, unmaskedContext, newContext!);
     }
 
@@ -197,7 +197,9 @@ export function updateClassComponent(fiber: IFiber, info: IWorkContext): void {
         (fiber.parent as OwnerType).insertPoint = getInsertPoint(fiber);
     }
     // devtool
-    fiber.effectTag *= EffectTag.DEVTOOL;
+    if (process.env.NODE_ENV !== "production") {
+        fiber.effectTag *= EffectTag.DEVTOOL;
+    }
     if (isStateful) {
         if (fiber.updateFail) {
             cloneChildren(fiber);
@@ -207,7 +209,7 @@ export function updateClassComponent(fiber: IFiber, info: IWorkContext): void {
 
         delete fiber.dirty;
         fiber.effectTag *= EffectTag.HOOK;
-    } else if(fiber.effectTag === EffectTag.NOWORK){
+    } else if (fiber.effectTag === EffectTag.NOWORK) {
         fiber.effectTag = EffectTag.WORKING;
         // fiber.effectTag *= EffectTag.HOOK;
     }
@@ -448,7 +450,7 @@ function cacheContext(instance: OwnerType, unmaskedContext: IBaseObject, context
 function getMaskedContext(instance: OwnerType|undefined, contextTypes: IBaseObject, unmaskedContext: IBaseObject): IBaseObject {
     const noContext = !contextTypes;
     if (instance && noContext) {
-        if(noContext) {
+        if (noContext) {
             return instance.context as IBaseObject;
         }
         const cachedUnmasked = instance.$unmaskedContext;
@@ -456,17 +458,15 @@ function getMaskedContext(instance: OwnerType|undefined, contextTypes: IBaseObje
             return instance.$maskedContext as IBaseObject;
         }
     }
-    let context: IBaseObject = {};
+    const context: IBaseObject = {};
     if (noContext) {
         return context;
     }
 
-    for (let key in contextTypes) {
+    for (const key in contextTypes) {
         // 第一代context
-        for (let key in contextTypes) {
-            if (contextTypes.hasOwnProperty(key)) {
-                context[key] = unmaskedContext[key];
-            }
+        if (contextTypes.hasOwnProperty(key)) {
+            context[key] = unmaskedContext[key];
         }
     }
     return context;

@@ -33,7 +33,7 @@ export function createInstance(fiber: IFiber, context: object): OwnerType {
     let instance: OwnerType|undefined;
     // 移动设置属性到最前面
     fiber.updateQueue = UpdateQueue();
-    fiber.errorHook = 'constructor';
+    fiber.errorHook = "constructor";
     // 去掉 try 让 constructor 触发 error hook
     // try {
     if (isStateless) {

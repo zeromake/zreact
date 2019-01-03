@@ -124,4 +124,4 @@ export interface IScheduledOptions {
 
 export type unEffectType = () => void;
 
-export type effectType = () => void | (() => void)
+export type effectType = () => void | (() => void);

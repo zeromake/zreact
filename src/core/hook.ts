@@ -1,7 +1,7 @@
-import { dispatcher } from '../fiber/dispatcher';
-import { effectType } from '../fiber/type-shared';
-import { EffectTag } from '../fiber/effect-tag';
-import { IRefType, IBaseObject, IProvider } from './type-shared';
+import { dispatcher } from "../fiber/dispatcher";
+import { effectType } from "../fiber/type-shared";
+import { EffectTag } from "../fiber/effect-tag";
+import { IRefType, IBaseObject, IProvider } from "./type-shared";
 
 export function useState<T>(initValue: T) {
     return dispatcher.useReducer(null, initValue);

@@ -4,7 +4,7 @@ import { Component } from "./core/component";
 import { PureComponent } from "./core/pure-component";
 import { createRef, forwardRef } from "./core/create-ref";
 import { createPortal } from "./core/create-portal";
-// import { createContext } from "react-core/createContext";
+import { createContext } from "./core/create-context";
 import {
     createElement,
     cloneElement,
@@ -51,7 +51,7 @@ export {
     PropTypes,
     Children,
     createPortal,
-    // createContext,
+    createContext,
     Component,
     createRef,
     forwardRef,

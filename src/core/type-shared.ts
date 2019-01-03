@@ -312,7 +312,6 @@ export interface IRenderer {
     // [name: string]: any;
 }
 
-
 export interface IConsumerState<T> {
     value: T;
 }
@@ -335,7 +334,7 @@ export abstract class IProvider<T> extends IComponentMinx<IProviderProps<T>, IPr
     public static defaultValue: any;
     public static getContext(fiber: IFiber): IFiber | null {
         return null;
-    };
+    }
     // public static providers: IProvider<any>[];
     public abstract value: T;
     public abstract subscribers: Array<OwnerType | IFiber>;

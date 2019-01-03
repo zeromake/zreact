@@ -112,10 +112,10 @@ export function commitDFS(effects: IFiber[]) {
             }
             if (passiveFibers.length) {
                 passiveFibers.forEach((fiber: IFiber) => {
-                    if(!fiber.hasMounted) {
+                    if (!fiber.hasMounted) {
                         fiber.hasMounted = true;
                     }
-                    safeInvokeHooks(fiber.updateQueue!, 'passive', true);
+                    safeInvokeHooks(fiber.updateQueue!, "passive", true);
                 });
                 passiveFibers.length = 0;
             }
@@ -130,34 +130,33 @@ export function commitDFS(effects: IFiber[]) {
 
 function safeInvokeHooks(upateQueue: IUpdateQueue, name: "layout" | "passive" | "unlayout" | "unpassive", isCreate?: boolean) {
     const isDefer = name === "passive" || "unpassive";
-    const destory = (isCreate ? "un" + name: name) as "unlayout" | "unpassive"; 
+    const destory = (isCreate ? "un" + name : name) as "unlayout" | "unpassive";
     const uneffects = upateQueue[destory];
-    if (!uneffects){
+    if (!uneffects) {
         return;
     }
-    if(isCreate) {
+    if (isCreate) {
         const create = name as "layout" | "passive";
         const effects = upateQueue[create];
-        if (!effects){
+        if (!effects) {
             return;
         }
         let effect: effectType | undefined;
         // effects
         while (effects && (effect = effects.shift())) {
-            if(isDefer) {
-                ((effect: effectType, uneffects: unEffectType[]) => {
+            if (isDefer) {
+                ((pEffect: effectType, pUneffects: unEffectType[]) => {
                     defer(() => {
-                        const uneffect = effect!();
-                        if (uneffect && typeof uneffect === 'function') {
-                            uneffects.push(uneffect);
+                        const uneffect = pEffect!();
+                        if (uneffect && typeof uneffect === "function") {
+                            pUneffects.push(uneffect);
                         }
                     });
                 })(effect, uneffects);
-                
             } else {
                 try {
                     const uneffect = effect();
-                    if (uneffect && typeof uneffect === 'function') {
+                    if (uneffect && typeof uneffect === "function") {
                         uneffects.push(uneffect);
                     }
                 } catch (e) {
@@ -169,7 +168,7 @@ function safeInvokeHooks(upateQueue: IUpdateQueue, name: "layout" | "passive" | 
         let uneffect: unEffectType | undefined;
         // uneffects
         while (uneffects && (uneffect = uneffects.shift())) {
-            if(isDefer) {
+            if (isDefer) {
                 defer(uneffect);
             } else {
                 try {
@@ -179,9 +178,7 @@ function safeInvokeHooks(upateQueue: IUpdateQueue, name: "layout" | "passive" | 
                 }
             }
         }
-
     }
-    
 }
 
 /**
@@ -209,7 +206,7 @@ export function commitEffects(fiber: IFiber) {
                 case EffectTag.HOOK:
                     if (instance.$isStateless) {
                         // stateless did hook
-                        if(!fiber.hasMounted) {
+                        if (!fiber.hasMounted) {
                             fiber.hasMounted = true;
                         }
                         safeInvokeHooks(fiber.updateQueue!, "layout", true);
@@ -236,12 +233,16 @@ export function commitEffects(fiber: IFiber) {
                     break;
                 case EffectTag.DEVTOOL:
                     if (fiber.hasMounted) {
-                        options.afterUpdate && (options.afterUpdate(instance));
+                        if (options.afterUpdate) {
+                            options.afterUpdate(instance);
+                        }
                     } else {
-                        if(!fiber.hasMounted) {
+                        if (!fiber.hasMounted) {
                             fiber.hasMounted = true;
                         }
-                        options.afterMount && (options.afterMount(instance));
+                        if (options.afterMount) {
+                            options.afterMount(instance);
+                        }
                     }
                     break;
                 case EffectTag.REF:
@@ -311,12 +312,14 @@ function disposeFiber(fiber: IFiber, force?: boolean|number) {
                 (stateNode.updater as IUpdater).enqueueSetState = returnFalse;
                 const instance = stateNode as IOwnerAttribute;
                 if (instance.$isStateless) {
-                    safeInvokeHooks(fiber.updateQueue!, 'unlayout');
-                    safeInvokeHooks(fiber.updateQueue!, 'unpassive');
+                    safeInvokeHooks(fiber.updateQueue!, "unlayout");
+                    safeInvokeHooks(fiber.updateQueue!, "unpassive");
                 }
                 guardCallback(stateNode, "componentWillUnmount", []);
-                if(options.beforeUnmount) {
-                    options.beforeUnmount(stateNode);
+                if (process.env.NODE_ENV !== "production") {
+                    if (options.beforeUnmount) {
+                        options.beforeUnmount(stateNode);
+                    }
                 }
                 delete fiber.stateNode;
             }

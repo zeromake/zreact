@@ -21,7 +21,7 @@ function getCurrentFiber(): IFiber {
 }
 
 function areHookInputsEqual(arr1: any[], arr2: any[]): boolean {
-    for (var i = 0; i < arr1.length; i++) {
+    for (let i = 0; i < arr1.length; i++) {
         if (Object.is(arr1[i], arr2[i])) {
             continue;
         }
@@ -30,13 +30,13 @@ function areHookInputsEqual(arr1: any[], arr2: any[]): boolean {
     return true;
 }
 
-export var dispatcher = {
+export const dispatcher = {
     useContext<T>(context: typeof IProvider): T {
         const fiber = getCurrentFiber();
         const providerFiber = context.getContext(fiber);
         if (providerFiber) {
             const instance = providerFiber.stateNode as IProvider<T>;
-            if(instance.subscribers.indexOf(fiber) !== -1) {
+            if (instance.subscribers.indexOf(fiber) !== -1) {
                 instance.subscribers.push(fiber);
             }
             return instance.value;
@@ -45,36 +45,36 @@ export var dispatcher = {
     },
     useReducer<T, F>(reducer: ((val: T, action: F) => T) | null, initValue: T, initAction?: F): [T, (val?: T) => void] {
         const fiber = getCurrentFiber();
-        const key = 'Hook.' + hookCursor;
+        const key = "Hook." + hookCursor;
         const updateQueue = fiber.updateQueue!.hook;
         hookCursor++;
-        const compute = reducer ? function (cursor: string, action: F) {
+        const compute = reducer ? function _compute(cursor: string, action: F) {
             return reducer(updateQueue[cursor], action || { type: Math.random() } as any) as T;
-        } : function (cursor: string, value: T | ((val: T) => T)): T {
-            if(isFn(value)) {
+        } : function _compute(cursor: string, newValue: T | ((val: T) => T)): T {
+            if (isFn(newValue)) {
                 const novel: T = updateQueue[cursor];
-                return (value as (val: T) => T)(novel);
+                return (newValue as (val: T) => T)(novel);
             }
-            return value as T;
-        }
+            return newValue as T;
+        };
         const dispatch = setter.bind(fiber, compute as any, key);
         if (key in updateQueue) {
             delete fiber.updateQueue!.isForced;
             return [updateQueue[key], dispatch];
         }
-        let value = updateQueue[key] = initAction && reducer ? reducer!(initValue, initAction) : initValue;
+        const value = updateQueue[key] = initAction && reducer ? reducer!(initValue, initAction) : initValue;
         return [value, dispatch];
     },
-    useCallbackOrMemo<T>(create: T | (() => T), inputs?: string[], isMemo?: boolean) {//ok
+    useCallbackOrMemo<T>(create: T | (() => T), inputs?: string[], isMemo?: boolean) {
         const fiber = getCurrentFiber();
-        const key = 'Hook.' + hookCursor;
+        const key = "Hook." + hookCursor;
         const updateQueue = fiber.updateQueue!.hook;
         hookCursor++;
 
-        let nextInputs = Array.isArray(inputs) ? inputs : [create];
-        let prevState = updateQueue[key];
+        const nextInputs = Array.isArray(inputs) ? inputs : [create];
+        const prevState = updateQueue[key];
         if (prevState) {
-            let prevInputs = prevState[1];
+            const prevInputs = prevState[1];
             if (areHookInputsEqual(nextInputs, prevInputs)) {
                 return prevState[0];
             }
@@ -84,9 +84,9 @@ export var dispatcher = {
         updateQueue[key] = [value, nextInputs];
         return value;
     },
-    useRef<T>(initValue: T) {//ok
+    useRef<T>(initValue: T) {
         const fiber = getCurrentFiber();
-        const key = 'Hook.' + hookCursor;
+        const key = "Hook." + hookCursor;
         const updateQueue = fiber.updateQueue!.hook;
         hookCursor++;
         if (key in updateQueue) {
@@ -96,7 +96,7 @@ export var dispatcher = {
             current: initValue,
         };
     },
-    useEffect(create: effectType, inputs: string[]|undefined, effectTag: number, createList: "layout" | "passive", destoryList: "unlayout" | "unpassive"): void {//ok
+    useEffect(create: effectType, inputs: string[]|undefined, effectTag: number, createList: "layout" | "passive", destoryList: "unlayout" | "unpassive"): void {
         const fiber = getCurrentFiber();
         const cb = dispatcher.useCallbackOrMemo(create, inputs);
         if (fiber.effectTag % effectTag) {
@@ -104,14 +104,16 @@ export var dispatcher = {
         }
         const updateQueue = fiber.updateQueue!;
         const list = updateQueue[createList] ||  (updateQueue[createList] = []);
-        updateQueue[destoryList] ||  (updateQueue[destoryList] = []);
+        if (!updateQueue[destoryList]) {
+            updateQueue[destoryList] = [];
+        }
         list.push(cb);
     },
     useImperativeMethods(ref: IRefType, create: () => IBaseObject, inputs?: any[]) {
         const nextInputs: string[] = Array.isArray(inputs) ? inputs.concat([ref])
             : [ref, create];
         dispatcher.useEffect(() => {
-            if (typeof ref === 'function') {
+            if (typeof ref === "function") {
                 const refCallback = ref;
                 const inst = create();
                 refCallback(inst);
@@ -126,4 +128,4 @@ export var dispatcher = {
             }
         }, nextInputs, EffectTag.PASSIVE, "passive", "unpassive");
     },
-}; 
+};

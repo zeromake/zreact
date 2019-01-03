@@ -79,6 +79,11 @@
   resolved "http://registry.npm.taobao.org/@types/node/download/@types/node-10.12.0.tgz#ea6dcbddbc5b584c83f06c60e82736d8fbb0c235"
   integrity sha1-6m3L3bxbWEyD8Gxg6Cc22PuwwjU=
 
+"@types/node@^10.12.18":
+  version "10.12.18"
+  resolved "http://registry.npm.taobao.org/@types/node/download/@types/node-10.12.18.tgz#1d3ca764718915584fcd9f6344621b7672665c67"
+  integrity sha1-HTynZHGJFVhPzZ9jRGIbdnJmXGc=
+
 "@types/shelljs@^0.8.0":
   version "0.8.0"
   resolved "http://registry.npm.taobao.org/@types/shelljs/download/@types/shelljs-0.8.0.tgz#0caa56b68baae4f68f44e0dd666ab30b098e3632"
