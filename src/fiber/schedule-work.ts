@@ -108,15 +108,24 @@ const deadline: IScheduledCallbackParams = {
 const win = getWindow();
 
 export function requestIdleCallback(fn: (d: IScheduledCallbackParams) => void) {
-    if (typeof (win as any).requestIdleCallback === "function") {
-        (win as any).requestIdleCallback(fn);
-    } else {
-        fn(deadline);
-    }
+    // if (typeof (win as any).requestIdleCallback === "function") {
+    //     (win as any).requestAnimationFrame(function _(start: number) {
+    //         start += 50;
+    //         const opt = {
+    //             didTimeout: false,
+    //             timeRemaining(): number {
+    //                 return start - performance.now();
+    //             },
+    //         };
+    //         return fn(opt);
+    //     });
+    // } else {
+    fn(deadline);
+    // }
 }
 
 Renderer.scheduleWork = function scheduleWork() {
-    performWork(deadline);
+    return requestIdleCallback(performWork);
 };
 
 let isBatching = false;

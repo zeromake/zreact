@@ -8,7 +8,6 @@
     <script src="/dist/zreact.js"></script>
 </head>
 <body>
-
     <div id="app"></div>
     <script>
         const {
@@ -109,14 +108,20 @@
                 o.children === n.children
             );
         };
+        let last = null;
         function App() {
+            const [count, update] = useState(0);
+            requestAnimationFrame(() => {
+                console.log(count);
+                update((count) => (count + 1) % 10)
+            });
             const t = 1;
             const scale = 1 + (t > 5 ? 10 - t : t) / 10;
             const transform = 'scaleX(' + (scale / 2.1) + ') scaleY(0.7) translateZ(0.1px)';
-            return h("div", {style: containerStyle},
+            return h("div", {style: Object.assign({}, containerStyle, { transform })},
                 h("div", null,
                     h(SierpinskiTriangle, {x: 0, y: 0, s: 1000},
-                        0
+                        count
                     )
                 )
             )
