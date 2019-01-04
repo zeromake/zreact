@@ -93,9 +93,9 @@
                 h(SierpinskiTriangle, {x: x - s, y: y + (s / 2), s: s},
                     children
                 ),
-                h(SierpinskiTriangle, {x: x + s, y: y + (s / 2), s: s},
-                    children
-                )
+                // h(SierpinskiTriangle, {x: x + s, y: y + (s / 2), s: s},
+                //     children
+                // )
             );
         }
         SierpinskiTriangle.shouldComponentUpdate = function(oldProps, newProps) {
@@ -111,10 +111,13 @@
         let last = null;
         function App() {
             const [count, update] = useState(0);
-            requestAnimationFrame(() => {
-                console.log(count);
-                update((count) => (count + 1) % 10)
-            });
+            setTimeout(() => {
+                 requestAnimationFrame(() => {
+                    // console.log(count);
+                    update((count) => (count + 1) % 10)
+                });
+            }, 1000);
+
             const t = 1;
             const scale = 1 + (t > 5 ? 10 - t : t) / 10;
             const transform = 'scaleX(' + (scale / 2.1) + ') scaleY(0.7) translateZ(0.1px)';
@@ -128,6 +131,6 @@
         }
         hydrate(createElement(App), document.getElementById('app'));
     </script>
-    <script src="/lib/devtools.js"></script>
+    <!-- <script src="/lib/devtools.js"></script> -->
 </body>
 </html>

@@ -34,11 +34,14 @@ import { resetCursor } from "./dispatcher";
  * 使用再路过此节点时，再弹出栈
  * 它需要对updateFail的情况进行优化
  */
-export function reconcileDFS(fiber: IFiber, info: IWorkContext, deadline: IScheduledCallbackParams, ENOUGH_TIME: number): void {
-    const topWork = fiber;
+export function reconcileDFS(fiber: IFiber, info: IWorkContext, deadline: IScheduledCallbackParams, ENOUGH_TIME: number, topWork?: IFiber): IFiber|null {
+    if (!topWork) {
+        topWork = fiber;
+    }
     outerLoop: while (fiber) {
         if (fiber.disposed || deadline.timeRemaining() <= ENOUGH_TIME) {
-            break;
+            return fiber;
+            // break;
         }
         let occurError: boolean = false;
         if (fiber.tag < 3) {
@@ -101,6 +104,7 @@ export function reconcileDFS(fiber: IFiber, info: IWorkContext, deadline: ISched
             f = f.return as IFiber;
         }
     }
+    return null;
 }
 
 /**

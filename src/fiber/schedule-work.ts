@@ -107,21 +107,22 @@ const deadline: IScheduledCallbackParams = {
 
 const win = getWindow();
 
-export function requestIdleCallback(fn: (d: IScheduledCallbackParams) => void) {
-    // if (typeof (win as any).requestIdleCallback === "function") {
-    //     (win as any).requestAnimationFrame(function _(start: number) {
-    //         start += 50;
-    //         const opt = {
-    //             didTimeout: false,
-    //             timeRemaining(): number {
-    //                 return start - performance.now();
-    //             },
-    //         };
-    //         return fn(opt);
-    //     });
-    // } else {
-    fn(deadline);
-    // }
+export function requestIdleCallback(fn: (d: IScheduledCallbackParams) => void): number {
+    if (typeof (win as any).requestIdleCallback === "function") {
+        return (win as any).requestAnimationFrame(function _(start: number) {
+            start += 50;
+            const opt = {
+                didTimeout: false,
+                timeRemaining(): number {
+                    return start - performance.now();
+                },
+            };
+            return fn(opt);
+        });
+    } else {
+        fn(deadline);
+        return 0;
+    }
 }
 
 Renderer.scheduleWork = function scheduleWork() {
@@ -165,18 +166,29 @@ function workLoop(dl: IScheduledCallbackParams) {
             const dom = getContainer(fiber);
             info = {
                 containerStack: [dom],
-                contextStack: [(fiber.stateNode as OwnerType).$unmaskedContext],
+                contextStack: [fiber.stateNode && (fiber.stateNode as OwnerType).$unmaskedContext],
             } as IFiber;
         }
+        return workLoopImp(fiber, info as IWorkContext, dl);
+    }
+}
 
-        reconcileDFS(fiber, info as IWorkContext, dl, ENOUGH_TIME);
-        updateCommitQueue(fiber);
-        resetStack(info);
-        if (macrotasks.length && dl.timeRemaining() > ENOUGH_TIME) {
-            workLoop(dl); // 收集任务
-        } else {
-            commitDFS(effects); // 执行任务
-        }
+function workLoopImp(fiber: IFiber, info: IWorkContext, dl: IScheduledCallbackParams, topWork?: IFiber) {
+    const lastFiber = reconcileDFS(fiber, info as IWorkContext, dl, ENOUGH_TIME, topWork);
+    if (topWork) {
+        fiber = topWork;
+    }
+    if (lastFiber) {
+        return requestIdleCallback((pdl: IScheduledCallbackParams) => {
+            workLoopImp(lastFiber, info, pdl, fiber);
+        });
+    }
+    updateCommitQueue(fiber);
+    resetStack(info as IFiber);
+    if (macrotasks.length && dl.timeRemaining() > ENOUGH_TIME) {
+        workLoop(dl); // 收集任务
+    } else {
+        commitDFS(effects); // 执行任务
     }
 }
 
