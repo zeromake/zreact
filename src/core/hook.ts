@@ -1,6 +1,6 @@
-import { dispatcher } from "../fiber/dispatcher";
-import { effectType } from "../fiber/type-shared";
-import { EffectTag } from "../fiber/effect-tag";
+import { dispatcher } from "zreact-fiber/dispatcher";
+import { effectType } from "zreact-fiber/type-shared";
+import { EffectTag } from "zreact-fiber/effect-tag";
 import { IRefType, IBaseObject, IProvider } from "./type-shared";
 
 export function useState<T>(initValue: T) {

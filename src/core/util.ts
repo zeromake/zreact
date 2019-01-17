@@ -1,5 +1,5 @@
 import { IUpdater, IBaseObject, IComponentMinx, IOwnerAttribute, IBaseProps, VirtualNode } from "./type-shared";
-import { IFiber } from "../fiber/type-shared";
+import { IFiber } from "zreact-fiber/type-shared";
 
 export const arrayPush = Array.prototype.push;
 export const hasOwnProperty = Object.prototype.hasOwnProperty;

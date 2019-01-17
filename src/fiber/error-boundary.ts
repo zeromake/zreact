@@ -1,8 +1,8 @@
 import { EffectTag } from "./effect-tag";
 import { IFiber } from "./type-shared";
-import { fakeUpdater, noop } from "../core/util";
-import { Renderer } from "../core/create-renderer";
-import { OwnerType } from "../core/type-shared";
+import { fakeUpdater, noop } from "zreact-core/util";
+import { Renderer } from "zreact-core/create-renderer";
+import { OwnerType } from "zreact-core/type-shared";
 
 export function pushError(fiber: IFiber, hook: string, error?: any) {
     const names: string[] = [];

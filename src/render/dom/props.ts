@@ -1,10 +1,10 @@
 import { NAMESPACE } from "./browser";
 import { patchStyle } from "./style";
 import { eventAction, rform } from "./event";
-import { typeNumber, emptyObject, noop } from "../../core/util";
-import { EffectTag } from "../../fiber/effect-tag";
-import { IFiber } from "../../fiber/type-shared";
-import { IBaseProps, IBaseObject } from "../../core/type-shared";
+import { typeNumber, emptyObject, noop } from "zreact-core/util";
+import { EffectTag } from "zreact-fiber/effect-tag";
+import { IFiber } from "zreact-fiber/type-shared";
+import { IBaseProps, IBaseObject } from "zreact-core/type-shared";
 import { IDuplexElement } from "./duplex";
 
 // 布尔属性的值末必为true,false

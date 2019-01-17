@@ -1,4 +1,3 @@
-import { isFn } from "./util";
 import { Component } from "./component";
 import { Renderer } from "./create-renderer";
 import {
@@ -11,7 +10,7 @@ import {
     IProviderProps,
     IProviderState,
 } from "./type-shared";
-import { IFiber } from "../fiber/type-shared";
+import { IFiber } from "zreact-fiber/type-shared";
 
 const MAX_NUMBER = 1073741823;
 export function createContext<T>(defaultValue: T, calculateChangedBits?: ((old: T, now: T) => number) | null): typeof IProvider {

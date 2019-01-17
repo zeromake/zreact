@@ -1,5 +1,5 @@
 import { isValidElement, traverseAllChildren } from "./create-element";
-import { VirtualNode, ChildrenType, IVNode, VirtualNodeList } from "./type-shared";
+import { VirtualNode, ChildrenType, IVNode } from "./type-shared";
 import { noop } from "./util";
 
 export const Children = {

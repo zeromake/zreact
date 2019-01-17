@@ -1,8 +1,8 @@
-import { extend, typeNumber, isFn, gDSFP, gSBU } from "../core/util";
-import { fiberizeChildren } from "../core/create-element";
-import { Portal } from "../core/create-portal";
+import { extend, typeNumber, isFn, gDSFP, gSBU } from "zreact-core/util";
+import { fiberizeChildren } from "zreact-core/create-element";
+import { Portal } from "zreact-core/create-portal";
 
-import { Renderer } from "../core/create-renderer";
+import { Renderer } from "zreact-core/create-renderer";
 import { createInstance, UpdateQueue } from "./create-instance";
 import { Fiber } from "./Fiber";
 import {
@@ -25,7 +25,7 @@ import {
     IUpdater,
     IWorkContext,
     IProvider,
-} from "../core/type-shared";
+} from "zreact-core/type-shared";
 import { resetCursor } from "./dispatcher";
 
 /**

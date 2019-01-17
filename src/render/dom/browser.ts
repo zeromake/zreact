@@ -1,5 +1,5 @@
-import { typeNumber, getWindow, noop } from "../../core/util";
-import { IBaseObject } from "../../core/type-shared";
+import { typeNumber, getWindow, noop } from "zreact-core/util";
+import { IBaseObject } from "zreact-core/type-shared";
 
 interface IDOMElement {
     nodeName: string;

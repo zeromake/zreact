@@ -2,7 +2,7 @@ import { IBaseProps, IBaseObject, VirtualNodeList, VirtualNode, VNodeType, IRefT
 import { hasOwnProperty, typeNumber, REACT_ELEMENT_TYPE, hasSymbol } from "./util";
 import { Renderer } from "./create-renderer";
 import { Component } from "./component";
-import { IFiber } from "../fiber/type-shared";
+import { IFiber } from "zreact-fiber/type-shared";
 
 const RESERVED_PROPS = {
     key: true,
@@ -100,7 +100,7 @@ export function isValidElement(element: any): boolean {
 
 export function createFactory(type: VNodeType) {
     const factory = createElement.bind(null, type);
-    factory.type = type;
+    (factory as any).type = type;
     return factory;
 }
 
@@ -245,7 +245,7 @@ export function traverseAllChildren(children: ChildrenType, nameSoFar: string, c
     }
     const iteratorFn = getIteractor((children as VirtualNodeList));
     if (iteratorFn) {
-        const iterator: Iterator<VirtualNode|VirtualNode[]> = iteratorFn.call(children);
+        const iterator: Iterator<VirtualNode|VirtualNode[]> = iteratorFn.call(children) as any;
         let ii = 0;
         let step: IteratorResult<VirtualNode|VirtualNode[]>;
         while (!(step = iterator.next()).done) {

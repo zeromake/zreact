@@ -8,6 +8,13 @@
       "jsx": "react",
       "jsxFactory": "createElement",
       "allowSyntheticDefaultImports": true, // 使用 ES2015 默认的 imports 风格
+      "baseUrl": ".",
+      "paths": {
+        "zreact-core/*": ["./src/core/*"],
+        "zreact-fiber/*": ["./src/fiber/*"],
+        "zreact-render/*": ["./src/render/*"],
+        "zreact/*": ["./src/*"],
+      },
       "lib": [
         "es2015",
         "dom",

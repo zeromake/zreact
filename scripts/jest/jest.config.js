@@ -1,8 +1,28 @@
 
+const moduleNameMapper = {
+    "^@/(.*)$": "<rootDir>/src/$1",
+}
+const modules = [
+    [
+        "zreact-core",
+        "core"
+    ],
+    [
+        "zreact-fiber",
+        "fiber"
+    ],
+    [
+        "zreact-render",
+        "render"
+    ]
+]
+modules.forEach((i => {
+    moduleNameMapper[`^${i[0]}$`] = `<rootDir>/src/${i[1]}`;
+    moduleNameMapper[`^${i[0]}/(.*)$`] = `<rootDir>/src/${i[1]}/$1`;
+}));
+
 module.exports = {
-    moduleNameMapper: {
-        "^@/(.*)$": "<rootDir>/src/$1"
-    },
+    moduleNameMapper,
     transform: {
         '^.+\\.tsx?$': 'ts-jest',
     },

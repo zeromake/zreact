@@ -1,4 +1,4 @@
-import { IFiber } from "../fiber/type-shared";
+import { IFiber } from "zreact-fiber/type-shared";
 
 /**
  * createRef

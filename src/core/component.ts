@@ -1,5 +1,4 @@
 import {
-    returnFalse,
     returnTrue,
     fakeUpdater,
 } from "./util";
@@ -12,7 +11,7 @@ import {
     VirtualNode,
     ChildrenType,
 } from "./type-shared";
-import { IFiber } from "../fiber/type-shared";
+import { IFiber } from "zreact-fiber/type-shared";
 
 export class Component<P extends IBaseProps, S extends IBaseObject> implements IComponentMinx<P, S> {
     public static defaultProps?: IBaseObject;

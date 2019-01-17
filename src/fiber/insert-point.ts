@@ -1,6 +1,6 @@
 import { IFiber } from "./type-shared";
 import { EffectTag } from "./effect-tag";
-import { IOwnerAttribute, OwnerType } from "../core/type-shared";
+import { OwnerType } from "zreact-core/type-shared";
 
 /**
  * 查找它后面的节点

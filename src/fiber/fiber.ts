@@ -1,5 +1,5 @@
-import { IVNode, IBaseProps, VNodeType } from "../core/type-shared";
-import { extend } from "../core/util";
+import { IVNode, IBaseProps, VNodeType } from "zreact-core/type-shared";
+import { extend } from "zreact-core/util";
 import { IFiber } from "./type-shared";
 import { EffectTag } from "./effect-tag";
 

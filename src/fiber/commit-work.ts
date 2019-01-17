@@ -3,7 +3,7 @@ import {
     returnFalse,
     emptyObject,
     defer,
-} from "../core/util";
+} from "zreact-core/util";
 import {
     EffectTag,
     effectLength,
@@ -13,8 +13,8 @@ import {
     guardCallback,
     removeFormBoundaries,
 } from "./error-boundary";
-import { Renderer } from "../core/create-renderer";
-import { Refs } from "./Refs";
+import { Renderer } from "zreact-core/create-renderer";
+import { Refs } from "./refs";
 import {
     IFiber,
     unEffectType,
@@ -26,7 +26,7 @@ import {
     IComponentMinx,
     IUpdater,
     IOwnerAttribute,
-} from "../core/type-shared";
+} from "zreact-core/type-shared";
 
 import { options } from "./options";
 

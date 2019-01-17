@@ -1,6 +1,5 @@
 import { noop, extend } from "./util";
-import { IMiddleware, IRenderer, OwnerType } from "./type-shared";
-import { IFiber } from "../fiber/type-shared";
+import { IMiddleware, IRenderer } from "./type-shared";
 
 export function createRenderer<T>(methods: T): IRenderer&T {
     return extend(Renderer, methods);

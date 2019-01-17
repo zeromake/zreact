@@ -1,10 +1,10 @@
-import { Renderer } from "../core/create-renderer";
-import { OwnerType, IRefType, IBaseObject, IProvider } from "../core/type-shared";
+import { Renderer } from "zreact-core/create-renderer";
+import { OwnerType, IRefType, IBaseObject, IProvider } from "zreact-core/type-shared";
 import { IFiber, effectType } from "./type-shared";
 import {
     EffectTag,
 } from "./effect-tag";
-import { isFn } from "../core/util";
+import { isFn } from "zreact-core/util";
 
 function setter<T>(this: IFiber, compute: (cur: string, val?: T) => T, cursor: string, value?: T): void {
     this.updateQueue!.hook[cursor] = compute(cursor, value);

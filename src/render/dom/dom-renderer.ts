@@ -5,12 +5,12 @@ import {
     emptyObject,
     topNodes,
     topFibers,
-} from "../../core/util";
-import { Renderer, createRenderer } from "../../core/create-renderer";
-import { render, createContainer } from "../../fiber/schedule-work";
+} from "zreact-core/util";
+import { Renderer, createRenderer } from "zreact-core/create-renderer";
+import { render, createContainer } from "zreact-fiber/schedule-work";
 import { duplexAction, fireDuplex, IDuplexElement } from "./duplex";
-import { IFiber } from "../../fiber/type-shared";
-import { OwnerType, IBaseObject, IWorkContext, IVNode } from "../../core/type-shared";
+import { IFiber } from "zreact-fiber/type-shared";
+import { OwnerType, IBaseObject, IWorkContext, IVNode } from "zreact-core/type-shared";
 
 const reuseTextNodes: Text[] = []; // 文本节点不能加属性，样式与事件，重用没有副作用
 export function createElement(vnode: IFiber): Element|Text|Comment {

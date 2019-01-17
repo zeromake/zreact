@@ -1,4 +1,4 @@
-import { OwnerType } from "../core/type-shared";
+import { OwnerType } from "zreact-core/type-shared";
 
 export const options: {
     afterUpdate: null|((instance: OwnerType) => void);

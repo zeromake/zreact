@@ -1,6 +1,6 @@
 import { IFiber, IUpdateQueue } from "./type-shared";
-import { Renderer } from "../core/create-renderer";
-import { returnFalse, isMounted, gDSFP, gSBU } from "../core/util";
+import { Renderer } from "zreact-core/create-renderer";
+import { returnFalse, isMounted, gDSFP, gSBU } from "zreact-core/util";
 import { EffectTag } from "./effect-tag";
 import { IUpdater, IOwnerAttribute, OwnerType, IComponentFunction, IComponentClass, IComponentMinx, IBaseProps, IBaseObject } from "../core/type-shared";
 

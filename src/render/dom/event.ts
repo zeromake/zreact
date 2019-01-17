@@ -1,8 +1,8 @@
 import { document, modern, contains } from "./browser";
-import { isFn, noop, toLowerCase } from "../../core/util";
-import { Renderer } from "../../core/create-renderer";
+import { isFn, noop, toLowerCase } from "zreact-core/util";
+import { Renderer } from "zreact-core/create-renderer";
 import { enqueueDuplex, IDuplexElement } from "./duplex";
-import { IFiber } from "../../fiber/type-shared";
+import { IFiber } from "zreact-fiber/type-shared";
 
 export const rform = /textarea|input|select|option/i;
 const globalEvents: {

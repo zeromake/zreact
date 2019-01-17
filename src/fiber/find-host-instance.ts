@@ -1,5 +1,5 @@
 import { IFiber } from "./type-shared";
-import { OwnerType } from "../core/type-shared";
+import { OwnerType } from "zreact-core/type-shared";
 
 /**
  * 对 fiber 对象或者组件对象查找 dom 对象

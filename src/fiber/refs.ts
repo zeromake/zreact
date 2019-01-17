@@ -1,6 +1,6 @@
 import { pushError } from "./error-boundary";
-import { typeNumber } from "../core/util";
-import { IRefFun, RefElement, IObjectRef, OwnerType } from "../core/type-shared";
+import { typeNumber } from "zreact-core/util";
+import { IRefFun, RefElement, IObjectRef, OwnerType } from "zreact-core/type-shared";
 import { IFiber } from "./type-shared";
 
 export let Refs = {

@@ -1,6 +1,6 @@
 import { reconcileDFS } from "./begin-work";
 import { commitDFS } from "./commit-work";
-import { Renderer } from "../core/create-renderer";
+import { Renderer } from "zreact-core/create-renderer";
 import {
     effects,
     resetStack,
@@ -10,13 +10,13 @@ import {
     typeNumber,
     topFibers,
     getWindow,
-} from "../core/util";
+} from "zreact-core/util";
 import { Unbatch } from "./unbatch";
 import { Fiber } from "./Fiber";
 
 import { createInstance } from "./create-instance";
 import { IFiber, IScheduledCallbackParams, IUpdateQueue } from "./type-shared";
-import { OwnerType, IVNode, IBaseObject, IWorkContext, IUpdater } from "../core/type-shared";
+import { OwnerType, IVNode, IBaseObject, IWorkContext, IUpdater } from "zreact-core/type-shared";
 
 const macrotasks = Renderer.macrotasks;
 const boundaries = Renderer.boundaries;

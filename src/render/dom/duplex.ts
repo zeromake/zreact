@@ -1,5 +1,5 @@
-import { typeNumber, emptyObject } from "../../core/util";
-import { IFiber } from "../../fiber/type-shared";
+import { typeNumber, emptyObject } from "zreact-core/util";
+import { IFiber } from "zreact-fiber/type-shared";
 
 function getSafeValue<T>(value: T): T|string {
     switch (typeNumber(value)) {

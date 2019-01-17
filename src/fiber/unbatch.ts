@@ -1,5 +1,5 @@
-import { Component } from "../core/Component";
-import { IBaseProps, VirtualNode, IBaseObject } from "../core/type-shared";
+import { Component } from "zreact-core/Component";
+import { IBaseProps, VirtualNode, IBaseObject } from "zreact-core/type-shared";
 
 interface IUnbatchProps extends IBaseProps {
     child: VirtualNode[] | VirtualNode;

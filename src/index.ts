@@ -1,21 +1,21 @@
-import { Children } from "./core/children";
-import { PropTypes } from "./core/prop-type";
-import { Component } from "./core/component";
-import { PureComponent } from "./core/pure-component";
-import { createRef, forwardRef } from "./core/create-ref";
-import { createPortal } from "./core/create-portal";
-import { createContext } from "./core/create-context";
+import { Children } from "zreact-core/children";
+import { PropTypes } from "zreact-core/prop-type";
+import { Component } from "zreact-core/component";
+import { PureComponent } from "zreact-core/pure-component";
+import { createRef, forwardRef } from "zreact-core/create-ref";
+import { createPortal } from "zreact-core/create-portal";
+import { createContext } from "zreact-core/create-context";
 import {
     createElement,
     cloneElement,
     isValidElement,
     createFactory,
-} from "./core/create-element";
-import { Fragment } from "./core/util";
+} from "zreact-core/create-element";
+import { Fragment } from "zreact-core/util";
 
-import { findDOMNode } from "./render/dom/find-dom-node";
-import { DOMRenderer } from "./render/dom/dom-renderer";
-import { options } from "./fiber/options";
+import { findDOMNode } from "zreact-render/dom/find-dom-node";
+import { DOMRenderer } from "zreact-render/dom/dom-renderer";
+import { options } from "zreact-fiber/options";
 import {
     useState,
     useEffect,
@@ -25,7 +25,7 @@ import {
     useRef,
     useMeno,
     useImperativeMethods,
-} from "./core/hook";
+} from "zreact-core/hook";
 const {
     render,
     eventSystem,

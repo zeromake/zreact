@@ -1,5 +1,5 @@
-import { oneObject, camelize } from "../../core/util";
-import { IBaseObject } from "../../core/type-shared";
+import { camelize } from "zreact-core/util";
+import { IBaseObject } from "zreact-core/type-shared";
 export const rnumber = /^-?\d+(\.\d+)?$/;
 
 /**
