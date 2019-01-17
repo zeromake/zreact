@@ -23,8 +23,8 @@
     "exclude": [
       "node_modeles" // 不转换 node_modeles
     ],
-    "files": [
-      "./src/type.d.ts",
-      "./src/index.ts"
+    "include": [
+      "./src/**/*.ts",
+      "./src/**/*.tsx"
     ]
 }

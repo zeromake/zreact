@@ -1,7 +1,6 @@
-import { createElement, cloneElement } from "../create-element";
-import { Children } from "../children";
-import { Component } from "../component";
-import { VirtualNode, IVNode } from "../type-shared";
+import { createElement, cloneElement } from "zreact-core/create-element";
+import { Children } from "zreact-core/children";
+import { VirtualNode, IVNode } from "zreact-core/type-shared";
 
 describe("Children", () => {
     beforeEach(() => {

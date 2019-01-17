@@ -1,7 +1,7 @@
-import { createElement } from "../create-element";
-import { Children } from "../children";
+import { createElement } from "zreact-core/create-element";
+import { Children } from "zreact-core/children";
 
-import { Component } from "../component";
+import { Component } from "zreact-core/component";
 
 const h = createElement;
 
