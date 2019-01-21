@@ -14,6 +14,10 @@ const modules = [
     [
         "zreact-render",
         "render"
+    ],
+    [
+        "zreact-test-utils",
+        "test-utils"
     ]
 ]
 modules.forEach((i => {

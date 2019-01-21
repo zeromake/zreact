@@ -1,12 +1,18 @@
-import { IVNode, IComponentClass, IBaseProps, IBaseObject, ChildrenType } from "./core/type-shared";
-import { createElement } from "./core/create-element";
-import { findDOMNode } from "./render/dom/find-dom-node";
+import { IVNode, IComponentClass, IBaseProps, IBaseObject, ChildrenType } from "../core/type-shared";
+import { createElement } from "../core/create-element";
+import { findDOMNode } from "../render/dom/find-dom-node";
 
 declare module "zreact" {
     export = zreact;
 }
 declare namespace zreact {
     type findDOMNode = typeof findDOMNode;
+    type Component = JSX.ElementClass;
+}
+
+
+declare module "test-utils" {
+    export type renderIntoDocument = any;
 }
 
 declare global {

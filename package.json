@@ -49,11 +49,13 @@
   "devDependencies": {
     "@types/jest": "^23.3.12",
     "@types/node": "^10.12.18",
+    "@types/prop-types": "^15.5.8",
     "conventional-changelog-cli": "^2.0.11",
     "coveralls": "^3.0.2",
     "cross-env": "^5.2.0",
     "gzip-size-cli": "^3.0.0",
     "jest": "^23.6.0",
+    "prop-types": "^15.6.2",
     "rimraf": "^2.6.3",
     "rollup": "^1.1.0",
     "rollup-plugin-alias": "^1.5.1",

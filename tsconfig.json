@@ -13,8 +13,13 @@
         "zreact-core/*": ["./src/core/*"],
         "zreact-fiber/*": ["./src/fiber/*"],
         "zreact-render/*": ["./src/render/*"],
+        "zreact-test-utils/*": ["./src/test-utils/*"],
         "zreact/*": ["./src/*"],
       },
+      "typeRoots": [
+        "./node_modules/@types",
+        "./src/@types"
+      ],
       "lib": [
         "es2015",
         "dom",
