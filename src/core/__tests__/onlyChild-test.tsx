@@ -8,9 +8,9 @@ const h = createElement;
 const WrapComponent = class extends Component<any, any> {
     public render(): any {
         return (
-            h("div", null,
-                Children.only(this.props.children),
-            )
+            <div>
+                {Children.only(this.props.children)}
+            </div>
         );
     }
 };
@@ -19,46 +19,58 @@ describe("onlyChild", () => {
     it("should fail when passed two children", () => {
         expect(() => {
             const instance = (
-                h(WrapComponent, null,
-                    h("div"),
-                    h("span"),
-                )
+                <WrapComponent>
+                    {
+                        [
+                            <div/>,
+                            <span/>,
+                        ]
+                    }
+                </WrapComponent>
             );
             Children.only(instance.props.children);
         }).toThrow();
     });
     it("should fail when passed nully values", () => {
         expect(() => {
-            const instance = h(WrapComponent, null, null);
+            const instance = <WrapComponent>
+                {null}
+            </WrapComponent>;
             Children.only(instance.props.children);
         }).toThrow();
 
         expect(() => {
-            const instance = h(WrapComponent, null, undefined);
+            const instance = <WrapComponent>
+                {undefined}
+            </WrapComponent>;
             Children.only(instance.props.children);
         }).toThrow();
     });
 
     it("should fail when key/value objects", () => {
         expect(() => {
-            const instance = h(WrapComponent, null, [h("span", {key: "abc"})]);
+            const instance = <WrapComponent>
+                {[<span key="abc"/>]}
+            </WrapComponent>;
             Children.only(instance.props.children);
         }).toThrow();
     });
 
     it("should not fail when passed interpolated single child", () => {
         expect(() => {
-            const instance = h(WrapComponent, null, h("span"));
+            const instance = <WrapComponent>
+                <span/>
+            </WrapComponent>;
             Children.only(instance.props.children);
         }).not.toThrow();
     });
 
     it("should return the only child", () => {
         const instance = (
-            h(WrapComponent, null,
-                h("span"),
-            )
+            <WrapComponent>
+                <span/>
+            </WrapComponent>
         );
-        expect(Children.only(instance.props.children)).toEqual(h("span"));
+        expect(Children.only(instance.props.children)).toEqual(<span/>);
     });
 });

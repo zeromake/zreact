@@ -33,7 +33,7 @@ const refStrategy = {
     [5](owner: OwnerType, ref: IRefFun, dom: RefElement) {
         ref(dom);
     },
-    [8](owner: OwnerType, ref: IObjectRef, dom: RefElement) {
+    [8](owner: OwnerType, ref: IObjectRef<RefElement>, dom: RefElement) {
         ref.current = dom;
     },
 };

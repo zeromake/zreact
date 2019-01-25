@@ -25,6 +25,7 @@ import {
     IUpdater,
     IWorkContext,
     IProvider,
+    IComponentClass,
 } from "zreact-core/type-shared";
 import { resetCursor } from "./dispatcher";
 
@@ -116,7 +117,7 @@ export function updateClassComponent(fiber: IFiber, info: IWorkContext): void {
     const { type, props } = fiber;
     let instance = fiber.stateNode;
     const { contextStack, containerStack } = info;
-    const providerClass = (type as OwnerType).contextType;
+    const providerClass = (type as IComponentClass).contextType;
     const unmaskedContext = contextStack[0];
     const isStaticContextType = isFn(providerClass);
     let newContext: IBaseObject|null = null;

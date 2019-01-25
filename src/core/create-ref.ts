@@ -3,9 +3,9 @@ import { IObjectRef } from "./type-shared";
 /**
  * 创建一个对象 ref
  */
-export function createRef(): IObjectRef {
+export function createRef<T>(): IObjectRef<T> {
     return {
-        current: null,
+        current: null as any,
     };
 }
 

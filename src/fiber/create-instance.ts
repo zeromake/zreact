@@ -59,7 +59,7 @@ export function createInstance(fiber: IFiber, context: object): OwnerType {
         }
         instance.$init = false;
     } else {
-        instance = new (type as IComponentClass<IBaseProps, IBaseObject>)(props, context);
+        instance = new (type as any)(props, context);
     }
     // } finally {
     Renderer.currentOwner = lastOwn;

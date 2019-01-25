@@ -1,4 +1,4 @@
-import { IVNode, IBaseProps, IBaseObject, OwnerType } from "zreact-core/type-shared";
+import { IVNode, IBaseProps, IBaseObject, VNodeType, OwnerType } from "zreact-core/type-shared";
 import { EffectTag } from "./effect-tag";
 
 export interface IUpdateQueue {

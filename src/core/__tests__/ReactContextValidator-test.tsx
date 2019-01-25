@@ -16,7 +16,7 @@ describe("ReactContextValidator", () => {
                 return <div />;
             }
         }
-        const ref = createRef();
+        const ref = createRef<BaseComponent>();
 
         class ComponentInFooBarContext extends Component<any, any> {
             public static childContextTypes = {
@@ -31,14 +31,11 @@ describe("ReactContextValidator", () => {
             }
 
             public render() {
-                const Temp2 = BaseComponent as any;
-                return <Temp2 ref={ref}/>;
+                return <BaseComponent ref={ref}/>;
             }
         }
-        const Temp = ComponentInFooBarContext as any;
-        ReactTestUtils.renderIntoDocument(<Temp />);
-        const fiber: IFiber = (ref.current! as any).$reactInternalFiber;
+        ReactTestUtils.renderIntoDocument(<ComponentInFooBarContext />);
         // console.log(fiber.child!.stateNode!.context);
-        // expect(fiber.child!.stateNode!.context).toEqual({ foo: "abc", bar: 123 });
+        expect(ref.current!.context).toEqual({ foo: "abc" });
     });
 });
