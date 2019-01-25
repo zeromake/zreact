@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
       "module": "esnext", // 目标代码模块方式
+      // "outFile": "./dist/zreact.m.js",
       "outDir": "dist", // 输出目录
       "sourceMap": true,
       "target": "es5", // 目标代码平台
@@ -9,6 +10,7 @@
       "jsxFactory": "createElement",
       "allowSyntheticDefaultImports": true, // 使用 ES2015 默认的 imports 风格
       "baseUrl": ".",
+      // "declaration": true,
       "paths": {
         "zreact-core/*": ["./src/core/*"],
         "zreact-fiber/*": ["./src/fiber/*"],
@@ -27,6 +29,9 @@
     "exclude": [
       "node_modeles" // 不转换 node_modeles
     ],
+    // "files": [
+    //   "./src/index.ts"
+    // ]
     "include": [
       "./src/**/*.ts",
       "./src/**/*.tsx"

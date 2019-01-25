@@ -87,7 +87,7 @@ function updateReactComponent(vnode: IFiber, parentDom?: Element): IReactVNode|n
     if (vnode.tag === 5 && vnode.hostRoot) {
         newInstance = createReactBaseComponent(vnode, vnode.hostRoot);
     } else if (vnode.tag < 3) {
-        newInstance = createReactBaseComponent(vnode, vnode.stateNode);
+        newInstance = createReactBaseComponent(vnode, vnode.stateNode!);
     } else {
         newInstance = createReactDOMComponent(vnode, parentDom);
     }
@@ -235,14 +235,14 @@ function visitNonCompositeChildren(instance: IReactVNode, callback: any) {
 function createDevToolsBridge() {
     console.log("createDevToolsBridge.....");
     const ComponentTree = {
-        getNodeFromInstance(instance) {
+        getNodeFromInstance(instance: any) {
             // createReactDOMComponent生成的实例有vnode对象
             return instance.node;
         },
-        getClosestInstanceFromNode(dom) {
+        getClosestInstanceFromNode(dom: any) {
             const vnode = findVNodeFromDOM(null, dom);
             // 转换为ReactCompositeComponent或ReactDOMComponent
-            return vnode ? updateReactComponent(vnode as any, null) : null;
+            return vnode ? updateReactComponent(vnode as any) : null;
         },
     };
 
@@ -261,7 +261,7 @@ function createDevToolsBridge() {
     const Mount = {
         _instancesByReactRootID: roots,
         // tslint:disable-next-line:no-empty
-        _renderNewRootComponent(instance) {
+        _renderNewRootComponent(instance: any) {
         },
     };
 
@@ -285,7 +285,7 @@ function createDevToolsBridge() {
     const queuedReceiveComponents = new Map();
     const queuedUnmountComponents = new Map();
 
-    const queueUpdate = function _queueUpdate(updater, map, component) {
+    const queueUpdate = function _queueUpdate(updater: any, map: any, component: any) {
         if (!map.has(component)) {
             map.set(component, true);
             requestAnimationFrame(function __() {
@@ -295,21 +295,21 @@ function createDevToolsBridge() {
         }
     };
 
-    const queueMountComponent = function _queueMountComponent(component) {
+    const queueMountComponent = function _queueMountComponent(component: any) {
         return queueUpdate(
             Reconciler.mountComponent,
             queuedMountComponents,
             component,
         );
     };
-    const queueReceiveComponent = function _queueReceiveComponent(component) {
+    const queueReceiveComponent = function _queueReceiveComponent(component: any) {
         return queueUpdate(
             Reconciler.receiveComponent,
             queuedReceiveComponents,
             component,
         );
     };
-    const queueUnmountComponent = function _queueUnmountComponent(component) {
+    const queueUnmountComponent = function _queueUnmountComponent(component: any) {
         return queueUpdate(
             Reconciler.unmountComponent,
             queuedUnmountComponents,
@@ -318,16 +318,16 @@ function createDevToolsBridge() {
     };
 
     // 创建 componentAdded， componentUpdated，componentRemoved三个重要钩子
-    const componentAdded = function _componentAdded(vnode) {
+    const componentAdded = function _componentAdded(vnode: any) {
         const instance = updateReactComponent(vnode);
         // 将_currentElement代替为ReactCompositeComponent实例
         if (isRootVNode(vnode)) {
-            instance._rootID = nextRootKey(roots);
-            roots[instance._rootID] = instance;
+            (instance as IReactVNode)._rootID = nextRootKey(roots);
+            roots[(instance as IReactVNode)._rootID!] = instance!;
             Mount._renderNewRootComponent(instance);
         }
         // 遍历非实组件的孩子
-        visitNonCompositeChildren(instance, function _(childInst) {
+        visitNonCompositeChildren(instance!, function _(childInst: any) {
             if (childInst) {
                 childInst._inDevTools = true;
                 queueMountComponent(childInst);
@@ -336,19 +336,19 @@ function createDevToolsBridge() {
         queueMountComponent(instance);
     };
 
-    const componentUpdated = function _componentUpdated(vnode) {
-        const prevRenderedChildren = [];
+    const componentUpdated = function _componentUpdated(vnode: any) {
+        const prevRenderedChildren: any[] = [];
 
         // 通过anujs instance得到 ReactCompositeComponent实例
-        visitNonCompositeChildren(instanceMap.get(vnode), function _(
-            childInst,
+        visitNonCompositeChildren(instanceMap.get(vnode)!, function _(
+            childInst: any,
         ) {
             prevRenderedChildren.push(childInst);
         });
 
         const instance = updateReactComponent(vnode);
         queueReceiveComponent(instance);
-        visitNonCompositeChildren(instance, function _(childInst) {
+        visitNonCompositeChildren(instance!, function _(childInst: any) {
             if (!childInst._inDevTools) {
                 // New DOM child component
                 childInst._inDevTools = true;
@@ -367,10 +367,10 @@ function createDevToolsBridge() {
         });
     };
 
-    const componentRemoved = function _componentRemoved(vnode) {
-        const instance = updateReactComponent(vnode);
+    const componentRemoved = function _componentRemoved(vnode: any) {
+        const instance = updateReactComponent(vnode)!;
 
-        visitNonCompositeChildren(instance, function _(childInst) {
+        visitNonCompositeChildren(instance, function _(childInst?: any) {
             instanceMap.delete(childInst.node);
             queueUnmountComponent(childInst);
         });
@@ -397,10 +397,10 @@ function createDevToolsBridge() {
 
 export function initDevTools() {
     /* tslint:disable */
-    const hook = window["__REACT_DEVTOOLS_GLOBAL_HOOK__"];
+    const hook = (window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__;
     if (hook) {
-        const bridge = createDevToolsBridge();
-        const Methods = {
+        const bridge = createDevToolsBridge() as any;
+        const Methods: any = {
             afterMount: "componentAdded",
             afterUpdate: "componentUpdated",
             beforeUnmount: "componentRemoved"
