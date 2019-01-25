@@ -14,7 +14,6 @@
         "zreact-fiber/*": ["./src/fiber/*"],
         "zreact-render/*": ["./src/render/*"],
         "zreact-test-utils/*": ["./src/test-utils/*"],
-        "zreact/*": ["./src/*"],
       },
       "typeRoots": [
         "./node_modules/@types",
