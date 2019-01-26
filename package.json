@@ -1,6 +1,6 @@
 {
   "name": "@zeromake/zreact",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "description": "React like,copy by preact",
   "main": "dist/zreact.js",
   "module": "dist/zreact.esm.js",
