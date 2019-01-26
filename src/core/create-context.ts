@@ -36,6 +36,13 @@ export function createContext<T>(defaultValue: T, calculateChangedBits?: ((old: 
         public subscribers: Array<OwnerType | IFiber> | null;
         constructor(props: IBaseProps) {
             super(props);
+            this.observedBits = 0;
+            this.subscribers = null;
+            this.state = {
+                value: defaultValue,
+            };
+        }
+        public componentDidMount() {
             const fiber = this.$reactInternalFiber!;
             const providerFiber = Provider.getContext(fiber);
             const instance = (providerFiber && providerFiber.stateNode as Provider | null);
@@ -46,10 +53,9 @@ export function createContext<T>(defaultValue: T, calculateChangedBits?: ((old: 
                 this.subscribers = null;
                 console.warn(`${fiber.name}.Consumer not find Provider!`);
             }
-            this.observedBits = 0;
-            this.state = {
+            this.setState({
                 value: instance ? instance.value : defaultValue,
-            };
+            });
         }
         public componentWillUnmount() {
             const subscribers = this.subscribers;
@@ -65,7 +71,7 @@ export function createContext<T>(defaultValue: T, calculateChangedBits?: ((old: 
     }
 
     class Provider extends Component<IProviderProps<T>, IProviderState<T>> implements IProvider<T> {
-        public static Provider: typeof IProvider = Provider as any;
+        public static Provider: typeof IProvider = Provider as (typeof IProvider);
         public static Consumer: typeof IConsumer = Consumer as (typeof IConsumer);
         public static defaultValue: T = defaultValue;
         public static defaultProps: {
@@ -73,14 +79,13 @@ export function createContext<T>(defaultValue: T, calculateChangedBits?: ((old: 
         } = {
             value: defaultValue,
         };
-        // public static providers: Provider[] = [];
 
         /**
          * 查找 Provider
          * @param fiber
          */
-        public static getContext(fiber: IFiber, now?: IFiber): IFiber | null {
-            while (fiber.return) {
+        public static getContext(fiber?: IFiber, now?: IFiber): IFiber | null {
+            while (fiber) {
                 if ((fiber.type as any) === Provider && fiber !== now) {
                     return fiber;
                 }

@@ -42,9 +42,9 @@ function findAllInRenderedTreeImpl(target: any, callback: any, ret: any) {
 }
 
 const ReactTestUtils = {
-    renderIntoDocument(element: any): any {
+    renderIntoDocument(element: any, cb?: any): any {
         const div = document.createElement("div");
-        return render(element, div);
+        return render(element, div, cb);
     },
 
     isElement(element: any) {

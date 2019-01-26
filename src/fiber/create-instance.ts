@@ -27,7 +27,7 @@ export function createInstance(fiber: IFiber, context: object): OwnerType {
         enqueueSetState: returnFalse,
         isMounted,
     };
-    const { props, type, tag, ref } = fiber;
+    const { props, type, tag, ref, key } = fiber;
     const isStateless = tag === EffectTag.NOWORK;
     const lastOwn = Renderer.currentOwner;
     let instance: OwnerType|undefined;
@@ -43,6 +43,7 @@ export function createInstance(fiber: IFiber, context: object): OwnerType {
             props,
             context,
             ref,
+            key,
             renderImpl: type as any,
             render(this: IOwnerAttribute) {
                 if (this.renderImpl) {

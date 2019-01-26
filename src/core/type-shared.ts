@@ -346,7 +346,7 @@ export interface IProviderState<T> extends IBaseObject {
 
 export abstract class IProvider<T> extends IComponentMinx<IProviderProps<T>, IProviderState<T>> {
     public static Provider: typeof IProvider;
-    public static Consumer: IConsumer<any>;
+    public static Consumer: typeof IConsumer;
     public static defaultValue: any;
     public static getContext(fiber: IFiber): IFiber | null {
         return null;
