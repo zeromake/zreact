@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>router test</title>
+    <script src="/dist/zreact.js"></script>
+    <script>
+        window.React = zreact;
+        window.ReactDOM = zreact;
+    </script>
+    <script src="/node_modules/zreact-router/dist/react-router.js"></script>
+    <script src="/node_modules/preact-animate/dist/react-animate.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div id="app"></div>
+    <script type="text/babel">
+        const { DRouter, Route, Link } = router;
+        const { render, useState } = zreact;
+        const Animate = animate;
+        function RootRouter() {
+            return <DRouter>
+                <Link href="/">Home</Link><br/>
+                <Link href="/test">Test</Link><br/>
+                    <Route
+                        key="1"
+                        component={() => <div className="animated">Home</div>}
+                        path="/"
+                        transitionName={{ enter: "fadeInLeft", leave: "fadeOutLeft" }}
+                    ></Route>
+                    <Route
+                        key="1"
+                        component={() => <div className="animated">Test</div>}
+                        path="/test"
+                        transitionName={{ enter: "fadeInRight", leave: "fadeOutRight" }}
+                    ></Route>
+            </DRouter>;
+        }
+
+        render(<RootRouter/>, document.getElementById("app"));
+    </script>
+    <script src="/lib/devtools.js">
+    </script>
+</body>
+</html>

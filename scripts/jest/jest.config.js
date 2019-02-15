@@ -30,10 +30,13 @@ module.exports = {
     transform: {
         '^.+\\.tsx?$': 'ts-jest',
     },
+    // runner: 'jest-runner-tsc',
+    // displayName: 'tsc',
     rootDir: process.cwd(),
     roots: ['<rootDir>/src'],
-    testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$',
-    setupTestFrameworkScriptFile: require.resolve('./setupTests.js'),
+    testMatch: ['<rootDir>/src/**/__tests__/*-test.ts', '<rootDir>/src/**/__tests__/*-test.tsx'],
+    // testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$',
+    setupFilesAfterEnv: [require.resolve('./setupTests.js')],
     coveragePathIgnorePatterns: ["<rootDir>/scripts"],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 }

@@ -3,9 +3,7 @@ import { Children } from "zreact-core/children";
 
 import { Component } from "zreact-core/component";
 
-const h = createElement;
-
-const WrapComponent = class extends Component<any, any> {
+class WrapComponent extends Component<any, any> {
     public render(): any {
         return (
             <div>
@@ -13,7 +11,7 @@ const WrapComponent = class extends Component<any, any> {
             </div>
         );
     }
-};
+}
 
 describe("onlyChild", () => {
     it("should fail when passed two children", () => {

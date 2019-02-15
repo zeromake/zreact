@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>content test</title>
+    <!-- <script src="/dist/zreact.js"></script>
+    <script>
+        window.React = zreact;
+        window.ReactDOM = zreact;
+    </script> -->
+    <script src="https://cdn.bootcss.com/react/16.8.0-alpha.1/umd/react.development.js"></script>
+    <script src="https://cdn.bootcss.com/react-dom/16.8.0-alpha.1/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div id="app"></div>
+    <script type="text/babel">
+        const { createContext, useState, Component } = React;
+        const { render } = ReactDOM;
+        const ThemeContext = createContext({
+            color: "red",
+        });
+        function Button(props) {
+            return <ThemeContext.Consumer>
+                {(theme) => {
+                    return <button style={theme}>{props.children}</button>;
+                }}
+            </ThemeContext.Consumer>;
+        }
+
+        class ComButton extends Component {
+            shouldComponentUpdate() {
+                return false;
+            }
+            render() {
+                const props = this.props;
+                return <ThemeContext.Consumer>
+                    {(theme) => {
+                        return <button style={theme}>{props.children}</button>;
+                    }}
+                </ThemeContext.Consumer>;
+            }
+        }
+        function Planel(props) {
+            const [value, update] = useState({
+                color: "blue",
+            });
+            if(props.status) {
+                return <ComButton>{props.children}</ComButton>;
+            }
+            return [
+                <ThemeContext.Provider value={value} key="context">
+                    <Button>{props.children}</Button>
+                </ThemeContext.Provider>,
+                <button key="button" onClick={() => {
+                    const color = value.color === "blue" ? "red" : "blue"
+                    return update({
+                        color,
+                    });
+                }}>切换</button>,
+            ];
+        }
+        function App() {
+            const [value, update] = useState({
+                color: "red",
+            });
+            return <div>
+                <ThemeContext.Provider value={value} key="context">
+                    <Planel key="1">测试1</Planel>
+                    <Planel key="2" status={true}>测试2</Planel>
+                </ThemeContext.Provider>
+                <button key="button" onClick={() => {
+                    const color = value.color === "blue" ? "red" : "blue"
+                    return update({
+                        color,
+                    });
+                }}>App切换</button>
+            </div>;
+        }
+        render(<App/>, document.getElementById('app'));
+    </script>
+</body>
+</html>

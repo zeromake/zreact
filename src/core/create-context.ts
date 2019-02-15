@@ -1,7 +1,7 @@
 import { Component } from "./component";
 import { Renderer } from "./create-renderer";
 import {
-    OwnerType,
+    IComponentClass,
     IBaseProps,
     ChildrenType,
     IProvider,
@@ -18,22 +18,24 @@ export function createContext<T>(defaultValue: T, calculateChangedBits?: ((old: 
         calculateChangedBits = null;
     }
 
-    function triggerConsumer(value: T, component: OwnerType | IFiber, changedBits: number): void {
-        let fiber: IFiber = component as IFiber;
-        if ((component as OwnerType).setState) {
-            (component as OwnerType).setState({
+    function triggerConsumer(value: T, fiber: IFiber, changedBits: number): void {
+        const component = fiber.type;
+        const instance = fiber.stateNode!;
+        if (component === Consumer) {
+            instance.setState({
                 value,
             });
-            (component as Consumer).observedBits += changedBits;
-            fiber = (component as OwnerType).$reactInternalFiber!;
+            (instance as Consumer).observedBits += changedBits;
             return;
+        } else if ((component as IComponentClass).contextType === Provider) {
+            instance.context = value;
         }
         Renderer.updateComponent!(fiber, true);
     }
 
     class Consumer extends Component<IBaseProps, IConsumerState<T>> implements IConsumer<T> {
         public observedBits: number;
-        public subscribers: Array<OwnerType | IFiber> | null;
+        public subscribers: IFiber[] | null;
         constructor(props: IBaseProps) {
             super(props);
             this.observedBits = 0;
@@ -47,11 +49,10 @@ export function createContext<T>(defaultValue: T, calculateChangedBits?: ((old: 
             const providerFiber = Provider.getContext(fiber);
             const instance = (providerFiber && providerFiber.stateNode as Provider | null);
             if (instance) {
-                instance.subscribers.push(this);
+                instance.subscribers.push(fiber);
                 this.subscribers = instance.subscribers;
             } else {
                 this.subscribers = null;
-                console.warn(`${fiber.name}.Consumer not find Provider!`);
             }
             this.setState({
                 value: instance ? instance.value : defaultValue,
@@ -60,7 +61,7 @@ export function createContext<T>(defaultValue: T, calculateChangedBits?: ((old: 
         public componentWillUnmount() {
             const subscribers = this.subscribers;
             if (subscribers) {
-                const i = subscribers.lastIndexOf(this);
+                const i = subscribers.lastIndexOf(this.$reactInternalFiber!);
                 subscribers.splice(i, 1);
             }
         }
@@ -84,9 +85,12 @@ export function createContext<T>(defaultValue: T, calculateChangedBits?: ((old: 
          * 查找 Provider
          * @param fiber
          */
-        public static getContext(fiber?: IFiber, now?: IFiber): IFiber | null {
+        public static getContext(fiber?: IFiber): IFiber | null {
+            if (fiber && (fiber.type as typeof Provider) === Provider) {
+                fiber = fiber.return;
+            }
             while (fiber) {
-                if ((fiber.type as any) === Provider && fiber !== now) {
+                if ((fiber.type as typeof Provider) === Provider) {
                     return fiber;
                 }
                 fiber = fiber.return;
@@ -104,7 +108,7 @@ export function createContext<T>(defaultValue: T, calculateChangedBits?: ((old: 
                     changedBits = calculateChangedBits ? calculateChangedBits(oldValue, newValue) : MAX_NUMBER;
                     changedBits |= 0;
                     if (changedBits !== 0) {
-                        self.subscribers.forEach((component: OwnerType | IFiber) => {
+                        self.subscribers.forEach((component: IFiber) => {
                             triggerConsumer(newValue, component, changedBits);
                         });
                     }
@@ -112,7 +116,7 @@ export function createContext<T>(defaultValue: T, calculateChangedBits?: ((old: 
             }
         }
         public value: T;
-        public subscribers: Array<OwnerType | IFiber>;
+        public subscribers: IFiber[];
         constructor(props: IProviderProps<T>) {
             super(props);
             this.state = {
@@ -120,17 +124,33 @@ export function createContext<T>(defaultValue: T, calculateChangedBits?: ((old: 
             };
             this.value = props.value;
             this.subscribers = [];
-            // Provider.providers.push(this);
+        }
+
+        public componentDidMount() {
+            const selfFiber = this.$reactInternalFiber;
+            const fiber = Provider.getContext(selfFiber);
+            if (fiber) {
+                const instance = fiber.stateNode! as Provider;
+                if  (instance.subscribers.length > 0) {
+                    const oldSubscribers = [];
+                    for (const sub of instance.subscribers) {
+                        if (Provider.getContext(sub) === selfFiber) {
+                            this.subscribers.push(sub);
+                            triggerConsumer(this.value, sub, 0);
+                        } else {
+                            oldSubscribers.push(sub);
+                        }
+                    }
+                    instance.subscribers.length = 0;
+                    instance.subscribers.push(...oldSubscribers);
+                }
+            }
         }
         public componentWillUnmount() {
             if (this.subscribers.length) {
-                this.subscribers.forEach((fiber: IFiber|OwnerType) => {
+                this.subscribers.forEach((fiber: IFiber) => {
                     const old = fiber;
-                    const isComponent = !!(fiber as OwnerType).setState;
-                    if (isComponent) {
-                        fiber = (fiber as OwnerType).$reactInternalFiber as IFiber;
-                    }
-                    const provider = Provider.getContext(fiber as IFiber, this.$reactInternalFiber);
+                    const provider = Provider.getContext(this.$reactInternalFiber);
                     if (provider) {
                         const instance = provider.stateNode as Provider;
                         instance.subscribers.push(old);
